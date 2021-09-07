@@ -1,2 +1,2 @@
 # tweettgram
-Bot telegram to publish post to twitter
+Telegram bot to publish post to twitter
