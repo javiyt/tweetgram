@@ -1,8 +1,9 @@
-module github.com/javiyt/twittgram
+module github.com/javiyt/tweettgram
 
-go 1.16
+go 1.17
 
 require (
-	github.com/joho/godotenv v1.3.0
+	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/subosito/gotenv v1.2.0
 	gopkg.in/tucnak/telebot.v2 v2.4.0
 )
