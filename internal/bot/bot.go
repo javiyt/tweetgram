@@ -47,9 +47,16 @@ func (b *Bot) Stop() {
 
 func (b *Bot) getHandlers() map[string]botHandler {
 	return map[string]botHandler{
-		"/hello": {
-			handlerFunc: b.helloHandler,
-			help:        "Show a hello world message",
+		"/start": {
+			handlerFunc: b.handleStartCommand,
+			help:        "Start a conversation with the bot",
+			filters: []filterFunc{
+				b.onlyPrivate,
+			},
+		},
+		"/help": {
+			handlerFunc: b.handleHelpCommand,
+			help:        "Show help",
 			filters: []filterFunc{
 				b.onlyPrivate,
 			},
