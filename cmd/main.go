@@ -4,10 +4,13 @@ import (
 	"bytes"
 	"flag"
 	"log"
+	"os"
+	"os/signal"
 	"time"
 
 	_ "embed"
 
+	"github.com/javiyt/tweettgram/internal/bot"
 	"github.com/javiyt/tweettgram/internal/config"
 	"github.com/subosito/gotenv"
 	tb "gopkg.in/tucnak/telebot.v2"
@@ -40,15 +43,20 @@ func main() {
 		Token:  cfg.BotToken,
 		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
 	})
-
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 
-	b.Handle("/hello", func(m *tb.Message) {
-		b.Send(m.Sender, "Hello World!")
-	})
+	tBot := bot.NewBot(bot.WithTelegramBot(b))
 
-	b.Start()
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+
+	go func() {
+		<-c
+		tBot.Stop()
+	}()
+
+	tBot.Start()
 }
