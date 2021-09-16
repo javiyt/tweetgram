@@ -7,7 +7,8 @@ import (
 )
 
 type EnvConfig struct {
-	BotToken       string `required:"true" split_words:"true"`
+	BotToken     string `required:"true" split_words:"true"`
+	ValidChannel int64  `required:"true" split_words:"true"`
 }
 
 func NewEnvConfig() EnvConfig {
@@ -18,4 +19,8 @@ func NewEnvConfig() EnvConfig {
 	}
 
 	return e
+}
+
+func (ec EnvConfig) IsValidChannel(channelID int64) bool {
+	return ec.ValidChannel == channelID
 }
