@@ -25,3 +25,22 @@ jobs:
         ENV_TEST_FILE: ${{secrets.ENV_TEST}}            
     - name: Test
       run: go test ./...
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Generate env file
+        run: 'echo "$ENV_FILE" > cmd/env'
+        shell: bash
+        env:
+          ENV_FILE: ${{secrets.ENV}}      
+      - name: Generate env.test file
+        run: 'echo "$ENV_TEST_FILE" > cmd/env.test'
+        shell: bash
+        env:
+          ENV_TEST_FILE: ${{secrets.ENV_TEST}}      
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.42.1      

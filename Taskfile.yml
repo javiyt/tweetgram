@@ -1,0 +1,26 @@
+version: '3'
+
+tasks:
+  install:
+    run: once
+    cmds:
+      - echo "Download tools and dependencies"
+      - go mod vendor
+    silent: true
+  lint:
+    deps:
+      - install
+    cmds:
+      - go run github.com/golangci/golangci-lint/cmd/golangci-lint run
+  mock:
+    deps:
+      - install
+    cmds:
+      - echo "Generating mocks for all interfaces"
+      - go run github.com/vektra/mockery/v2/ --all --inpackage --keeptree --dir=internal
+    silent: true
+  run-test:
+    deps:
+      - install
+    cmds:
+      - go run cmd/main.go -test=true

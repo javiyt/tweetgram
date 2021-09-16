@@ -5,7 +5,7 @@ import (
 )
 
 func (b *Bot) handleStartCommand(m *tb.Message) {
-	b.bot.Send(m.Sender, "Thanks for using the bot! You can type /help command to know what can I do")
+	_, _ = b.bot.Send(m.Sender, "Thanks for using the bot! You can type /help command to know what can I do")
 }
 
 func (b *Bot) handleHelpCommand(m *tb.Message) {
@@ -14,5 +14,5 @@ func (b *Bot) handleHelpCommand(m *tb.Message) {
 		helpText += c + " - " + h.help + "\n"
 	}
 
-	b.bot.Send(m.Sender, helpText)
+	_, _ = b.bot.Send(m.Sender, helpText)
 }
