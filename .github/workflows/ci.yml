@@ -30,6 +30,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Generate env file
+        run: 'echo "$ENV_FILE" > cmd/env'
+        shell: bash
+        env:
+          ENV_FILE: ${{secrets.ENV}}      
+      - name: Generate env.test file
+        run: 'echo "$ENV_TEST_FILE" > cmd/env.test'
+        shell: bash
+        env:
+          ENV_TEST_FILE: ${{secrets.ENV_TEST}}      
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2
         with:
