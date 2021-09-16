@@ -58,5 +58,8 @@ func main() {
 		tBot.Stop()
 	}()
 
-	tBot.Start()
+	if err := tBot.Start(); err != nil {
+		log.Fatal(err)
+		return
+	}
 }

@@ -34,11 +34,15 @@ func NewBot(options ...BotOption) *Bot {
 	return b
 }
 
-func (b *Bot) Start() {
-	b.setCommands()
-	b.setUpHandlers()
+func (b *Bot) Start() error {
+	if err := b.setCommands(); err != nil {
+		return err
+	}
 
+	b.setUpHandlers()
 	b.bot.Start()
+
+	return nil
 }
 
 func (b *Bot) Stop() {
@@ -64,7 +68,7 @@ func (b *Bot) getHandlers() map[string]botHandler {
 	}
 }
 
-func (b *Bot) setCommands() {
+func (b *Bot) setCommands() error {
 	var cmds []tb.Command
 	for c, h := range b.getHandlers() {
 		cmds = append(cmds, tb.Command{
@@ -73,7 +77,7 @@ func (b *Bot) setCommands() {
 		})
 	}
 
-	b.bot.SetCommands(cmds)
+	return b.bot.SetCommands(cmds)
 }
 
 func (b *Bot) setUpHandlers() {
