@@ -27,6 +27,7 @@ func TestStart(t *testing.T) {
 	mockedBot.On("Handle", "/start", mock.Anything).Once().Return(nil, nil)
 	mockedBot.On("Handle", "/help", mock.Anything).Once().Return(nil, nil)
 	mockedBot.On("Handle", tb.OnPhoto, mock.Anything).Once().Return(nil, nil)
+	mockedBot.On("Handle", tb.OnText, mock.Anything).Once().Return(nil, nil)
 	mockedBot.On("Start").Once()
 
 	require.Nil(t, bot.NewBot(bot.WithTelegramBot(mockedBot)).Start())
