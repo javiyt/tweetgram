@@ -27,3 +27,12 @@ func (b *Bot) handlePhoto(m *tb.Message) {
 
 	b.bot.Send(m.Sender, caption)
 }
+
+func (b *Bot) handleText(m *tb.Message) {
+	msg := strings.TrimSpace(m.Text)
+	if msg == "" {
+		return
+	}
+
+	b.bot.Send(m.Sender, msg)
+}

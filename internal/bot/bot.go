@@ -89,6 +89,13 @@ func (b *Bot) getHandlers() map[string]botHandler {
 				b.onlyAdmins,
 			},
 		},
+		tb.OnText: {
+			handlerFunc: b.handleText,
+			filters: []filterFunc{
+				b.onlyPrivate,
+				b.onlyAdmins,
+			},
+		},
 	}
 }
 
