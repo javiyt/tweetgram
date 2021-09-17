@@ -22,9 +22,13 @@ jobs:
       run: 'echo "$ENV_TEST_FILE" > cmd/env.test'
       shell: bash
       env:
-        ENV_TEST_FILE: ${{secrets.ENV_TEST}}            
+        ENV_TEST_FILE: ${{secrets.ENV_TEST}} 
+    - name: Install Task
+      uses: arduino/setup-task@v1
+      with:
+        version: 3.7.3                   
     - name: Test
-      run: go test ./...
+      run: task test
   golangci:
     name: lint
     runs-on: ubuntu-latest
