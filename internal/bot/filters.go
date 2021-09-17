@@ -1,9 +1,6 @@
 package bot
 
 import (
-	"encoding/json"
-	"log"
-
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
@@ -19,12 +16,9 @@ func (b *Bot) onlyPrivate(f func(*tb.Message)) func(*tb.Message) {
 	}
 }
 
-func (b *Bot) validChannel(f func(*tb.Message)) func(*tb.Message) {
+func (b *Bot) onlyAdmins(f func(*tb.Message)) func(*tb.Message) {
 	return func(m *tb.Message) {
-		jm, _ := json.Marshal(m)
-		log.Printf("message: %s", string(jm))
-		
-		if !b.cfg.IsValidChannel(m.Chat.ID) {
+		if !b.cfg.IsAdmin(m.Sender.ID) {
 			return
 		}
 

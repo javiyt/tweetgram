@@ -85,7 +85,8 @@ func (b *Bot) getHandlers() map[string]botHandler {
 		tb.OnPhoto: {
 			handlerFunc: b.handlePhoto,
 			filters: []filterFunc{
-				b.validChannel,
+				b.onlyPrivate,
+				b.onlyAdmins,
 			},
 		},
 	}

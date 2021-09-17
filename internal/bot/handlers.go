@@ -1,7 +1,6 @@
 package bot
 
 import (
-	"log"
 	"strings"
 
 	tb "gopkg.in/tucnak/telebot.v2"
@@ -21,7 +20,6 @@ func (b *Bot) handleHelpCommand(m *tb.Message) {
 }
 
 func (b *Bot) handlePhoto(m *tb.Message) {
-	log.Printf("%+v", m)
 	caption := strings.TrimSpace(m.Caption)
 	if m.Caption == "" {
 		return
