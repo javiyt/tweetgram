@@ -1,8 +1,6 @@
 package config
 
 import (
-	"log"
-
 	"github.com/kelseyhightower/envconfig"
 )
 
@@ -12,14 +10,14 @@ type EnvConfig struct {
 	BroadcastChannel int64  `required:"true" split_words:"true"`
 }
 
-func NewEnvConfig() EnvConfig {
+func NewEnvConfig() (EnvConfig, error) {
 	var e EnvConfig
 	err := envconfig.Process("", &e)
 	if err != nil {
-		log.Fatal(err.Error())
+		return EnvConfig{}, err
 	}
 
-	return e
+	return e, nil
 }
 
 func (ec EnvConfig) IsAdmin(userID int) bool {
