@@ -136,7 +136,7 @@ func TestHandlerPhoto(t *testing.T) {
 		mockedBot.AssertNotCalled(t, "Send", mock.Anything, mock.Anything)
 	})
 
-	t.Run("it should send caption when present", func(t *testing.T) {
+	t.Run("it should send photo when caption is present", func(t *testing.T) {
 		m := &tb.Message{
 			Chat: &tb.Chat{
 				Type: tb.ChatPrivate,
@@ -145,11 +145,19 @@ func TestHandlerPhoto(t *testing.T) {
 				ID: adminID,
 			},
 			Caption: "testing",
+			Photo: &tb.Photo{
+				Caption: "testing",
+				File: tb.File{
+					FileID:   "blablabla",
+					FileURL:  "http://myimage.com/test.jpg",
+					FileSize: 1234,
+				},
+			},
 		}
 		mockedBot.On(
 			"Send",
 			tb.ChatID(broadcastChannel),
-			"testing",
+			m.Photo,
 		).Once().Return(nil, nil)
 
 		handler(m)

@@ -25,7 +25,14 @@ func (b *Bot) handlePhoto(m *tb.Message) {
 		return
 	}
 
-	b.bot.Send(tb.ChatID(b.cfg.BroadcastChannel), caption)
+	b.bot.Send(tb.ChatID(b.cfg.BroadcastChannel), &tb.Photo{
+		Caption: caption,
+		File: tb.File{
+			FileID: m.Photo.FileID,
+			FileURL: m.Photo.FileURL,
+			FileSize: m.Photo.FileSize,
+		},	
+	})
 }
 
 func (b *Bot) handleText(m *tb.Message) {
