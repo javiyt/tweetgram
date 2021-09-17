@@ -29,6 +29,8 @@ jobs:
         version: 3.7.3                   
     - name: Test
       run: task test
+    - name: Upload coverage to Codecov
+      run: bash <(curl -s https://codecov.io/bash)      
   golangci:
     name: lint
     runs-on: ubuntu-latest
