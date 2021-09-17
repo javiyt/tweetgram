@@ -83,10 +83,13 @@ func TestHandlerHelpCommand(t *testing.T) {
 
 func TestHandlerPhoto(t *testing.T) {
 	adminID := 12345
+	broadcastChannel := int64(987654)
+
 	handler, mockedBot := generateHandlerAndMockedBot(
 		tb.OnPhoto,
 		config.EnvConfig{
-			Admins: []int{adminID},
+			Admins:           []int{adminID},
+			BroadcastChannel: broadcastChannel,
 		},
 	)
 
@@ -145,7 +148,7 @@ func TestHandlerPhoto(t *testing.T) {
 		}
 		mockedBot.On(
 			"Send",
-			m.Sender,
+			tb.ChatID(broadcastChannel),
 			"testing",
 		).Once().Return(nil, nil)
 
@@ -157,10 +160,13 @@ func TestHandlerPhoto(t *testing.T) {
 
 func TestHandlerText(t *testing.T) {
 	adminID := 12345
+	broadcastChannel := int64(987654)
+
 	handler, mockedBot := generateHandlerAndMockedBot(
 		tb.OnText,
 		config.EnvConfig{
-			Admins: []int{adminID},
+			Admins:           []int{adminID},
+			BroadcastChannel: broadcastChannel,
 		},
 	)
 
@@ -207,7 +213,7 @@ func TestHandlerText(t *testing.T) {
 		mockedBot.AssertNotCalled(t, "Send", mock.Anything, mock.Anything)
 	})
 
-	t.Run("it should send caption when present", func(t *testing.T) {
+	t.Run("it should send text when present", func(t *testing.T) {
 		m := &tb.Message{
 			Chat: &tb.Chat{
 				Type: tb.ChatPrivate,
@@ -219,7 +225,7 @@ func TestHandlerText(t *testing.T) {
 		}
 		mockedBot.On(
 			"Send",
-			m.Sender,
+			tb.ChatID(broadcastChannel),
 			"testing",
 		).Once().Return(nil, nil)
 

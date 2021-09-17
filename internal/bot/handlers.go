@@ -25,7 +25,7 @@ func (b *Bot) handlePhoto(m *tb.Message) {
 		return
 	}
 
-	b.bot.Send(m.Sender, caption)
+	b.bot.Send(tb.ChatID(b.cfg.BroadcastChannel), caption)
 }
 
 func (b *Bot) handleText(m *tb.Message) {
@@ -34,5 +34,5 @@ func (b *Bot) handleText(m *tb.Message) {
 		return
 	}
 
-	b.bot.Send(m.Sender, msg)
+	b.bot.Send(tb.ChatID(b.cfg.BroadcastChannel), msg)
 }
