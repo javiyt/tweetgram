@@ -33,7 +33,7 @@ tasks:
       - install
       - mock
     cmds:
-      - go test -v -timeout 10s ./...
+      - go test -v -timeout 10s -race -count 5 ./...
   run-test:
     desc: Execute test mode for the bot
     deps:

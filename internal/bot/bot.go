@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"sort"
 	"strings"
 
 	tb "gopkg.in/tucnak/telebot.v2"
@@ -84,6 +85,10 @@ func (b *Bot) setCommands() error {
 			Description: h.help,
 		})
 	}
+
+	sort.Slice(cmds, func(i, j int) bool {
+		return cmds[i].Text < cmds[j].Text
+	})
 
 	return b.bot.SetCommands(cmds)
 }

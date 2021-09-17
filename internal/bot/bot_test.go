@@ -15,12 +15,12 @@ func TestStart(t *testing.T) {
 
 	cmds := []tb.Command{
 		{
-			Text:        "start",
-			Description: "Start a conversation with the bot",
-		},
-		{
 			Text:        "help",
 			Description: "Show help",
+		},
+		{
+			Text:        "start",
+			Description: "Start a conversation with the bot",
 		},
 	}
 	mockedBot.On("SetCommands", cmds).Once().Return(nil)
