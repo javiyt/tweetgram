@@ -6,8 +6,16 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
+type TelegramBot interface {
+	Start()
+	Stop()
+	SetCommands(cmds []tb.Command) error
+	Handle(endpoint interface{}, handler interface{})
+	Send(to tb.Recipient, what interface{}, options ...interface{}) (*tb.Message, error)
+}
+
 type Bot struct {
-	bot *tb.Bot
+	bot TelegramBot
 }
 
 type BotOption func(b *Bot)
@@ -18,7 +26,7 @@ type botHandler struct {
 	filters     []filterFunc
 }
 
-func WithTelegramBot(tb *tb.Bot) BotOption {
+func WithTelegramBot(tb TelegramBot) BotOption {
 	return func(b *Bot) {
 		b.bot = tb
 	}

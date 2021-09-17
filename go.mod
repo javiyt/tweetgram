@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/golangci/golangci-lint v1.42.1
 	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/stretchr/testify v1.7.0
 	github.com/subosito/gotenv v1.2.0
 	github.com/vektra/mockery/v2 v2.9.3
 	gopkg.in/tucnak/telebot.v2 v2.4.0
@@ -123,7 +124,6 @@ require (
 	github.com/spf13/viper v1.8.1 // indirect
 	github.com/ssgreg/nlreturn/v2 v2.1.0 // indirect
 	github.com/stretchr/objx v0.1.1 // indirect
-	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/tdakkota/asciicheck v0.0.0-20200416200610-e657995f937b // indirect
 	github.com/tetafro/godot v1.4.9 // indirect
 	github.com/timakin/bodyclose v0.0.0-20200424151742-cb6215831a94 // indirect
