@@ -11,7 +11,7 @@ tasks:
     run: once
     cmds:
       - echo "Download tools and dependencies"
-      - go mod vendor
+      - go mod vendor -e
     silent: true
   lint:
     desc: Execute golangci-lint tool
