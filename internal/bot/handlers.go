@@ -10,8 +10,8 @@ func (b *Bot) handleStartCommand(m *tb.Message) {
 
 func (b *Bot) handleHelpCommand(m *tb.Message) {
 	var helpText string
-	for c, h := range b.getHandlers() {
-		helpText += c + " - " + h.help + "\n"
+	for _, h := range b.getCommands() {
+		helpText += "/" + h.Text + " - " + h.Description + "\n"
 	}
 
 	_, _ = b.bot.Send(m.Sender, helpText)
