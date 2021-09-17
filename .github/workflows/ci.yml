@@ -33,6 +33,10 @@ jobs:
     name: lint
     runs-on: ubuntu-latest
     steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17.x
       - uses: actions/checkout@v2
       - name: Generate env file
         run: 'echo "$ENV_FILE" > cmd/env'
@@ -44,6 +48,12 @@ jobs:
         shell: bash
         env:
           ENV_TEST_FILE: ${{secrets.ENV_TEST}}      
+      - name: Install Task
+        uses: arduino/setup-task@v1
+        with:
+          version: 3.7.3     
+      - name: Generate code
+        run: task wire
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2
         with:

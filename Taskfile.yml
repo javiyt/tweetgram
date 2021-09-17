@@ -9,34 +9,45 @@ tasks:
   install:
     desc: Download all tools and dependencies to vendor directory
     run: once
+    silent: true
     cmds:
       - echo "Download tools and dependencies"
       - go mod vendor -e
-    silent: true
   lint:
     desc: Execute golangci-lint tool
     deps:
       - install
     cmds:
       - go run github.com/golangci/golangci-lint/cmd/golangci-lint run
+  wire:
+    desc: Execute wire binary to generate DI
+    run: once
+    silent: true
+    deps:
+      - install
+    cmds:
+      - go run github.com/google/wire/cmd/wire ./...
   mock:
     desc: Generate all mocks for testing
+    run: once
+    silent: true
     deps:
       - install
     cmds:
       - echo "Generating mocks for all interfaces"
       - go run github.com/vektra/mockery/v2/ --all --inpackage --keeptree --dir=internal
-    silent: true
   test:
     desc: Run all tests
     deps:
       - install
       - mock
+      - wire
     cmds:
       - go test -v -timeout 10s -race -count 5 ./...
   run-test:
     desc: Execute test mode for the bot
     deps:
       - install
+      - wire
     cmds:
       - go run cmd/main.go -test=true
