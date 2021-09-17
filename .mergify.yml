@@ -4,7 +4,7 @@ pull_request_rules:
       - author=javiyt
       - base=main
     actions:
-      update: true
+      update:
       merge:
         method: squash
   - name: automatic merge for Dependabot pull requests
@@ -12,6 +12,6 @@ pull_request_rules:
       - author~=^dependabot(|-preview)\[bot\]$
       - base=main
     actions:
-      update: true
+      update:
       merge:
         method: squash        
