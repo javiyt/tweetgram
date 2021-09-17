@@ -7,8 +7,9 @@ import (
 )
 
 type EnvConfig struct {
-	BotToken string `required:"true" split_words:"true"`
-	Admins   []int  `required:"true" split_words:"true"`
+	BotToken         string `required:"true" split_words:"true"`
+	Admins           []int  `required:"true" split_words:"true"`
+	BroadcastChannel int64  `required:"true" split_words:"true"`
 }
 
 func NewEnvConfig() EnvConfig {
