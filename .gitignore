@@ -19,3 +19,4 @@ cmd/env*
 mocks/
 .vscode
 wire_gen.go
+coverage.txt

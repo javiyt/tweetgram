@@ -43,7 +43,7 @@ tasks:
       - mock
       - wire
     cmds:
-      - go test -v -timeout 10s -race -count 5 ./...
+      - go test -v -timeout 10s -race -count 5 -coverprofile=coverage.txt -covermode=atomic ./...
   run-test:
     desc: Execute test mode for the bot
     deps:
