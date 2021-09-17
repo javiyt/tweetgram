@@ -44,6 +44,12 @@ jobs:
         shell: bash
         env:
           ENV_TEST_FILE: ${{secrets.ENV_TEST}}      
+      - name: Install Task
+        uses: arduino/setup-task@v1
+        with:
+          version: 3.7.3     
+      - name: Generate code
+        run: task wire
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2
         with:
