@@ -1,6 +1,8 @@
 package bot
 
 import (
+	"strings"
+
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
@@ -15,4 +17,13 @@ func (b *Bot) handleHelpCommand(m *tb.Message) {
 	}
 
 	_, _ = b.bot.Send(m.Sender, helpText)
+}
+
+func (b *Bot) handlePhoto(m *tb.Message) {
+	caption := strings.TrimSpace(m.Caption)
+	if m.Caption == "" {
+		return
+	}
+
+	b.bot.Send(m.Sender, caption)
 }

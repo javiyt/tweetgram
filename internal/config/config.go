@@ -7,7 +7,8 @@ import (
 )
 
 type EnvConfig struct {
-	BotToken       string `required:"true" split_words:"true"`
+	BotToken string `required:"true" split_words:"true"`
+	Admins   []int  `required:"true" split_words:"true"`
 }
 
 func NewEnvConfig() EnvConfig {
@@ -18,4 +19,14 @@ func NewEnvConfig() EnvConfig {
 	}
 
 	return e
+}
+
+func (ec EnvConfig) IsAdmin(userID int) bool {
+	for _, v := range ec.Admins {
+		if v == userID {
+			return true
+		}
+	}
+
+	return false
 }

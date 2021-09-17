@@ -48,7 +48,10 @@ func main() {
 		return
 	}
 
-	tBot := bot.NewBot(bot.WithTelegramBot(b))
+	tBot := bot.NewBot(
+		bot.WithTelegramBot(b),
+		bot.WithConfig(cfg),
+	)
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)

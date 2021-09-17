@@ -9,12 +9,18 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    assignees:
+      - "javiyt"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "daily"
+    assignees:
+      - "javiyt"
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "daily"
+    assignees:
+      - "javiyt"
       
