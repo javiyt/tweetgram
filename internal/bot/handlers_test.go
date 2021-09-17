@@ -155,8 +155,82 @@ func TestHandlerPhoto(t *testing.T) {
 	})
 }
 
+func TestHandlerText(t *testing.T) {
+	adminID := 12345
+	handler, mockedBot := generateHandlerAndMockedBot(
+		tb.OnText,
+		config.EnvConfig{
+			Admins: []int{adminID},
+		},
+	)
+
+	t.Run("it should do nothing when not in private conversation", func(t *testing.T) {
+		handler(&tb.Message{
+			Chat: &tb.Chat{
+				Type: tb.ChatGroup,
+			},
+			Sender: &tb.User{
+				ID: 1234,
+			},
+		})
+
+		mockedBot.AssertExpectations(t)
+		mockedBot.AssertNotCalled(t, "Send", mock.Anything, mock.Anything)
+	})
+
+	t.Run("it should do nothing when in private conversation but not admin", func(t *testing.T) {
+		handler(&tb.Message{
+			Chat: &tb.Chat{
+				Type: tb.ChatPrivate,
+			},
+			Sender: &tb.User{
+				ID: 54321,
+			},
+		})
+
+		mockedBot.AssertExpectations(t)
+		mockedBot.AssertNotCalled(t, "Send", mock.Anything, mock.Anything)
+	})
+
+	t.Run("it should do nothing when text no present", func(t *testing.T) {
+		handler(&tb.Message{
+			Chat: &tb.Chat{
+				Type: tb.ChatPrivate,
+			},
+			Sender: &tb.User{
+				ID: adminID,
+			},
+			Text: "",
+		})
+
+		mockedBot.AssertExpectations(t)
+		mockedBot.AssertNotCalled(t, "Send", mock.Anything, mock.Anything)
+	})
+
+	t.Run("it should send caption when present", func(t *testing.T) {
+		m := &tb.Message{
+			Chat: &tb.Chat{
+				Type: tb.ChatPrivate,
+			},
+			Sender: &tb.User{
+				ID: adminID,
+			},
+			Text: "testing",
+		}
+		mockedBot.On(
+			"Send",
+			m.Sender,
+			"testing",
+		).Once().Return(nil, nil)
+
+		handler(m)
+
+		mockedBot.AssertExpectations(t)
+	})
+}
+
 func generateHandlerAndMockedBot(toHandle string, cfg config.EnvConfig) (func(*tb.Message), *mb.TelegramBot) {
-	allHandlers := []string{"/start", "/help", tb.OnPhoto}
+	allHandlers := []string{"/start", "/help", tb.OnPhoto, tb.OnText}
 	var handler func(*tb.Message)
 
 	mockedBot := new(mb.TelegramBot)
