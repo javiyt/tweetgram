@@ -21,10 +21,8 @@ func ProvideBot() (*bot.Bot, error) {
 	))
 }
 
-func provideConfiguration() config.EnvConfig {
-	wire.Build(config.NewEnvConfig)
-
-	return config.EnvConfig{}
+func provideConfiguration() (config.EnvConfig, error) {
+	panic(wire.Build(config.NewEnvConfig))
 }
 
 func provideTBot() (*tb.Bot, error) {
