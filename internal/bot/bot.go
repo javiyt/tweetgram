@@ -16,8 +16,13 @@ type TelegramBot interface {
 	Send(to tb.Recipient, what interface{}, options ...interface{}) (*tb.Message, error)
 }
 
+type TwitterClient interface{
+	SendUpdate(string) error
+}
+
 type Bot struct {
 	bot TelegramBot
+	tc  TwitterClient
 	cfg config.EnvConfig
 }
 
@@ -38,6 +43,12 @@ func WithTelegramBot(tb TelegramBot) BotOption {
 func WithConfig(cfg config.EnvConfig) BotOption {
 	return func(b *Bot) {
 		b.cfg = cfg
+	}
+}
+
+func WithTwitterClient(tc TwitterClient) BotOption {
+	return func(b *Bot) {
+		b.tc = tc
 	}
 }
 

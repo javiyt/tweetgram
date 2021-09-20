@@ -5,9 +5,14 @@ import (
 )
 
 type EnvConfig struct {
-	BotToken         string `required:"true" split_words:"true"`
-	Admins           []int  `required:"true" split_words:"true"`
-	BroadcastChannel int64  `required:"true" split_words:"true"`
+	BotToken            string `required:"true" split_words:"true"`
+	Admins              []int  `required:"true" split_words:"true"`
+	BroadcastChannel    int64  `required:"true" split_words:"true"`
+	TwitterApiKey       string `required:"true" split_words:"true"`
+	TwitterApiSecret    string `required:"true" split_words:"true"`
+	TwitterBearerToken  string `required:"true" split_words:"true"`
+	TwitterAccessToken  string `required:"true" split_words:"true"`
+	TwitterAccessSecret string `required:"true" split_words:"true"`
 }
 
 func NewEnvConfig() (EnvConfig, error) {

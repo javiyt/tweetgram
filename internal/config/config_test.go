@@ -1,6 +1,7 @@
 package config_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -14,6 +15,11 @@ func TestNewConfig(t *testing.T) {
 		"BOT_TOKEN":         "asdfg",
 		"ADMINS":            "12345",
 		"BROADCAST_CHANNEL": "9876543",
+		"TWITTER_API_KEY": "asdfg1234",
+		"TWITTER_API_SECRET": "poiuyt",
+		"TWITTER_BEARER_TOKEN": "qwertyui",
+		"TWITTER_ACCESS_TOKEN": "zxcvbnm",
+		"TWITTER_ACCESS_SECRET": "lkjhgfd",
 	}
 
 	for k, v := range mocked {
@@ -29,38 +35,27 @@ func TestNewConfig(t *testing.T) {
 			BotToken:         "asdfg",
 			Admins:           []int{12345},
 			BroadcastChannel: 9876543,
+			TwitterApiKey: "asdfg1234",
+			TwitterApiSecret: "poiuyt",
+			TwitterBearerToken: "qwertyui",
+			TwitterAccessToken: "zxcvbnm",
+			TwitterAccessSecret: "lkjhgfd",
+	
 		}, c)	
 	})
 
-	t.Run("it should fail when bot token not present", func(t *testing.T) {
-		os.Unsetenv("BOT_TOKEN")
+	for k, mv := range mocked {
+		t.Run(fmt.Sprintf("it should fail when %s not present", k), func(t *testing.T) {
+			os.Unsetenv(k)
+	
+			_, err := config.NewEnvConfig()
+	
+			require.EqualError(t, err, fmt.Sprintf("required key %s missing value", k))
+	
+			os.Setenv(k, mv)
+		})			
+	}
 
-		_, err := config.NewEnvConfig()
-
-		require.EqualError(t, err, "required key BOT_TOKEN missing value")
-
-		os.Setenv("BOT_TOKEN", mocked["BOT_TOKEN"])
-	})
-
-	t.Run("it should fail when admins not present", func(t *testing.T) {
-		os.Unsetenv("ADMINS")
-
-		_, err := config.NewEnvConfig()
-
-		require.EqualError(t, err, "required key ADMINS missing value")
-
-		os.Setenv("ADMINS", mocked["ADMINS"])
-	})
-
-	t.Run("it should fail when broadcast channel not present", func(t *testing.T) {
-		os.Unsetenv("BROADCAST_CHANNEL")
-
-		_, err := config.NewEnvConfig()
-
-		require.EqualError(t, err, "required key BROADCAST_CHANNEL missing value")
-
-		os.Setenv("BROADCAST_CHANNEL", mocked["BROADCAST_CHANNEL"])
-	})
 
 	for k, v := range original {
 		os.Setenv(k, v)
@@ -73,6 +68,11 @@ func TestIsAdmin(t *testing.T) {
 		"BOT_TOKEN":         "asdfg",
 		"ADMINS":            "12345",
 		"BROADCAST_CHANNEL": "9876543",
+		"TWITTER_API_KEY": "asdfg1234",
+		"TWITTER_API_SECRET": "poiuyt",
+		"TWITTER_BEARER_TOKEN": "qwertyui",
+		"TWITTER_ACCESS_TOKEN": "zxcvbnm",
+		"TWITTER_ACCESS_SECRET": "lkjhgfd",	
 	}
 
 	for k, v := range mocked {
