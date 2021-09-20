@@ -30,6 +30,8 @@ require (
 	github.com/daixiang0/gci v0.2.9 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/denis-tingajkin/go-header v0.4.2 // indirect
+	github.com/dghubble/go-twitter v0.0.0-20210609183100-2fdbf421508e
+	github.com/dghubble/oauth1 v0.7.0
 	github.com/esimonov/ifshort v1.0.2 // indirect
 	github.com/ettle/strcase v0.1.1 // indirect
 	github.com/fatih/color v1.12.0 // indirect
@@ -152,4 +154,9 @@ require (
 	mvdan.cc/unparam v0.0.0-20210104141923-aac4ce9116a7 // indirect
 )
 
-require github.com/google/subcommands v1.0.1 // indirect
+require (
+	github.com/cenkalti/backoff v2.1.1+incompatible // indirect
+	github.com/dghubble/sling v1.3.0 // indirect
+	github.com/google/go-querystring v1.0.0 // indirect
+	github.com/google/subcommands v1.0.1 // indirect
+)
