@@ -14,11 +14,13 @@ type TelegramBot interface {
 	SetCommands(cmds []tb.Command) error
 	Handle(endpoint interface{}, handler interface{})
 	Send(to tb.Recipient, what interface{}, options ...interface{}) (*tb.Message, error)
+	SendAlbum(to tb.Recipient, a tb.Album, options ...interface{}) ([]tb.Message, error)
 }
 
 type Bot struct {
-	bot TelegramBot
-	cfg config.EnvConfig
+	bot       TelegramBot
+	cfg       config.EnvConfig
+	albumChan chan *tb.Message
 }
 
 type BotOption func(b *Bot)
@@ -42,7 +44,9 @@ func WithConfig(cfg config.EnvConfig) BotOption {
 }
 
 func NewBot(options ...BotOption) *Bot {
-	b := &Bot{}
+	b := &Bot{
+		albumChan: make(chan *tb.Message),
+	}
 
 	for _, o := range options {
 		o(b)
@@ -57,12 +61,14 @@ func (b *Bot) Start() error {
 	}
 
 	b.setUpHandlers()
+	b.handleAlbum()
 	b.bot.Start()
 
 	return nil
 }
 
 func (b *Bot) Stop() {
+	close(b.albumChan)
 	b.bot.Stop()
 }
 
