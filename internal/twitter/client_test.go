@@ -3,7 +3,7 @@ package twitter_test
 import (
 	"testing"
 
-	gt "github.com/dghubble/go-twitter/twitter"
+	gt "github.com/javiyt/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 	"github.com/javiyt/tweettgram/internal/twitter"
 	"github.com/stretchr/testify/require"

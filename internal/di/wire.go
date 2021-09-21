@@ -12,7 +12,7 @@ import (
 	"github.com/javiyt/tweettgram/internal/config"
 	"github.com/javiyt/tweettgram/internal/twitter"
 
-	gt "github.com/dghubble/go-twitter/twitter"
+	gt "github.com/javiyt/go-twitter/twitter"
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
