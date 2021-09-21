@@ -1,6 +1,6 @@
 package twitter
 
-import gt "github.com/dghubble/go-twitter/twitter"
+import gt "github.com/javiyt/go-twitter/twitter"
 
 type Client struct {
 	tc *gt.Client
