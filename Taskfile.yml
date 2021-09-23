@@ -6,6 +6,39 @@ tasks:
   default:
     cmds:
       - task: test
+  generate-env:
+    desc: Generates env and env.test files
+    dir: cmd
+    silent: true
+    status:
+      - test -f env
+      - test -f env.test
+    vars:
+      CONTENT: |
+        BOT_TOKEN=1234567890:G8o4ATpRsfUtl0p7N1HW9S2IdIcxSRoSY67
+        ADMINS=123456789
+        BROADCAST_CHANNEL=-1234567890123
+        TWITTER_API_KEY=c7FU8EvL9smKN2k2IN0yur67k
+        TWITTER_API_SECRET=LYzF53kJoVK46rp859rQCw6Dqw6TpQV668aemPb2KI9GUxTTU0
+        TWITTER_BEARER_TOKEN=hIlQI351HEPT6xbA4xHnYRfgOsF8jqcPT5m6Ec0VeCXtUyOY9Mzy6uFYevH%4ys86GL3KfO1ZRBwichZOlGDYyZ52Ht2BXh2WgUFvywJKbRq9lMH
+        TWITTER_ACCESS_TOKEN=123456789-0xW7uNw2mEykTVTTKHS32y3oIXHab5hSh7POa0Wf
+        TWITTER_ACCESS_SECRET=BWa9T8hkEEj5yCutPwJTs7Vk4f1wfj690Dq3UGCyf9YQB
+    cmds:
+      - Writing content for env files
+      - |
+        {{range $line := .CONTENT | trim | splitLines -}}
+          echo {{$line}} >> env
+          echo {{$line}} >> env.test
+        {{end}} 
+      - Env files generated, set up proper values for vars
+  setup:
+    desc: Set up bot environment to work with
+    silent: true
+    cmds:
+      - task: generate-env
+      - task: install
+      - task: wire
+      - task: mock
   install:
     desc: Download all tools and dependencies to vendor directory
     run: once
@@ -51,3 +84,11 @@ tasks:
       - wire
     cmds:
       - go run cmd/main.go -test=true
+  clean:
+    desc: Clean all auto generated files
+    cmds:
+      - echo "Removing auto generated files"
+      - rm -f internal/di/wire_gen.go
+      - rm -Rf mocks
+      - echo "Files removed"
+    silent: true
