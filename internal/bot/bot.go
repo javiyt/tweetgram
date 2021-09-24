@@ -16,6 +16,11 @@ type TelegramBot interface {
 	Send(to tb.Recipient, what interface{}, options ...interface{}) (*tb.Message, error)
 }
 
+type AppBot interface {
+	Start() error
+	Stop()
+}
+
 type TwitterClient interface{
 	SendUpdate(string) error
 }
@@ -52,7 +57,7 @@ func WithTwitterClient(tc TwitterClient) BotOption {
 	}
 }
 
-func NewBot(options ...BotOption) *Bot {
+func NewBot(options ...BotOption) AppBot {
 	b := &Bot{}
 
 	for _, o := range options {
