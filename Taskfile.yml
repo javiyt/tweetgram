@@ -88,7 +88,7 @@ tasks:
     desc: Clean all auto generated files
     cmds:
       - echo "Removing auto generated files"
-      - rm -f internal/di/wire_gen.go
+      - rm -f internal/app/wire_gen.go
       - rm -Rf mocks
       - echo "Files removed"
     silent: true

@@ -1,6 +1,6 @@
 //+build wireinject
 
-package di
+package app
 
 import (
 	"net/http"
@@ -19,7 +19,7 @@ import (
 var twitterClient = wire.NewSet(provideTwitterHttpClient, provideTwitterClient)
 var telegramBot = wire.NewSet(provideTBot)
 
-func ProvideBot() (*bot.Bot, error) {
+func ProvideBot() (bot.AppBot, error) {
 	panic(wire.Build(
 		provideConfiguration,
 		telegramBot,
