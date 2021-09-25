@@ -63,8 +63,9 @@ tasks:
     desc: Execute golangci-lint tool
     deps:
       - install
+      - generate
     cmds:
-      - go run github.com/golangci/golangci-lint/cmd/golangci-lint run
+      - go run github.com/golangci/golangci-lint/cmd/golangci-lint run cmd internal
   wire:
     desc: Execute wire binary to generate DI
     run: once
@@ -121,9 +122,9 @@ tasks:
     cmds:
       - echo "Removing auto generated files"
       - rm -f coverage.txt
-      - find . -type f -name '*_gen.go' -delete
-      - find . -type f -name '*_string.go' -delete
-      - find . -type f -name '*_easyjson.go' -delete
+      - find ./internal -type f -name '*_gen.go' -delete
+      - find ./internal -type f -name '*_string.go' -delete
+      - find ./internal -type f -name '*_easyjson.go' -delete
       - rm -Rf mocks
       - echo "Files removed"
     silent: true

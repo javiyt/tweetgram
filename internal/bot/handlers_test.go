@@ -1,6 +1,9 @@
 package bot_test
 
 import (
+	"github.com/ThreeDotsLabs/watermill/message"
+	"github.com/javiyt/tweettgram/internal/pubsub"
+	mq "github.com/javiyt/tweettgram/mocks/pubsub"
 	"testing"
 
 	"github.com/javiyt/tweettgram/internal/bot"
@@ -12,7 +15,11 @@ import (
 )
 
 func TestHandlerStartCommand(t *testing.T) {
-	handler, mockedBot := generateHandlerAndMockedBot("/start", config.EnvConfig{})
+	handler, mockedBot := generateHandlerAndMockedBot(
+		"/start",
+		config.EnvConfig{},
+		new(mq.Queue),
+	)
 
 	t.Run("it should do nothing when not in private conversation", func(t *testing.T) {
 		handler(&tb.Message{
@@ -47,7 +54,11 @@ func TestHandlerStartCommand(t *testing.T) {
 }
 
 func TestHandlerHelpCommand(t *testing.T) {
-	handler, mockedBot := generateHandlerAndMockedBot("/help", config.EnvConfig{})
+	handler, mockedBot := generateHandlerAndMockedBot(
+		"/help",
+		config.EnvConfig{},
+		new(mq.Queue),
+	)
 
 	t.Run("it should do nothing when not in private conversation", func(t *testing.T) {
 		handler(&tb.Message{
@@ -85,12 +96,14 @@ func TestHandlerPhoto(t *testing.T) {
 	adminID := 12345
 	broadcastChannel := int64(987654)
 
+	mockedQueue := new(mq.Queue)
 	handler, mockedBot := generateHandlerAndMockedBot(
 		tb.OnPhoto,
 		config.EnvConfig{
 			Admins:           []int{adminID},
 			BroadcastChannel: broadcastChannel,
 		},
+		mockedQueue,
 	)
 
 	t.Run("it should do nothing when not in private conversation", func(t *testing.T) {
@@ -104,7 +117,7 @@ func TestHandlerPhoto(t *testing.T) {
 		})
 
 		mockedBot.AssertExpectations(t)
-		mockedBot.AssertNotCalled(t, "Send", mock.Anything, mock.Anything)
+		mockedQueue.AssertNotCalled(t, "Publish", mock.Anything, mock.Anything)
 	})
 
 	t.Run("it should do nothing when in private conversation but not admin", func(t *testing.T) {
@@ -118,7 +131,7 @@ func TestHandlerPhoto(t *testing.T) {
 		})
 
 		mockedBot.AssertExpectations(t)
-		mockedBot.AssertNotCalled(t, "Send", mock.Anything, mock.Anything)
+		mockedQueue.AssertNotCalled(t, "Publish", mock.Anything, mock.Anything)
 	})
 
 	t.Run("it should do nothing when caption no present", func(t *testing.T) {
@@ -133,7 +146,7 @@ func TestHandlerPhoto(t *testing.T) {
 		})
 
 		mockedBot.AssertExpectations(t)
-		mockedBot.AssertNotCalled(t, "Send", mock.Anything, mock.Anything)
+		mockedQueue.AssertNotCalled(t, "Publish", mock.Anything, mock.Anything)
 	})
 
 	t.Run("it should send photo when caption is present", func(t *testing.T) {
@@ -154,15 +167,21 @@ func TestHandlerPhoto(t *testing.T) {
 				},
 			},
 		}
-		mockedBot.On(
-			"Send",
-			tb.ChatID(broadcastChannel),
-			m.Photo,
-		).Once().Return(nil, nil)
+		mockedQueue.On(
+			"Publish",
+			pubsub.PhotoTopic.String(),
+			mock.MatchedBy(func(message *message.Message) bool {
+				return string(message.Payload) == "{\"caption\":\"testing\"," +
+					"\"file_id\":\"blablabla\"," +
+					"\"file_url\":\"http://myimage.com/test.jpg\"," +
+					"\"file_size\":1234}"
+			}),
+		).Once().Return(nil)
 
 		handler(m)
 
 		mockedBot.AssertExpectations(t)
+		mockedQueue.AssertExpectations(t)
 	})
 }
 
@@ -170,12 +189,14 @@ func TestHandlerText(t *testing.T) {
 	adminID := 12345
 	broadcastChannel := int64(987654)
 
+	mockedQueue := new(mq.Queue)
 	handler, mockedBot := generateHandlerAndMockedBot(
 		tb.OnText,
 		config.EnvConfig{
 			Admins:           []int{adminID},
 			BroadcastChannel: broadcastChannel,
 		},
+		mockedQueue,
 	)
 
 	t.Run("it should do nothing when not in private conversation", func(t *testing.T) {
@@ -189,7 +210,7 @@ func TestHandlerText(t *testing.T) {
 		})
 
 		mockedBot.AssertExpectations(t)
-		mockedBot.AssertNotCalled(t, "Send", mock.Anything, mock.Anything)
+		mockedQueue.AssertNotCalled(t, "Publish", mock.Anything, mock.Anything)
 	})
 
 	t.Run("it should do nothing when in private conversation but not admin", func(t *testing.T) {
@@ -203,7 +224,7 @@ func TestHandlerText(t *testing.T) {
 		})
 
 		mockedBot.AssertExpectations(t)
-		mockedBot.AssertNotCalled(t, "Send", mock.Anything, mock.Anything)
+		mockedQueue.AssertNotCalled(t, "Publish", mock.Anything, mock.Anything)
 	})
 
 	t.Run("it should do nothing when text no present", func(t *testing.T) {
@@ -218,7 +239,7 @@ func TestHandlerText(t *testing.T) {
 		})
 
 		mockedBot.AssertExpectations(t)
-		mockedBot.AssertNotCalled(t, "Send", mock.Anything, mock.Anything)
+		mockedQueue.AssertNotCalled(t, "Send", mock.Anything, mock.Anything)
 	})
 
 	t.Run("it should send text when present", func(t *testing.T) {
@@ -231,19 +252,22 @@ func TestHandlerText(t *testing.T) {
 			},
 			Text: "testing",
 		}
-		mockedBot.On(
-			"Send",
-			tb.ChatID(broadcastChannel),
-			"testing",
-		).Once().Return(nil, nil)
+		mockedQueue.On(
+			"Publish",
+			pubsub.TextTopic.String(),
+			mock.MatchedBy(func(message *message.Message) bool {
+				return string(message.Payload) == "{\"text\":\"testing\"}"
+			}),
+		).Once().Return(nil)
 
 		handler(m)
 
 		mockedBot.AssertExpectations(t)
+		mockedQueue.AssertExpectations(t)
 	})
 }
 
-func generateHandlerAndMockedBot(toHandle string, cfg config.EnvConfig) (func(*tb.Message), *mb.TelegramBot) {
+func generateHandlerAndMockedBot(toHandle string, cfg config.EnvConfig, mockedQueue *mq.Queue) (func(*tb.Message), *mb.TelegramBot) {
 	allHandlers := []string{"/start", "/help", tb.OnPhoto, tb.OnText}
 	var handler func(*tb.Message)
 
@@ -264,9 +288,10 @@ func generateHandlerAndMockedBot(toHandle string, cfg config.EnvConfig) (func(*t
 		}
 	}
 
-	bot.NewBot(
+	_ = bot.NewBot(
 		bot.WithTelegramBot(mockedBot),
 		bot.WithConfig(cfg),
+		bot.WithQueue(mockedQueue),
 	).Start()
 
 	return handler, mockedBot
