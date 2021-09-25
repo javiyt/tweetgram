@@ -55,7 +55,7 @@ jobs:
         with:
           version: 3.7.3
       - name: Generate code
-        run: task wire
+        run: task generate
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2
         with:
