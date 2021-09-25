@@ -1,36 +1,36 @@
-on: [push, pull_request]
+on: [ push, pull_request ]
 name: Test
 jobs:
   test:
     strategy:
       matrix:
-        go-version: [1.16.x, 1.17.x]
+        go-version: [ 1.16.x, 1.17.x ]
     runs-on: ubuntu-latest
     steps:
-    - name: Install Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: ${{ matrix.go-version }}                
-    - name: Checkout code
-      uses: actions/checkout@v2
-    - name: Generate env file
-      run: 'echo "$ENV_FILE" > cmd/env'
-      shell: bash
-      env:
-        ENV_FILE: ${{secrets.ENV}}      
-    - name: Generate env.test file
-      run: 'echo "$ENV_TEST_FILE" > cmd/env.test'
-      shell: bash
-      env:
-        ENV_TEST_FILE: ${{secrets.ENV_TEST}} 
-    - name: Install Task
-      uses: arduino/setup-task@v1
-      with:
-        version: 3.7.3                   
-    - name: Test
-      run: task test
-    - name: Upload coverage to Codecov
-      run: bash <(curl -s https://codecov.io/bash)      
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Generate env file
+        run: 'echo "$ENV_FILE" > cmd/env'
+        shell: bash
+        env:
+          ENV_FILE: ${{secrets.ENV}}
+      - name: Generate env.test file
+        run: 'echo "$ENV_TEST_FILE" > cmd/env.test'
+        shell: bash
+        env:
+          ENV_TEST_FILE: ${{secrets.ENV_TEST}}
+      - name: Install Task
+        uses: arduino/setup-task@v1
+        with:
+          version: 3.7.3
+      - name: Test
+        run: task test
+      - name: Upload coverage to Codecov
+        run: bash <(curl -s https://codecov.io/bash)
   golangci:
     name: lint
     runs-on: ubuntu-latest
@@ -44,16 +44,16 @@ jobs:
         run: 'echo "$ENV_FILE" > cmd/env'
         shell: bash
         env:
-          ENV_FILE: ${{secrets.ENV}}      
+          ENV_FILE: ${{secrets.ENV}}
       - name: Generate env.test file
         run: 'echo "$ENV_TEST_FILE" > cmd/env.test'
         shell: bash
         env:
-          ENV_TEST_FILE: ${{secrets.ENV_TEST}}      
+          ENV_TEST_FILE: ${{secrets.ENV_TEST}}
       - name: Install Task
         uses: arduino/setup-task@v1
         with:
-          version: 3.7.3     
+          version: 3.7.3
       - name: Generate code
         run: task wire
       - name: golangci-lint

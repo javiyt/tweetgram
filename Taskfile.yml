@@ -37,6 +37,16 @@ tasks:
     cmds:
       - task: generate-env
       - task: install
+      - task: generate
+  generate:
+    desc: Run all code generation
+    silent: true
+    deps:
+      - clean
+      - install
+    cmds:
+      - task: stringer
+      - task: json
       - task: wire
       - task: mock
   install:
@@ -46,6 +56,9 @@ tasks:
     cmds:
       - echo "Download tools and dependencies"
       - go mod vendor -e
+    sources:
+      - go.mod
+    method: checksum
   lint:
     desc: Execute golangci-lint tool
     deps:
@@ -60,6 +73,22 @@ tasks:
       - install
     cmds:
       - go run github.com/google/wire/cmd/wire ./...
+  stringer:
+    desc: Stringify all enums
+    run: once
+    silent: true
+    deps:
+      - install
+    cmds:
+      - go run golang.org/x/tools/cmd/stringer -type=TopicName internal/pubsub/broadcast.go
+  json:
+    desc: Generate json Marshal/Unmarshal functions
+    run: once
+    silent: true
+    deps:
+      - install
+    cmds:
+      - go run github.com/mailru/easyjson/easyjson internal/pubsub/broadcast.go
   mock:
     desc: Generate all mocks for testing
     run: once
@@ -72,15 +101,18 @@ tasks:
   test:
     desc: Run all tests
     deps:
+      - clean
       - install
-      - mock
-      - wire
+      - generate
     cmds:
       - go test -v -timeout 10s -race -count 5 -coverprofile=coverage.txt -covermode=atomic ./...
   run-test:
     desc: Execute test mode for the bot
     deps:
+      - clean
       - install
+      - stringer
+      - json
       - wire
     cmds:
       - go run cmd/main.go -test=true
@@ -88,7 +120,10 @@ tasks:
     desc: Clean all auto generated files
     cmds:
       - echo "Removing auto generated files"
-      - rm -f internal/app/wire_gen.go
+      - rm -f coverage.txt
+      - find . -type f -name '*_gen.go' -delete
+      - find . -type f -name '*_string.go' -delete
+      - find . -type f -name '*_easyjson.go' -delete
       - rm -Rf mocks
       - echo "Files removed"
     silent: true

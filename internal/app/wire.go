@@ -1,8 +1,12 @@
-//+build wireinject
+//go:build wireinject
+// +build wireinject
 
 package app
 
 import (
+	"github.com/ThreeDotsLabs/watermill"
+	"github.com/ThreeDotsLabs/watermill/pubsub/gochannel"
+	"github.com/javiyt/tweettgram/internal/pubsub"
 	"net/http"
 	"time"
 
@@ -16,14 +20,18 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-var twitterClient = wire.NewSet(provideTwitterHttpClient, provideTwitterClient)
-var telegramBot = wire.NewSet(provideTBot)
+var (
+	twitterClient = wire.NewSet(provideTwitterHttpClient, provideTwitterClient)
+	telegramBot   = wire.NewSet(provideTBot)
+	queue         = wire.NewSet(provideGoChannelQueue, wire.Bind(new(pubsub.Queue), new(*gochannel.GoChannel)))
+)
 
 func ProvideBot() (bot.AppBot, error) {
 	panic(wire.Build(
 		provideConfiguration,
 		telegramBot,
 		twitterClient,
+		queue,
 		provideBotOptions,
 		bot.NewBot,
 	))
@@ -44,7 +52,7 @@ func provideTBotSettings(cfg config.EnvConfig) tb.Settings {
 	}
 }
 
-func provideTwitterClient(htc *http.Client) *twitter.Client {
+func provideTwitterClient(*http.Client) *twitter.Client {
 	wire.Build(gt.NewClient, twitter.NewTwitterClient)
 
 	return &twitter.Client{}
@@ -55,10 +63,18 @@ func provideTwitterHttpClient(cfg config.EnvConfig) *http.Client {
 		Client(oauth1.NoContext, oauth1.NewToken(cfg.TwitterAccessToken, cfg.TwitterAccessSecret))
 }
 
-func provideBotOptions(b *tb.Bot, cfg config.EnvConfig, tc *twitter.Client) []bot.BotOption {
-	return []bot.BotOption{
+func provideGoChannelQueue() *gochannel.GoChannel {
+	return gochannel.NewGoChannel(
+		gochannel.Config{},
+		watermill.NewStdLogger(false, false),
+	)
+}
+
+func provideBotOptions(b *tb.Bot, cfg config.EnvConfig, tc *twitter.Client, gq pubsub.Queue) []bot.Option {
+	return []bot.Option{
 		bot.WithTelegramBot(b),
 		bot.WithConfig(cfg),
 		bot.WithTwitterClient(tc),
+		bot.WithQueue(gq),
 	}
 }

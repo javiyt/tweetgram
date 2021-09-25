@@ -1,18 +1,27 @@
 # tweettgram
 
 [![codecov](https://codecov.io/gh/javiyt/tweettgram/branch/main/graph/badge.svg?token=Q15YVM2SMC)](https://codecov.io/gh/javiyt/tweettgram)
+[![Test](https://github.com/javiyt/tweettgram/actions/workflows/ci.yml/badge.svg)](https://github.com/javiyt/tweettgram/actions/workflows/ci.yml)
 
 Telegram bot to publish post to twitter
 
 ## How to set up the environment?
-First you need to install, if not installed on your machine, [Task](https://taskfile.dev/#/). Once installed you only need to run in your command line:
+
+First you need to install, if not installed on your machine, [Task](https://taskfile.dev/#/). Once installed you only
+need to run in your command line:
+
 ```
 task setup
 ```
-And you are done, it will generate the env files needed to run the bot and will download all dependencies, also run all code generation tools.
 
-### Configuring the bot
-You can find a file inside cmd folder called env where you can adjust the variables, take into account the generated one are random values. The content of the env file will look like following:
+And you are done, it will generate the env files needed to run the bot and will download all dependencies, also run all
+code generation tools.
+
+###  Configuring the bot
+
+You can find a file inside cmd folder called env where you can adjust the variables, take into account the generated one
+are random values. The content of the env file will look like following:
+
 ```
 BOT_TOKEN=1234567890:G8o4ATpRsfUtl0p7N1HW9S2IdIcxSRoSY67
 ADMINS=123456789
@@ -23,11 +32,17 @@ TWITTER_BEARER_TOKEN=hIlQI351HEPT6xbA4xHnYRfgOsF8jqcPT5m6Ec0VeCXtUyOY9Mzy6uFYevH
 TWITTER_ACCESS_TOKEN=123456789-0xW7uNw2mEykTVTTKHS32y3oIXHab5hSh7POa0Wf
 TWITTER_ACCESS_SECRET=BWa9T8hkEEj5yCutPwJTs7Vk4f1wfj690Dq3UGCyf9YQB
 ```
-Check env.test file, you only need there all the variables that should be override in order to run a test instance of the bot. Take into account env.test file is not needed to run the test case they set up the appropiate variables to run them. Remove all not needed variables from env.test file
+
+Check env.test file, you only need there all the variables that should be override in order to run a test instance of
+the bot. Take into account env.test file is not needed to run the test case they set up the appropiate variables to run
+them. Remove all not needed variables from env.test file
 
 ### Running a local instance of the bot
+
 You just need to run the following command:
+
 ```
 task run-test
 ```
+
 Remember all env variables will be overrriden by the ones defined in env.test
