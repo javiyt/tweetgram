@@ -119,6 +119,7 @@ tasks:
       - go run cmd/main.go -test=true
   clean:
     desc: Clean all auto generated files
+    run: once
     cmds:
       - echo "Removing auto generated files"
       - rm -f coverage.txt

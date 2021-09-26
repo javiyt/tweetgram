@@ -22,7 +22,7 @@ func TestInitializeConfiguration(t *testing.T) {
 
 		require.NoError(t, e)
 		require.Equal(t, "asdfg", os.Getenv("BOT_TOKEN"))
-		os.Unsetenv("BOT_TOKEN")
+		_ = os.Unsetenv("BOT_TOKEN")
 	})
 
 	t.Run("it should load test configuration from environment file when in test env", func(t *testing.T) {
@@ -30,7 +30,7 @@ func TestInitializeConfiguration(t *testing.T) {
 
 		require.NoError(t, e)
 		require.Equal(t, "qwert", os.Getenv("BOT_TOKEN"))
-		os.Unsetenv("BOT_TOKEN")
+		_ = os.Unsetenv("BOT_TOKEN")
 	})
 
 	t.Run("it should fail when not a valid env file", func(t *testing.T) {
@@ -43,7 +43,7 @@ func TestInitializeConfiguration(t *testing.T) {
 		e := a.InitializeConfiguration(true, envFile, []byte("BOT_TOKEN"))
 
 		require.EqualError(t, e, "error loading env.test file: line `BOT_TOKEN` doesn't match format")
-		os.Unsetenv("BOT_TOKEN")
+		_ = os.Unsetenv("BOT_TOKEN")
 	})
 }
 

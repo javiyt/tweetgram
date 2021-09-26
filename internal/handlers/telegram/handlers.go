@@ -17,7 +17,7 @@ type Telegram struct {
 	q   pubsub.Queue
 }
 
-func NewTelegram(bot bot.TelegramBot, cfg config.EnvConfig, q pubsub.Queue) *Telegram {
+func NewTelegram(cfg config.EnvConfig, bot bot.TelegramBot, q pubsub.Queue) *Telegram {
 	return &Telegram{bot: bot, cfg: cfg, q: q}
 }
 
@@ -53,7 +53,7 @@ func (t *Telegram) handleText() {
 }
 
 func (t *Telegram) handlePhoto() {
-	messages, err := t.q.Subscribe(context.Background(), pubsub.TextTopic.String())
+	messages, err := t.q.Subscribe(context.Background(), pubsub.PhotoTopic.String())
 	if err != nil {
 		t.sendError(err)
 	}
