@@ -1,12 +1,15 @@
 package bot
 
 import (
+	"github.com/javiyt/tweettgram/internal/pubsub"
 	"sort"
 	"strings"
 
 	"github.com/javiyt/tweettgram/internal/config"
 	tb "gopkg.in/tucnak/telebot.v2"
 )
+
+
 
 type TelegramBot interface {
 	Start()
@@ -17,13 +20,24 @@ type TelegramBot interface {
 	SendAlbum(to tb.Recipient, a tb.Album, options ...interface{}) ([]tb.Message, error)
 }
 
+type AppBot interface {
+	Start() error
+	Stop()
+}
+
+type TwitterClient interface {
+	SendUpdate(string) error
+}
+
 type Bot struct {
-	bot       TelegramBot
-	cfg       config.EnvConfig
+	bot TelegramBot
+	tc  TwitterClient
+	cfg config.EnvConfig
+	q   pubsub.Queue
 	albumChan chan *tb.Message
 }
 
-type BotOption func(b *Bot)
+type Option func(b *Bot)
 
 type botHandler struct {
 	handlerFunc func(*tb.Message)
@@ -31,19 +45,31 @@ type botHandler struct {
 	filters     []filterFunc
 }
 
-func WithTelegramBot(tb TelegramBot) BotOption {
+func WithTelegramBot(tb TelegramBot) Option {
 	return func(b *Bot) {
 		b.bot = tb
 	}
 }
 
-func WithConfig(cfg config.EnvConfig) BotOption {
+func WithConfig(cfg config.EnvConfig) Option {
 	return func(b *Bot) {
 		b.cfg = cfg
 	}
 }
 
-func NewBot(options ...BotOption) *Bot {
+func WithTwitterClient(tc TwitterClient) Option {
+	return func(b *Bot) {
+		b.tc = tc
+	}
+}
+
+func WithQueue(q pubsub.Queue) Option {
+	return func(b *Bot) {
+		b.q = q
+	}
+}
+
+func NewBot(options ...Option) AppBot {
 	b := &Bot{
 		albumChan: make(chan *tb.Message),
 	}

@@ -19,4 +19,8 @@ cmd/env*
 mocks/
 .vscode
 wire_gen.go
+*_string.go
+*_easyjson.go
 coverage.txt
+.idea
+.task

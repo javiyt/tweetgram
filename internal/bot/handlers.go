@@ -3,6 +3,11 @@ package bot
 import (
 	"encoding/json"
 	"log"
+
+	"github.com/ThreeDotsLabs/watermill"
+	"github.com/ThreeDotsLabs/watermill/message"
+	"github.com/javiyt/tweettgram/internal/pubsub"
+	"github.com/mailru/easyjson"
 	"strings"
 
 	tb "gopkg.in/tucnak/telebot.v2"
@@ -23,8 +28,7 @@ func (b *Bot) handleHelpCommand(m *tb.Message) {
 
 func (b *Bot) handlePhoto(m *tb.Message) {
 	caption := strings.TrimSpace(m.Caption)
-	if m.Caption == "" && m.AlbumID == "" {
-		log.Print("not album not caption")
+	if caption == "" && m.AlbumID == "" {
 		return
 	}
 
@@ -36,14 +40,14 @@ func (b *Bot) handlePhoto(m *tb.Message) {
 		return
 	}
 
-	b.bot.Send(tb.ChatID(b.cfg.BroadcastChannel), &tb.Photo{
-		Caption: caption,
-		File: tb.File{
-			FileID:   m.Photo.FileID,
-			FileURL:  m.Photo.FileURL,
-			FileSize: m.Photo.FileSize,
-		},
+	mb, _ := easyjson.Marshal(pubsub.PhotoEvent{
+		Caption:  caption,
+		FileID:   m.Photo.FileID,
+		FileURL:  m.Photo.FileURL,
+		FileSize: m.Photo.FileSize,
 	})
+
+	_ = b.q.Publish(pubsub.PhotoTopic.String(), message.NewMessage(watermill.NewUUID(), mb))
 }
 
 func (b *Bot) handleText(m *tb.Message) {
@@ -52,7 +56,11 @@ func (b *Bot) handleText(m *tb.Message) {
 		return
 	}
 
-	b.bot.Send(tb.ChatID(b.cfg.BroadcastChannel), msg)
+	mb, _ := easyjson.Marshal(pubsub.TextEvent{
+		Text: msg,
+	})
+
+	_ = b.q.Publish(pubsub.TextTopic.String(), message.NewMessage(watermill.NewUUID(), mb))
 }
 
 func (b *Bot) handleAlbum() {

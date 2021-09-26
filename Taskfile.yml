@@ -6,6 +6,49 @@ tasks:
   default:
     cmds:
       - task: test
+  generate-env:
+    desc: Generates env and env.test files
+    dir: cmd
+    silent: true
+    status:
+      - test -f env
+      - test -f env.test
+    vars:
+      CONTENT: |
+        BOT_TOKEN=1234567890:G8o4ATpRsfUtl0p7N1HW9S2IdIcxSRoSY67
+        ADMINS=123456789
+        BROADCAST_CHANNEL=-1234567890123
+        TWITTER_API_KEY=c7FU8EvL9smKN2k2IN0yur67k
+        TWITTER_API_SECRET=LYzF53kJoVK46rp859rQCw6Dqw6TpQV668aemPb2KI9GUxTTU0
+        TWITTER_BEARER_TOKEN=hIlQI351HEPT6xbA4xHnYRfgOsF8jqcPT5m6Ec0VeCXtUyOY9Mzy6uFYevH%4ys86GL3KfO1ZRBwichZOlGDYyZ52Ht2BXh2WgUFvywJKbRq9lMH
+        TWITTER_ACCESS_TOKEN=123456789-0xW7uNw2mEykTVTTKHS32y3oIXHab5hSh7POa0Wf
+        TWITTER_ACCESS_SECRET=BWa9T8hkEEj5yCutPwJTs7Vk4f1wfj690Dq3UGCyf9YQB
+    cmds:
+      - Writing content for env files
+      - |
+        {{range $line := .CONTENT | trim | splitLines -}}
+          echo {{$line}} >> env
+          echo {{$line}} >> env.test
+        {{end}} 
+      - Env files generated, set up proper values for vars
+  setup:
+    desc: Set up bot environment to work with
+    silent: true
+    cmds:
+      - task: generate-env
+      - task: install
+      - task: generate
+  generate:
+    desc: Run all code generation
+    silent: true
+    deps:
+      - clean
+      - install
+    cmds:
+      - task: stringer
+      - task: json
+      - task: wire
+      - task: mock
   install:
     desc: Download all tools and dependencies to vendor directory
     run: once
@@ -13,12 +56,16 @@ tasks:
     cmds:
       - echo "Download tools and dependencies"
       - go mod vendor -e
+    sources:
+      - go.mod
+    method: checksum
   lint:
     desc: Execute golangci-lint tool
     deps:
       - install
+      - generate
     cmds:
-      - go run github.com/golangci/golangci-lint/cmd/golangci-lint run
+      - go run github.com/golangci/golangci-lint/cmd/golangci-lint run cmd internal
   wire:
     desc: Execute wire binary to generate DI
     run: once
@@ -27,6 +74,22 @@ tasks:
       - install
     cmds:
       - go run github.com/google/wire/cmd/wire ./...
+  stringer:
+    desc: Stringify all enums
+    run: once
+    silent: true
+    deps:
+      - install
+    cmds:
+      - go run golang.org/x/tools/cmd/stringer -type=TopicName internal/pubsub/broadcast.go
+  json:
+    desc: Generate json Marshal/Unmarshal functions
+    run: once
+    silent: true
+    deps:
+      - install
+    cmds:
+      - go run github.com/mailru/easyjson/easyjson internal/pubsub/broadcast.go
   mock:
     desc: Generate all mocks for testing
     run: once
@@ -39,15 +102,30 @@ tasks:
   test:
     desc: Run all tests
     deps:
+      - clean
       - install
-      - mock
-      - wire
+      - generate
     cmds:
       - go test -v -timeout 10s -race -count 5 -coverprofile=coverage.txt -covermode=atomic ./...
   run-test:
     desc: Execute test mode for the bot
     deps:
+      - clean
       - install
+      - stringer
+      - json
       - wire
     cmds:
       - go run cmd/main.go -test=true
+  clean:
+    desc: Clean all auto generated files
+    run: once
+    cmds:
+      - echo "Removing auto generated files"
+      - rm -f coverage.txt
+      - find ./internal -type f -name '*_gen.go' -delete
+      - find ./internal -type f -name '*_string.go' -delete
+      - find ./internal -type f -name '*_easyjson.go' -delete
+      - rm -Rf mocks
+      - echo "Files removed"
+    silent: true
