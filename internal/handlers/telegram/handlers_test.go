@@ -1,4 +1,4 @@
-package handlers_telegram
+package handlers_telegram_test
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/javiyt/tweettgram/internal/config"
+	ht "github.com/javiyt/tweettgram/internal/handlers/telegram"
 	"github.com/javiyt/tweettgram/internal/pubsub"
 	mb "github.com/javiyt/tweettgram/mocks/bot"
 	mq "github.com/javiyt/tweettgram/mocks/pubsub"
@@ -25,7 +26,7 @@ func TestTelegram_ExecuteHandlers(t *testing.T) {
 		mockedBot := new(mb.TelegramBot)
 		mockedQueue := new(mq.Queue)
 
-		th := NewTelegram(cfg, mockedBot, mockedQueue)
+		th := ht.NewTelegram(cfg, mockedBot, mockedQueue)
 
 		mockedQueue.On("Subscribe", context.Background(), pubsub.TextTopic.String()).
 			Once().
@@ -47,7 +48,7 @@ func TestTelegram_ExecuteHandlers(t *testing.T) {
 		mockedBot := new(mb.TelegramBot)
 		mockedQueue := new(mq.Queue)
 
-		th := NewTelegram(cfg, mockedBot, mockedQueue)
+		th := ht.NewTelegram(cfg, mockedBot, mockedQueue)
 
 		textChannel := make(chan *message.Message)
 		photoChannel := make(chan *message.Message)
@@ -81,7 +82,7 @@ func TestTelegram_ExecuteHandlers(t *testing.T) {
 		mockedBot := new(mb.TelegramBot)
 		mockedQueue := new(mq.Queue)
 
-		th := NewTelegram(cfg, mockedBot, mockedQueue)
+		th := ht.NewTelegram(cfg, mockedBot, mockedQueue)
 
 		textChannel := make(chan *message.Message)
 		photoChannel := make(chan *message.Message)
@@ -119,7 +120,7 @@ func TestTelegram_ExecuteHandlers(t *testing.T) {
 		mockedBot := new(mb.TelegramBot)
 		mockedQueue := new(mq.Queue)
 
-		th := NewTelegram(cfg, mockedBot, mockedQueue)
+		th := ht.NewTelegram(cfg, mockedBot, mockedQueue)
 
 		textChannel := make(chan *message.Message)
 		photoChannel := make(chan *message.Message)
@@ -153,7 +154,7 @@ func TestTelegram_ExecuteHandlers(t *testing.T) {
 		mockedBot := new(mb.TelegramBot)
 		mockedQueue := new(mq.Queue)
 
-		th := NewTelegram(cfg, mockedBot, mockedQueue)
+		th := ht.NewTelegram(cfg, mockedBot, mockedQueue)
 
 		textChannel := make(chan *message.Message)
 		photoChannel := make(chan *message.Message)
@@ -187,7 +188,7 @@ func TestTelegram_ExecuteHandlers(t *testing.T) {
 		mockedBot := new(mb.TelegramBot)
 		mockedQueue := new(mq.Queue)
 
-		th := NewTelegram(cfg, mockedBot, mockedQueue)
+		th := ht.NewTelegram(cfg, mockedBot, mockedQueue)
 
 		textChannel := make(chan *message.Message)
 		photoChannel := make(chan *message.Message)
@@ -234,7 +235,7 @@ func TestTelegram_ExecuteHandlers(t *testing.T) {
 		mockedBot := new(mb.TelegramBot)
 		mockedQueue := new(mq.Queue)
 
-		th := NewTelegram(cfg, mockedBot, mockedQueue)
+		th := ht.NewTelegram(cfg, mockedBot, mockedQueue)
 
 		textChannel := make(chan *message.Message)
 		photoChannel := make(chan *message.Message)
