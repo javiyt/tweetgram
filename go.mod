@@ -160,6 +160,7 @@ require (
 	github.com/go-toolsmith/pkgload v1.0.1 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/subcommands v1.2.0 // indirect
+	github.com/jarcoal/httpmock v1.0.8
 	github.com/mailru/easyjson v0.7.7
 	github.com/rivo/uniseg v0.2.0 // indirect
 	golang.org/x/tools v0.1.6
