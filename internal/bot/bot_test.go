@@ -6,6 +6,7 @@ import (
 
 	"github.com/javiyt/tweettgram/internal/bot"
 	mb "github.com/javiyt/tweettgram/mocks/bot"
+	mq "github.com/javiyt/tweettgram/mocks/pubsub"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	tb "gopkg.in/tucnak/telebot.v2"
@@ -47,7 +48,6 @@ func TestStart(t *testing.T) {
 		mockedBot.On("Handle", "/help", mock.Anything).Once().Return(nil, nil)
 		mockedBot.On("Handle", tb.OnPhoto, mock.Anything).Once().Return(nil, nil)
 		mockedBot.On("Handle", tb.OnText, mock.Anything).Once().Return(nil, nil)
-		mockedBot.On("Start").Once()
 
 		require.Nil(t, b.Start())
 
@@ -55,11 +55,23 @@ func TestStart(t *testing.T) {
 	})
 }
 
+func TestRun(t *testing.T) {
+	mockedBot := new(mb.TelegramBot)
+	mockedBot.On("Start").Once()
+	
+	bot.NewBot(bot.WithTelegramBot(mockedBot)).Run()
+
+	mockedBot.AssertExpectations(t)
+}
+
 func TestStop(t *testing.T) {
 	mockedBot := new(mb.TelegramBot)
 	mockedBot.On("Stop").Once()
+	mockedQueue := new(mq.Queue)
+	mockedQueue.On("Close").Once().Return(nil)
 
-	bot.NewBot(bot.WithTelegramBot(mockedBot)).Stop()
+	bot.NewBot(bot.WithTelegramBot(mockedBot), bot.WithQueue(mockedQueue)).Stop()
 
 	mockedBot.AssertExpectations(t)
+	mockedQueue.AssertExpectations(t)
 }

@@ -56,12 +56,12 @@ func TestTelegram_ExecuteHandlers(t *testing.T) {
 			Once().
 			Return(func(context.Context, string) <-chan *message.Message {
 				return textChannel
-		}, nil)
+			}, nil)
 		mockedQueue.On("Subscribe", context.Background(), pubsub.PhotoTopic.String()).
 			Once().
 			Return(func(context.Context, string) <-chan *message.Message {
-			return photoChannel
-		}, nil)
+				return photoChannel
+			}, nil)
 		mockedQueue.On("Publish", pubsub.ErrorTopic.String(), mock.MatchedBy(func(m *message.Message) bool {
 			return string(m.Payload) == "{\"error\":\"parse error: unterminated string literal near offset 12 of '{\\\"asd\\\":\\\"qwer'\"}"
 		})).Once().
@@ -72,7 +72,7 @@ func TestTelegram_ExecuteHandlers(t *testing.T) {
 		textChannel <- newMessage
 
 		require.Eventually(t, func() bool {
-			<-newMessage.Nacked()
+			<-newMessage.Acked()
 			return true
 		}, time.Second, time.Millisecond)
 		mockedQueue.AssertExpectations(t)
@@ -100,9 +100,9 @@ func TestTelegram_ExecuteHandlers(t *testing.T) {
 			return string(m.Payload) == "{\"error\":\"couldn't send message to telegram\"}"
 		})).Once().
 			Return(nil)
-		mockedBot.On("Send", tb.ChatID(cfg.BroadcastChannel), mock.MatchedBy(func(m interface{}) bool {
-			return m.(*tb.Message).Text == "testing message"
-		})).Once().Return(nil, errors.New("couldn't send message to telegram"))
+		mockedBot.On("Send", tb.ChatID(cfg.BroadcastChannel), "testing message").
+			Once().
+			Return(nil, errors.New("couldn't send message to telegram"))
 
 		th.ExecuteHandlers()
 		newMessage := message.NewMessage(watermill.NewUUID(), []byte("{\"text\":\"testing message\"}"))
@@ -134,9 +134,9 @@ func TestTelegram_ExecuteHandlers(t *testing.T) {
 			Return(func(context.Context, string) <-chan *message.Message {
 				return photoChannel
 			}, nil)
-		mockedBot.On("Send", tb.ChatID(cfg.BroadcastChannel), mock.MatchedBy(func(m interface{}) bool {
-			return m.(*tb.Message).Text == "testing message"
-		})).Once().Return(nil, nil)
+		mockedBot.On("Send", tb.ChatID(cfg.BroadcastChannel), "testing message").
+			Once().
+			Return(nil, nil)
 
 		th.ExecuteHandlers()
 		newMessage := message.NewMessage(watermill.NewUUID(), []byte("{\"text\":\"testing message\"}"))
@@ -162,12 +162,12 @@ func TestTelegram_ExecuteHandlers(t *testing.T) {
 			Once().
 			Return(func(context.Context, string) <-chan *message.Message {
 				return textChannel
-		}, nil)
+			}, nil)
 		mockedQueue.On("Subscribe", context.Background(), pubsub.PhotoTopic.String()).
 			Once().
 			Return(func(context.Context, string) <-chan *message.Message {
-			return photoChannel
-		}, nil)
+				return photoChannel
+			}, nil)
 		mockedQueue.On("Publish", pubsub.ErrorTopic.String(), mock.MatchedBy(func(m *message.Message) bool {
 			return string(m.Payload) == "{\"error\":\"parse error: unterminated string literal near offset 12 of '{\\\"asd\\\":\\\"qwer'\"}"
 		})).Once().
@@ -178,7 +178,7 @@ func TestTelegram_ExecuteHandlers(t *testing.T) {
 		photoChannel <- newMessage
 
 		require.Eventually(t, func() bool {
-			<-newMessage.Nacked()
+			<-newMessage.Acked()
 			return true
 		}, time.Second, time.Millisecond)
 		mockedQueue.AssertExpectations(t)

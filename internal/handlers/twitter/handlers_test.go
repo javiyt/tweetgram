@@ -57,13 +57,13 @@ func TestTwitter_ExecuteHandlers(t *testing.T) {
 		textChannel <- newMessage
 
 		require.Eventually(t, func() bool {
-			<-newMessage.Nacked()
+			<-newMessage.Acked()
 			return true
 		}, time.Second, time.Millisecond)
 		mockedQueue.AssertExpectations(t)
 	})
 
-	t.Run("it should fail sending text message to telegram", func(t *testing.T) {
+	t.Run("it should fail sending text message to twitter", func(t *testing.T) {
 		mockedTwitter := new(mb.TwitterClient)
 		mockedQueue := new(mq.Queue)
 
@@ -93,7 +93,7 @@ func TestTwitter_ExecuteHandlers(t *testing.T) {
 		mockedTwitter.AssertExpectations(t)
 	})
 
-	t.Run("it should send text message to telegram", func(t *testing.T) {
+	t.Run("it should send text message to twitter", func(t *testing.T) {
 		mockedTwitter := new(mb.TwitterClient)
 		mockedQueue := new(mq.Queue)
 

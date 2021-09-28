@@ -1,20 +1,19 @@
 package bot
 
 import (
-	"github.com/javiyt/tweettgram/internal/pubsub"
 	"sort"
 	"strings"
+
+	"github.com/javiyt/tweettgram/internal/pubsub"
 
 	"github.com/javiyt/tweettgram/internal/config"
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-
-
 type TelegramBot interface {
 	Start()
 	Stop()
-	SetCommands(cmds []tb.Command) error
+	SetCommands([]tb.Command) error
 	Handle(endpoint interface{}, handler interface{})
 	Send(to tb.Recipient, what interface{}, options ...interface{}) (*tb.Message, error)
 	SendAlbum(to tb.Recipient, a tb.Album, options ...interface{}) ([]tb.Message, error)
@@ -22,6 +21,7 @@ type TelegramBot interface {
 
 type AppBot interface {
 	Start() error
+	Run()
 	Stop()
 }
 
@@ -88,14 +88,18 @@ func (b *Bot) Start() error {
 
 	b.setUpHandlers()
 	b.handleAlbum()
-	b.bot.Start()
 
 	return nil
+}
+
+func (b *Bot) Run() {
+	b.bot.Start()
 }
 
 func (b *Bot) Stop() {
 	close(b.albumChan)
 	b.bot.Stop()
+	b.q.Close()
 }
 
 func (b *Bot) getHandlers() map[string]botHandler {

@@ -106,16 +106,16 @@ tasks:
       - install
       - generate
     cmds:
-      - go test -v -timeout 10s -race -count 5 -coverprofile=coverage.txt -covermode=atomic ./...
+      - go test -timeout 10s -race -count 5 -coverprofile=coverage.txt -covermode=atomic ./...
   run-test:
     desc: Execute test mode for the bot
     deps:
       - clean
       - install
-      - stringer
-      - json
-      - wire
     cmds:
+      - task: stringer
+      - task: json
+      - task: wire
       - go run cmd/main.go -test=true
   clean:
     desc: Clean all auto generated files
