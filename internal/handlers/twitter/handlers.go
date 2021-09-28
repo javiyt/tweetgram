@@ -2,6 +2,7 @@ package handlers_twitter
 
 import (
 	"context"
+
 	"github.com/javiyt/tweettgram/internal/bot"
 	"github.com/javiyt/tweettgram/internal/handlers"
 	"github.com/javiyt/tweettgram/internal/pubsub"
@@ -32,7 +33,7 @@ func (t *Twitter) handleText() {
 			var m pubsub.TextEvent
 			if err := easyjson.Unmarshal(msg.Payload, &m); err != nil {
 				handlers.SendError(t.q, err)
-				msg.Nack()
+				msg.Ack()
 				continue
 			}
 
