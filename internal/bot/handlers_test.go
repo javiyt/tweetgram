@@ -273,7 +273,6 @@ func generateHandlerAndMockedBot(toHandle string, cfg config.EnvConfig, mockedQu
 
 	mockedBot := new(mb.TelegramBot)
 	mockedBot.On("SetCommands", mock.Anything).Once().Return(nil)
-	mockedBot.On("Start").Once()
 
 	for _, v := range allHandlers {
 		if v == toHandle {

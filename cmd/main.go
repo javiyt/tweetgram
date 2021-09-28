@@ -21,8 +21,12 @@ func main() {
 	testBot := flag.Bool("test", false, "Should execute test bot")
 	flag.Parse()
 
-	botApp := app.NewApp(nil)
-	if err := botApp.InitializeConfiguration(*testBot, envFile, envTestFile); err != nil {
+	if err := app.InitializeConfiguration(*testBot, envFile, envTestFile); err != nil {
+		log.Fatal(err)
+	}
+
+	botApp, cleanup, err := app.ProvideApp()
+	if err != nil {
 		log.Fatal(err)
 	}
 
@@ -37,5 +41,8 @@ func main() {
 		defer close(c)
 		<-c
 		botApp.Stop()
+		cleanup()
 	}()
+
+	botApp.Run()
 }

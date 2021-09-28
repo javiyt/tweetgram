@@ -2,6 +2,7 @@ package handlers_telegram
 
 import (
 	"context"
+
 	"github.com/javiyt/tweettgram/internal/bot"
 	"github.com/javiyt/tweettgram/internal/config"
 	"github.com/javiyt/tweettgram/internal/handlers"
@@ -36,11 +37,11 @@ func (t *Telegram) handleText() {
 			var m pubsub.TextEvent
 			if err := easyjson.Unmarshal(msg.Payload, &m); err != nil {
 				handlers.SendError(t.q, err)
-				msg.Nack()
+				msg.Ack()
 				continue
 			}
 
-			if _, err := t.bot.Send(tb.ChatID(t.cfg.BroadcastChannel), &tb.Message{Text: m.Text}); err != nil {
+			if _, err := t.bot.Send(tb.ChatID(t.cfg.BroadcastChannel), m.Text); err != nil {
 				handlers.SendError(t.q, err)
 				msg.Nack()
 				continue
@@ -62,7 +63,7 @@ func (t *Telegram) handlePhoto() {
 			var m pubsub.PhotoEvent
 			if err := easyjson.Unmarshal(msg.Payload, &m); err != nil {
 				handlers.SendError(t.q, err)
-				msg.Nack()
+				msg.Ack()
 				continue
 			}
 

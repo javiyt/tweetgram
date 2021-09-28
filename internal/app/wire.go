@@ -4,11 +4,17 @@
 package app
 
 import (
-	"github.com/ThreeDotsLabs/watermill"
-	"github.com/ThreeDotsLabs/watermill/pubsub/gochannel"
-	"github.com/javiyt/tweettgram/internal/pubsub"
 	"net/http"
 	"time"
+
+	"github.com/ThreeDotsLabs/watermill"
+	"github.com/ThreeDotsLabs/watermill/pubsub/gochannel"
+	"github.com/javiyt/tweettgram/internal/handlers"
+	hse "github.com/javiyt/tweettgram/internal/handlers/error"
+	hstl "github.com/javiyt/tweettgram/internal/handlers/telegram"
+	hstw "github.com/javiyt/tweettgram/internal/handlers/twitter"
+	"github.com/javiyt/tweettgram/internal/pubsub"
+	"github.com/sirupsen/logrus"
 
 	"github.com/dghubble/oauth1"
 	"github.com/google/wire"
@@ -21,12 +27,33 @@ import (
 )
 
 var (
-	twitterClient = wire.NewSet(provideTwitterHttpClient, provideTwitterClient)
-	telegramBot   = wire.NewSet(provideTBot)
+	twitterClient = wire.NewSet(provideTwitterHttpClient, provideTwitterClient, wire.Bind(new(bot.TwitterClient), new(*twitter.Client)))
+	telegramBot   = wire.NewSet(provideTBot, wire.Bind(new(bot.TelegramBot), new(*tb.Bot)))
 	queue         = wire.NewSet(provideGoChannelQueue, wire.Bind(new(pubsub.Queue), new(*gochannel.GoChannel)))
+	queueInstance *gochannel.GoChannel
 )
 
-func ProvideBot() (bot.AppBot, error) {
+func ProvideApp() (*App, func(), error) {
+	panic(wire.Build(
+		provideBotProvider,
+		twitterClient,
+		provideConfiguration,
+		telegramBot,
+		queue,
+		provideLogger,
+		provideTelegramHandler,
+		provideTwitterHandler,
+		provideErrorHandler,
+		provideHandlerManager,
+		NewApp,
+	))
+}
+
+func provideBotProvider() botProvider {
+	return provideBot
+}
+
+func provideBot() (bot.AppBot, error) {
 	panic(wire.Build(
 		provideConfiguration,
 		telegramBot,
@@ -64,17 +91,53 @@ func provideTwitterHttpClient(cfg config.EnvConfig) *http.Client {
 }
 
 func provideGoChannelQueue() *gochannel.GoChannel {
-	return gochannel.NewGoChannel(
-		gochannel.Config{},
-		watermill.NewStdLogger(false, false),
-	)
+	if queueInstance == nil {
+		queueInstance = gochannel.NewGoChannel(
+			gochannel.Config{},
+			watermill.NewStdLogger(true, true),
+		)
+	}
+	return queueInstance
 }
 
-func provideBotOptions(b *tb.Bot, cfg config.EnvConfig, tc *twitter.Client, gq pubsub.Queue) []bot.Option {
+func provideBotOptions(b bot.TelegramBot, cfg config.EnvConfig, tc bot.TwitterClient, gq pubsub.Queue) []bot.Option {
 	return []bot.Option{
 		bot.WithTelegramBot(b),
 		bot.WithConfig(cfg),
 		bot.WithTwitterClient(tc),
 		bot.WithQueue(gq),
 	}
+}
+
+func provideLogger() (*logrus.Logger, func()) {
+	logger := logrus.New()
+	logger.SetFormatter(&logrus.TextFormatter{
+		DisableColors: true,
+		FullTimestamp: true,
+	})
+	logger.SetReportCaller(true)
+	logger.SetLevel(logrus.DebugLevel)
+
+	return logger, func() {
+		logger.Exit(0)
+	}
+}
+
+func provideTelegramHandler(config.EnvConfig, bot.TelegramBot, pubsub.Queue) *hstl.Telegram {
+	wire.Build(hstl.NewTelegram)
+	return &hstl.Telegram{}
+}
+
+func provideTwitterHandler(bot.TwitterClient, pubsub.Queue) *hstw.Twitter {
+	wire.Build(hstw.NewTwitter)
+	return &hstw.Twitter{}
+}
+
+func provideErrorHandler(pubsub.Queue, *logrus.Logger) *hse.ErrorHandler {
+	wire.Build(hse.NewErrorHandler)
+	return &hse.ErrorHandler{}
+}
+
+func provideHandlerManager(tlh *hstl.Telegram, twh *hstw.Twitter, eh *hse.ErrorHandler) *handlers.Manager {
+	return handlers.NewHandlersManager(tlh, twh, eh)
 }
