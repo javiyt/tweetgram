@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"bytes"
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/javiyt/tweettgram/internal/pubsub"
@@ -29,11 +30,20 @@ func (b *Bot) handlePhoto(m *tb.Message) {
 		return
 	}
 
+	fileReader, err := b.bot.GetFile(m.Photo.MediaFile())
+	if err != nil {
+		return
+	}
+
+	fileContent := new(bytes.Buffer)
+	_, _ = fileContent.ReadFrom(fileReader)
+
 	mb, _ := easyjson.Marshal(pubsub.PhotoEvent{
 		Caption:  caption,
 		FileID:   m.Photo.FileID,
 		FileURL:  m.Photo.FileURL,
 		FileSize: m.Photo.FileSize,
+		FileContent: fileContent.Bytes(),
 	})
 
 	_ = b.q.Publish(pubsub.PhotoTopic.String(), message.NewMessage(watermill.NewUUID(), mb))

@@ -1,9 +1,11 @@
 package bot_test
 
 import (
+	"errors"
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/javiyt/tweettgram/internal/pubsub"
 	mq "github.com/javiyt/tweettgram/mocks/pubsub"
+	"os"
 	"testing"
 
 	"github.com/javiyt/tweettgram/internal/bot"
@@ -149,7 +151,7 @@ func TestHandlerPhoto(t *testing.T) {
 		mockedQueue.AssertNotCalled(t, "Publish", mock.Anything, mock.Anything)
 	})
 
-	t.Run("it should send photo when caption is present", func(t *testing.T) {
+	t.Run("it should do nothing when error getting image", func(t *testing.T) {
 		m := &tb.Message{
 			Chat: &tb.Chat{
 				Type: tb.ChatPrivate,
@@ -167,6 +169,39 @@ func TestHandlerPhoto(t *testing.T) {
 				},
 			},
 		}
+		mockedBot.On("GetFile", &m.Photo.File).
+			Once().
+			Return(nil, errors.New("error downloading image"))
+
+		handler(m)
+
+		mockedBot.AssertExpectations(t)
+		mockedQueue.AssertNotCalled(t, "Publish", mock.Anything, mock.Anything)
+	})
+
+	t.Run("it should send photo when caption is present and image could be downloaded", func(t *testing.T) {
+		m := &tb.Message{
+			Chat: &tb.Chat{
+				Type: tb.ChatPrivate,
+			},
+			Sender: &tb.User{
+				ID: adminID,
+			},
+			Caption: "testing",
+			Photo: &tb.Photo{
+				Caption: "testing",
+				File: tb.File{
+					FileID:   "blablabla",
+					FileURL:  "http://myimage.com/test.jpg",
+					FileSize: 1234,
+				},
+			},
+		}
+		file, _ := os.Open("testdata/test.png")
+		defer func() { _ = file.Close() }()
+		mockedBot.On("GetFile", &m.Photo.File).
+			Once().
+			Return(file, nil)
 		mockedQueue.On(
 			"Publish",
 			pubsub.PhotoTopic.String(),
@@ -174,7 +209,8 @@ func TestHandlerPhoto(t *testing.T) {
 				return string(message.Payload) == "{\"caption\":\"testing\"," +
 					"\"file_id\":\"blablabla\"," +
 					"\"file_url\":\"http://myimage.com/test.jpg\"," +
-					"\"file_size\":1234}"
+					"\"file_size\":1234," +
+					"\"file_content\":\"iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAQklEQVR4nGJWTd9ZaWdyOfW69Y8zDF5sfALun5c7SL+8ysQUqp7euSxThUtU5v9FJg2PoueTrrw5Vyt36AYgAAD//yOnFnjB+cHEAAAAAElFTkSuQmCC\"}"
 			}),
 		).Once().Return(nil)
 
