@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"io"
 	"sort"
 	"strings"
 
@@ -16,6 +17,7 @@ type TelegramBot interface {
 	SetCommands([]tb.Command) error
 	Handle(endpoint interface{}, handler interface{})
 	Send(to tb.Recipient, what interface{}, options ...interface{}) (*tb.Message, error)
+	GetFile(file *tb.File) (io.ReadCloser, error)
 }
 
 type AppBot interface {
@@ -26,6 +28,7 @@ type AppBot interface {
 
 type TwitterClient interface {
 	SendUpdate(string) error
+	SendUpdateWithPhoto(string, []byte) error
 }
 
 type Bot struct {
@@ -93,7 +96,7 @@ func (b *Bot) Run() {
 
 func (b *Bot) Stop() {
 	b.bot.Stop()
-	b.q.Close()
+	_ = b.q.Close()
 }
 
 func (b *Bot) getHandlers() map[string]botHandler {
