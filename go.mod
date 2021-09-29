@@ -163,7 +163,7 @@ require (
 	github.com/mailru/easyjson v0.7.7
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/sirupsen/logrus v1.8.1
-	golang.org/x/tools v0.1.6
+	golang.org/x/tools v0.1.7
 )
 
 require (
