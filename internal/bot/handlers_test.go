@@ -198,6 +198,7 @@ func TestHandlerPhoto(t *testing.T) {
 			},
 		}
 		file, _ := os.Open("testdata/test.png")
+		defer func() { _ = file.Close() }()
 		mockedBot.On("GetFile", &m.Photo.File).
 			Once().
 			Return(file, nil)
