@@ -28,7 +28,7 @@ jobs:
       with:
         find: "/home/tweetgram/bin"
         replace: ${{secrets.FOLDER}}
-        include: "system\/"
+        include: "system/"
     - name: Copy binary
       uses: appleboy/scp-action@master
       with:
