@@ -24,13 +24,13 @@ tasks:
         TWITTER_ACCESS_TOKEN=123456789-0xW7uNw2mEykTVTTKHS32y3oIXHab5hSh7POa0Wf
         TWITTER_ACCESS_SECRET=BWa9T8hkEEj5yCutPwJTs7Vk4f1wfj690Dq3UGCyf9YQB
     cmds:
-      - Writing content for env files
+      - echo "Writing content for env files"
       - |
         {{range $line := .CONTENT | trim | splitLines -}}
           echo {{$line}} >> env
           echo {{$line}} >> env.test
-        {{end}} 
-      - Env files generated, set up proper values for vars
+        {{end}}
+      - echo "Env files generated, set up proper values for vars"
   setup:
     desc: Set up bot environment to work with
     silent: true
