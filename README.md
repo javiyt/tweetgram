@@ -1,7 +1,7 @@
-# tweettgram
+# Tweetgram
 
-[![codecov](https://codecov.io/gh/javiyt/tweettgram/branch/main/graph/badge.svg?token=Q15YVM2SMC)](https://codecov.io/gh/javiyt/tweettgram)
-[![Test](https://github.com/javiyt/tweettgram/actions/workflows/ci.yml/badge.svg)](https://github.com/javiyt/tweettgram/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/javiyt/tweetgram/branch/main/graph/badge.svg?token=Q15YVM2SMC)](https://codecov.io/gh/javiyt/tweetgram)
+[![Test](https://github.com/javiyt/tweetgram/actions/workflows/ci.yml/badge.svg)](https://github.com/javiyt/tweetgram/actions/workflows/ci.yml)
 
 Telegram bot to publish post to twitter
 
