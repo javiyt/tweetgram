@@ -55,6 +55,7 @@ jobs:
         passphrase: ${{secrets.PASSPHRASE}}
         source: system/bot.service
         target: /home/${{secrets.USERNAME}}/.config/systemd/user/
+        strip_components: 1
     - name: Run new bot version
       uses: appleboy/ssh-action@master
       with:
