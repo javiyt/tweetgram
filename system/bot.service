@@ -1,11 +1,11 @@
 [Unit]
 Description=Tweetgram Bot
-ConditionPathExists=/usr/local/bin/tweetgram
+ConditionPathExists=/home/tweetgram/bin/tweetgram
 After=network.target
 [Service]
 Type=simple
-WorkingDirectory=/usr/local/bin/
-ExecStart=/usr/local/bin/tweetgram
+WorkingDirectory=/home/tweetgram/bin/
+ExecStart=//home/tweetgram/bin/tweetgram
 Restart=always
 RestartSec=0
 SyslogIdentifier=tweetgram

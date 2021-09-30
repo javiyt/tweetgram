@@ -46,3 +46,16 @@ task run-test
 ```
 
 Remember all env variables will be overrriden by the ones defined in env.test
+
+## Deploying the bot
+There's an action called deploy that you can trigger to deploy the bot. Some [secrets should be added](https://docs.github.com/en/actions/security-guides/encrypted-secrets) to your account before running the deployment script. The variables that should be added are:
+| Variable      | Description                                  |
+|---------------|----------------------------------------------|
+| ENV_FILE      | cmd/env file content                         |
+| ENV_TEST_FILE | cmd/env.test file content                    |
+| HOST          | Host of the server to deploy the bot         |
+| USERNAME      | User to connect to the server                |
+| SSHKEY        | SSH key of the user to login onto the server |
+| PORT          | Port where the SSH server is running         |
+| PASSPHRASE    | Passphrase to decrypt the SSH key            |
+| FOLDER        | Folder to deploy the bot binary              |
