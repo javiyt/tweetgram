@@ -117,6 +117,16 @@ tasks:
       - task: json
       - task: wire
       - go run cmd/main.go -test=true
+  run:
+    desc: Execute the bot
+    deps:
+      - clean
+      - install
+    cmds:
+      - task: stringer
+      - task: json
+      - task: wire
+      - go run cmd/main.go
   clean:
     desc: Clean all auto generated files
     run: once

@@ -59,3 +59,4 @@ There's an action called deploy that you can trigger to deploy the bot. Some [se
 | PORT          | Port where the SSH server is running         |
 | PASSPHRASE    | Passphrase to decrypt the SSH key            |
 | FOLDER        | Folder to deploy the bot binary              |
+| BINARY_NAME   | Name for the generated binary                |
