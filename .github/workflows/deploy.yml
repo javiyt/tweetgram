@@ -1,71 +1,89 @@
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch: # on button click
 name: Build and Deploy
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Install Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.17.1
-    - name: Install Task
-      uses: arduino/setup-task@v1
-      with:
-        version: 3.7.3
-    - name: Checkout code
-      uses: actions/checkout@v2
-    - name: Generate env file
-      run: 'echo "$ENV_FILE" > cmd/env'
-      shell: bash
-      env:
-        ENV_FILE: ${{secrets.ENV}}      
-    - name: Generate env.test file
-      run: 'echo "$ENV_TEST_FILE" > cmd/env.test'
-      shell: bash
-      env:
-        ENV_TEST_FILE: ${{secrets.ENV_TEST}}    
-    - name: Run code generation
-      run: task generate
-    - name: Build Binary
-      run: go build -o tweetgram cmd/main.go
-    - name: Find and Replace
-      uses: jacobtomlinson/gha-find-replace@master
-      with:
-        find: "/home/tweetgram/bin"
-        replace: ${{secrets.FOLDER}}
-        include: "systemd/"
-    - name: Copy binary
-      uses: appleboy/scp-action@master
-      with:
-        host: ${{secrets.HOST}}
-        username: ${{secrets.USERNAME}}
-        key: ${{secrets.SSHKEY}}
-        port: ${{secrets.PORT}}
-        passphrase: ${{secrets.PASSPHRASE}}
-        source: tweetgram
-        target: ${{secrets.FOLDER}}
-    - name: Copy systemd file
-      uses: appleboy/scp-action@master
-      with:
-        host: ${{secrets.HOST}}
-        username: ${{secrets.USERNAME}}
-        key: ${{secrets.SSHKEY}}
-        port: ${{secrets.PORT}}
-        passphrase: ${{secrets.PASSPHRASE}}
-        source: systemd/user/bot.service
-        target: /home/${{secrets.USERNAME}}/.config/
-        strip_components: 1
-    - name: Run new bot version
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{secrets.HOST}}
-        username: ${{secrets.USERNAME}}
-        key: ${{secrets.SSHKEY}}
-        port: ${{secrets.PORT}}
-        passphrase: ${{secrets.PASSPHRASE}}
-        script: |
-          systemctl --user stop bot.service   
-          systemctl --user daemon-reload
-          systemctl --user start bot.service   
-          systemctl --user status bot.service
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17.1
+      - name: Install Task
+        uses: arduino/setup-task@v1
+        with:
+          version: 3.7.3
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Generate env file
+        run: 'echo "$ENV_FILE" > cmd/env'
+        shell: bash
+        env:
+          ENV_FILE: ${{secrets.ENV_FILE}}
+      - name: Generate env.test file
+        run: 'echo "$ENV_TEST_FILE" > cmd/env.test'
+        shell: bash
+        env:
+          ENV_TEST_FILE: ${{secrets.ENV_TEST}}
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Code generation
+        run: task generate
+      - name: Build Binary
+        run: go build -o ${{secrets.BINARY_NAME}} cmd/main.go
+      - name: Find and Replace binary folder
+        uses: jacobtomlinson/gha-find-replace@master
+        with:
+          find: "/home/tweetgram/bin"
+          replace: ${{secrets.FOLDER}}
+          include: "systemd/"
+      - name: Find and Replace binary name
+        uses: jacobtomlinson/gha-find-replace@master
+        with:
+          find: "tweetgram_bin"
+          replace: ${{secrets.BINARY_NAME}}
+          include: "systemd/"
+      - name: Rename service file
+        run: mv systemd/user/bot.service systemd/user/${{secrets.BINARY_NAME}}.service
+      - name: Copy binary
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{secrets.HOST}}
+          username: ${{secrets.USERNAME}}
+          key: ${{secrets.SSHKEY}}
+          port: ${{secrets.PORT}}
+          passphrase: ${{secrets.PASSPHRASE}}
+          source: ${{secrets.BINARY_NAME}}
+          target: ${{secrets.FOLDER}}
+      - name: Copy systemd file
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{secrets.HOST}}
+          username: ${{secrets.USERNAME}}
+          key: ${{secrets.SSHKEY}}
+          port: ${{secrets.PORT}}
+          passphrase: ${{secrets.PASSPHRASE}}
+          source: systemd/
+          target: /home/${{secrets.USERNAME}}/.config/
+      - name: Run new bot version
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.HOST}}
+          username: ${{secrets.USERNAME}}
+          key: ${{secrets.SSHKEY}}
+          port: ${{secrets.PORT}}
+          passphrase: ${{secrets.PASSPHRASE}}
+          script: |
+            systemctl --user stop ${{secrets.BINARY_NAME}}.service   
+            systemctl --user daemon-reload
+            systemctl --user start ${{secrets.BINARY_NAME}}.service   
+            systemctl --user status ${{secrets.BINARY_NAME}}.service
