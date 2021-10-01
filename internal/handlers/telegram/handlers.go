@@ -3,10 +3,10 @@ package handlers_telegram
 import (
 	"context"
 
-	"github.com/javiyt/tweettgram/internal/bot"
-	"github.com/javiyt/tweettgram/internal/config"
-	"github.com/javiyt/tweettgram/internal/handlers"
-	"github.com/javiyt/tweettgram/internal/pubsub"
+	"github.com/javiyt/tweetgram/internal/bot"
+	"github.com/javiyt/tweetgram/internal/config"
+	"github.com/javiyt/tweetgram/internal/handlers"
+	"github.com/javiyt/tweetgram/internal/pubsub"
 	"github.com/mailru/easyjson"
 	tb "gopkg.in/tucnak/telebot.v2"
 )

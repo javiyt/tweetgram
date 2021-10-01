@@ -3,14 +3,14 @@ package bot_test
 import (
 	"errors"
 	"github.com/ThreeDotsLabs/watermill/message"
-	"github.com/javiyt/tweettgram/internal/pubsub"
-	mq "github.com/javiyt/tweettgram/mocks/pubsub"
+	"github.com/javiyt/tweetgram/internal/pubsub"
+	mq "github.com/javiyt/tweetgram/mocks/pubsub"
 	"os"
 	"testing"
 
-	"github.com/javiyt/tweettgram/internal/bot"
-	"github.com/javiyt/tweettgram/internal/config"
-	mb "github.com/javiyt/tweettgram/mocks/bot"
+	"github.com/javiyt/tweetgram/internal/bot"
+	"github.com/javiyt/tweetgram/internal/config"
+	mb "github.com/javiyt/tweetgram/mocks/bot"
 	"github.com/stretchr/testify/mock"
 
 	tb "gopkg.in/tucnak/telebot.v2"

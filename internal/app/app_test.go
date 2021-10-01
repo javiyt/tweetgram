@@ -5,12 +5,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/javiyt/tweettgram/internal/app"
-	"github.com/javiyt/tweettgram/internal/bot"
-	"github.com/javiyt/tweettgram/internal/handlers"
+	"github.com/javiyt/tweetgram/internal/app"
+	"github.com/javiyt/tweetgram/internal/bot"
+	"github.com/javiyt/tweetgram/internal/handlers"
 	"github.com/stretchr/testify/require"
 
-	mockBot "github.com/javiyt/tweettgram/mocks/bot"
+	mockBot "github.com/javiyt/tweetgram/mocks/bot"
 )
 
 func TestInitializeConfiguration(t *testing.T) {

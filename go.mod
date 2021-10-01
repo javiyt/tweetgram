@@ -1,4 +1,4 @@
-module github.com/javiyt/tweettgram
+module github.com/javiyt/tweetgram
 
 go 1.17
 
