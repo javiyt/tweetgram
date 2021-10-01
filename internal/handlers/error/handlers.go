@@ -3,7 +3,7 @@ package handlers_error
 import (
 	"context"
 
-	"github.com/javiyt/tweettgram/internal/pubsub"
+	"github.com/javiyt/tweetgram/internal/pubsub"
 	"github.com/mailru/easyjson"
 	"github.com/sirupsen/logrus"
 )
