@@ -8,7 +8,7 @@ import (
 
 	_ "embed"
 
-	"github.com/javiyt/tweettgram/internal/app"
+	"github.com/javiyt/tweetgram/internal/app"
 )
 
 //go:embed env

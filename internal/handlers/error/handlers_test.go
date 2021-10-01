@@ -8,9 +8,9 @@ import (
 
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
-	hse "github.com/javiyt/tweettgram/internal/handlers/error"
-	"github.com/javiyt/tweettgram/internal/pubsub"
-	mq "github.com/javiyt/tweettgram/mocks/pubsub"
+	hse "github.com/javiyt/tweetgram/internal/handlers/error"
+	"github.com/javiyt/tweetgram/internal/pubsub"
+	mq "github.com/javiyt/tweetgram/mocks/pubsub"
 	"github.com/sirupsen/logrus"
 	logrusTest "github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/require"
