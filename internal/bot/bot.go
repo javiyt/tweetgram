@@ -5,9 +5,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/javiyt/tweettgram/internal/pubsub"
+	"github.com/javiyt/tweetgram/internal/pubsub"
 
-	"github.com/javiyt/tweettgram/internal/config"
+	"github.com/javiyt/tweetgram/internal/config"
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
