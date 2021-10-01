@@ -111,7 +111,10 @@ func provideBotOptions(b bot.TelegramBot, cfg config.EnvConfig, tc bot.TwitterCl
 }
 
 func provideLogger(cfg config.EnvConfig) (*logrus.Logger, func()) {
-	var file *os.File
+	var (
+		file *os.File
+		err error
+	)
 
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.TextFormatter{
