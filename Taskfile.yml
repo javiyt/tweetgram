@@ -23,6 +23,8 @@ tasks:
         TWITTER_BEARER_TOKEN=hIlQI351HEPT6xbA4xHnYRfgOsF8jqcPT5m6Ec0VeCXtUyOY9Mzy6uFYevH%4ys86GL3KfO1ZRBwichZOlGDYyZ52Ht2BXh2WgUFvywJKbRq9lMH
         TWITTER_ACCESS_TOKEN=123456789-0xW7uNw2mEykTVTTKHS32y3oIXHab5hSh7POa0Wf
         TWITTER_ACCESS_SECRET=BWa9T8hkEEj5yCutPwJTs7Vk4f1wfj690Dq3UGCyf9YQB
+        ENVIRONMENT=TEST
+        LOG_FILE=/var/log/tweetgram.log
     cmds:
       - echo "Writing content for env files"
       - |

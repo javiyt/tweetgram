@@ -5,6 +5,7 @@ package app
 
 import (
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/ThreeDotsLabs/watermill"
@@ -109,17 +110,37 @@ func provideBotOptions(b bot.TelegramBot, cfg config.EnvConfig, tc bot.TwitterCl
 	}
 }
 
-func provideLogger() (*logrus.Logger, func()) {
+func provideLogger(cfg config.EnvConfig) (*logrus.Logger, func()) {
+	var (
+		file *os.File
+		err error
+	)
+
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.TextFormatter{
 		DisableColors: true,
 		FullTimestamp: true,
 	})
 	logger.SetReportCaller(true)
-	logger.SetLevel(logrus.DebugLevel)
+
+	lvl := logrus.DebugLevel
+	if cfg.IsProd() {
+		lvl = logrus.ErrorLevel
+
+		if cfg.LogFile != "" {
+			file, err = os.OpenFile(cfg.LogFile, os.O_WRONLY | os.O_CREATE | os.O_APPEND, 0755)
+			if err != nil {
+				logger.Fatal(err)
+			}
+			logger.SetOutput(file)
+		}
+	}
+
+	logger.SetLevel(lvl)
 
 	return logger, func() {
 		logger.Exit(0)
+		file.Close()
 	}
 }
 
