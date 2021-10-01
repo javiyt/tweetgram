@@ -31,10 +31,13 @@ TWITTER_API_SECRET=LYzF53kJoVK46rp859rQCw6Dqw6TpQV668aemPb2KI9GUxTTU0
 TWITTER_BEARER_TOKEN=hIlQI351HEPT6xbA4xHnYRfgOsF8jqcPT5m6Ec0VeCXtUyOY9Mzy6uFYevH%4ys86GL3KfO1ZRBwichZOlGDYyZ52Ht2BXh2WgUFvywJKbRq9lMH
 TWITTER_ACCESS_TOKEN=123456789-0xW7uNw2mEykTVTTKHS32y3oIXHab5hSh7POa0Wf
 TWITTER_ACCESS_SECRET=BWa9T8hkEEj5yCutPwJTs7Vk4f1wfj690Dq3UGCyf9YQB
+ENV=TEST
+LOG_FILE=/var/log/tweetgram.log
 ```
+Env file variables are self-explanatory
 
-Check env.test file, you only need there all the variables that should be override in order to run a test instance of
-the bot. Take into account env.test file is not needed to run the test case they set up the appropiate variables to run
+Check env.test file, you only need there all the variables that should be overridden in order to run a test instance of
+the bot. Take into account env.test file is not needed to run the test case they set up the appropriate variables to run
 them. Remove all not needed variables from env.test file
 
 ### Running a local instance of the bot
@@ -45,7 +48,7 @@ You just need to run the following command:
 task run-test
 ```
 
-Remember all env variables will be overrriden by the ones defined in env.test
+Remember all env variables will be overridden by the ones defined in env.test
 
 ## Deploying the bot
 There's an action called deploy that you can trigger to deploy the bot. Some [secrets should be added](https://docs.github.com/en/actions/security-guides/encrypted-secrets) to your account before running the deployment script. The variables that should be added are:

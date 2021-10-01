@@ -13,6 +13,8 @@ type EnvConfig struct {
 	TwitterBearerToken  string `required:"true" split_words:"true"`
 	TwitterAccessToken  string `required:"true" split_words:"true"`
 	TwitterAccessSecret string `required:"true" split_words:"true"`
+	Environment         string `required:"true" split_words:"true"`
+	LogFile				string `split_words:"true"`
 }
 
 func NewEnvConfig() (EnvConfig, error) {
@@ -33,4 +35,8 @@ func (ec EnvConfig) IsAdmin(userID int) bool {
 	}
 
 	return false
+}
+
+func (ec EnvConfig) IsProd() bool {
+	return ec.Environment == "PROD"
 }
