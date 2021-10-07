@@ -121,6 +121,16 @@ func TestSendUpdate(t *testing.T) {
 		httpmock.ZeroCallCounters()
 	})
 
+	t.Run("it should fail when invalid character in status update", func(t *testing.T) {
+		require.EqualError(
+			t,
+			client.SendUpdate("test \uFFFE"),
+			"error sending status update: Invalid chararcter [\uFFFE] found at byte offset 5",
+		)
+		require.Zero(t, httpmock.GetTotalCallCount())
+		httpmock.ZeroCallCounters()
+	})
+
 
 	t.Run("it should send status update to Twitter API", func(t *testing.T) {
 		require.NoError(t, client.SendUpdate("testing"))
