@@ -1,7 +1,4 @@
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch: # on button click
 name: Build and Deploy
 jobs:
@@ -47,7 +44,7 @@ jobs:
           replace: ${{secrets.FOLDER}}
           regex: false
           include: "systemd/"
-          exclude: ""
+          exclude: ".git/"
       - name: Find and Replace binary name
         uses: jacobtomlinson/gha-find-replace@v2
         with:
@@ -55,7 +52,7 @@ jobs:
           replace: ${{secrets.BINARY_NAME}}
           regex: false
           include: "systemd/"
-          exclude: ""
+          exclude: ".git/"
       - name: Rename service file
         run: mv systemd/user/bot.service systemd/user/${{secrets.BINARY_NAME}}.service
       - name: Copy binary
