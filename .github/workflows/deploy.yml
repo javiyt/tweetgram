@@ -41,17 +41,21 @@ jobs:
       - name: Build Binary
         run: go build -o ${{secrets.BINARY_NAME}} cmd/main.go
       - name: Find and Replace binary folder
-        uses: jacobtomlinson/gha-find-replace@master
+        uses: jacobtomlinson/gha-find-replace@v2
         with:
           find: "/home/tweetgram/bin"
           replace: ${{secrets.FOLDER}}
+          regex: false
           include: "systemd/"
+          exclude: ""
       - name: Find and Replace binary name
-        uses: jacobtomlinson/gha-find-replace@master
+        uses: jacobtomlinson/gha-find-replace@v2
         with:
           find: "tweetgram_bin"
           replace: ${{secrets.BINARY_NAME}}
+          regex: false
           include: "systemd/"
+          exclude: ""
       - name: Rename service file
         run: mv systemd/user/bot.service systemd/user/${{secrets.BINARY_NAME}}.service
       - name: Copy binary
