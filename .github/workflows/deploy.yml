@@ -33,8 +33,8 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - name: Code generation
-        run: task generate
+      - name: Test
+        run: task test
       - name: Build Binary
         run: go build -o ${{secrets.BINARY_NAME}} cmd/main.go
       - name: Find and Replace binary folder
@@ -43,7 +43,7 @@ jobs:
           find: "/home/tweetgram/bin"
           replace: ${{secrets.FOLDER}}
           regex: false
-          include: "systemd/"
+          include: "systemd/user/*"
           exclude: ".git/"
       - name: Find and Replace binary name
         uses: jacobtomlinson/gha-find-replace@v2
@@ -51,7 +51,7 @@ jobs:
           find: "tweetgram_bin"
           replace: ${{secrets.BINARY_NAME}}
           regex: false
-          include: "systemd/"
+          include: "systemd/user/*"
           exclude: ".git/"
       - name: Rename service file
         run: mv systemd/user/bot.service systemd/user/${{secrets.BINARY_NAME}}.service
