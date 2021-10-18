@@ -113,7 +113,7 @@ func provideBotOptions(b bot.TelegramBot, cfg config.EnvConfig, tc bot.TwitterCl
 func provideLogger(cfg config.EnvConfig) (*logrus.Logger, func()) {
 	var (
 		file *os.File
-		err error
+		err  error
 	)
 
 	logger := logrus.New()
@@ -128,7 +128,7 @@ func provideLogger(cfg config.EnvConfig) (*logrus.Logger, func()) {
 		lvl = logrus.ErrorLevel
 
 		if cfg.LogFile != "" {
-			file, err = os.OpenFile(cfg.LogFile, os.O_WRONLY | os.O_CREATE | os.O_APPEND, 0755)
+			file, err = os.OpenFile(cfg.LogFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0755)
 			if err != nil {
 				logger.Fatal(err)
 			}
@@ -144,13 +144,28 @@ func provideLogger(cfg config.EnvConfig) (*logrus.Logger, func()) {
 	}
 }
 
+func provideTelegramOptions(cfg config.EnvConfig, tb bot.TelegramBot, pq pubsub.Queue) []hstl.Option {
+	return []hstl.Option{
+		hstl.WithConfig(cfg),
+		hstl.WithTelegramBot(tb),
+		hstl.WithQueue(pq),
+	}
+}
+
 func provideTelegramHandler(config.EnvConfig, bot.TelegramBot, pubsub.Queue) *hstl.Telegram {
-	wire.Build(hstl.NewTelegram)
+	wire.Build(provideTelegramOptions, hstl.NewTelegram)
 	return &hstl.Telegram{}
 }
 
+func provideTwitterOptions(tc bot.TwitterClient, pq pubsub.Queue) []hstw.Option {
+	return []hstw.Option{
+		hstw.WithTwitterClient(tc),
+		hstw.WithQueue(pq),
+	}
+}
+
 func provideTwitterHandler(bot.TwitterClient, pubsub.Queue) *hstw.Twitter {
-	wire.Build(hstw.NewTwitter)
+	wire.Build(provideTwitterOptions, hstw.NewTwitter)
 	return &hstw.Twitter{}
 }
 

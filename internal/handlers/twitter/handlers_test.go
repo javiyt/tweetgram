@@ -21,7 +21,7 @@ func TestTwitter_ExecuteHandlers(t *testing.T) {
 		mockedTwitter := new(mb.TwitterClient)
 		mockedQueue := new(mq.Queue)
 
-		th := ht.NewTwitter(mockedTwitter, mockedQueue)
+		th := ht.NewTwitter(ht.WithTwitterClient(mockedTwitter), ht.WithQueue(mockedQueue))
 
 		mockedQueue.On("Subscribe", context.Background(), pubsub.TextTopic.String()).
 			Once().
@@ -43,7 +43,7 @@ func TestTwitter_ExecuteHandlers(t *testing.T) {
 		mockedTwitter := new(mb.TwitterClient)
 		mockedQueue := new(mq.Queue)
 
-		th := ht.NewTwitter(mockedTwitter, mockedQueue)
+		th := ht.NewTwitter(ht.WithTwitterClient(mockedTwitter), ht.WithQueue(mockedQueue))
 
 		textChannel := make(chan *message.Message)
 		photoChannel := make(chan *message.Message)
@@ -77,7 +77,7 @@ func TestTwitter_ExecuteHandlers(t *testing.T) {
 		mockedTwitter := new(mb.TwitterClient)
 		mockedQueue := new(mq.Queue)
 
-		th := ht.NewTwitter(mockedTwitter, mockedQueue)
+		th := ht.NewTwitter(ht.WithTwitterClient(mockedTwitter), ht.WithQueue(mockedQueue))
 
 		textChannel := make(chan *message.Message)
 		photoChannel := make(chan *message.Message)
@@ -117,7 +117,7 @@ func TestTwitter_ExecuteHandlers(t *testing.T) {
 		mockedTwitter := new(mb.TwitterClient)
 		mockedQueue := new(mq.Queue)
 
-		th := ht.NewTwitter(mockedTwitter, mockedQueue)
+		th := ht.NewTwitter(ht.WithTwitterClient(mockedTwitter), ht.WithQueue(mockedQueue))
 
 		textChannel := make(chan *message.Message)
 		photoChannel := make(chan *message.Message)
@@ -149,7 +149,7 @@ func TestTwitter_ExecuteHandlers(t *testing.T) {
 		mockedTwitter := new(mb.TwitterClient)
 		mockedQueue := new(mq.Queue)
 
-		th := ht.NewTwitter(mockedTwitter, mockedQueue)
+		th := ht.NewTwitter(ht.WithTwitterClient(mockedTwitter), ht.WithQueue(mockedQueue))
 
 		textChannel := make(chan *message.Message)
 		photoChannel := make(chan *message.Message)
@@ -183,7 +183,7 @@ func TestTwitter_ExecuteHandlers(t *testing.T) {
 		mockedTwitter := new(mb.TwitterClient)
 		mockedQueue := new(mq.Queue)
 
-		th := ht.NewTwitter(mockedTwitter, mockedQueue)
+		th := ht.NewTwitter(ht.WithTwitterClient(mockedTwitter), ht.WithQueue(mockedQueue))
 
 		textChannel := make(chan *message.Message)
 		photoChannel := make(chan *message.Message)
@@ -191,13 +191,13 @@ func TestTwitter_ExecuteHandlers(t *testing.T) {
 		mockedQueue.On("Subscribe", context.Background(), pubsub.TextTopic.String()).
 			Once().
 			Return(func(context.Context, string) <-chan *message.Message {
-			return textChannel
-		}, nil)
+				return textChannel
+			}, nil)
 		mockedQueue.On("Subscribe", context.Background(), pubsub.PhotoTopic.String()).
 			Once().
 			Return(func(context.Context, string) <-chan *message.Message {
-			return photoChannel
-		}, nil)
+				return photoChannel
+			}, nil)
 		mockedQueue.On(
 			"Publish",
 			pubsub.ErrorTopic.String(),
@@ -238,7 +238,7 @@ func TestTwitter_ExecuteHandlers(t *testing.T) {
 		mockedTwitter := new(mb.TwitterClient)
 		mockedQueue := new(mq.Queue)
 
-		th := ht.NewTwitter(mockedTwitter, mockedQueue)
+		th := ht.NewTwitter(ht.WithTwitterClient(mockedTwitter), ht.WithQueue(mockedQueue))
 
 		textChannel := make(chan *message.Message)
 		photoChannel := make(chan *message.Message)
