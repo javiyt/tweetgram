@@ -1,0 +1,40 @@
+on:
+  workflow_dispatch: # on button click
+  push:
+    branches:
+      - main
+name: Mutation Testing
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17.1
+      - name: Install Task
+        uses: arduino/setup-task@v1
+        with:
+          version: 3.7.3
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Generate env file
+        run: 'echo "$ENV_FILE" > cmd/env'
+        shell: bash
+        env:
+          ENV_FILE: ${{secrets.ENV_FILE}}
+      - name: Generate env.test file
+        run: 'echo "$ENV_TEST_FILE" > cmd/env.test'
+        shell: bash
+        env:
+          ENV_TEST_FILE: ${{secrets.ENV_TEST}}
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Test Mutations
+        run: task mutation

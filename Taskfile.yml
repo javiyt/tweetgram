@@ -109,6 +109,14 @@ tasks:
       - generate
     cmds:
       - go test -timeout 10s -race -count 5 -coverprofile=coverage.txt -covermode=atomic ./...
+  mutation:
+    desc: Run mutation testing
+    deps:
+      - clean
+      - install
+      - generate
+    cmds:
+      - go run github.com/zimmski/go-mutesting/cmd/go-mutesting internal/bot/ internal/config/ internal/handlers/... internal/twitter/
   run-test:
     desc: Execute test mode for the bot
     deps:
