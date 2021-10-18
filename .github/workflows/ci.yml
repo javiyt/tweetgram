@@ -29,8 +29,11 @@ jobs:
           version: 3.7.3
       - name: Test
         run: task test
-      - name: Upload coverage to Codecov
-        run: bash <(curl -s https://codecov.io/bash)
+      - name: Upload report to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          verbose: true
+          files: coverage.txt
   golangci:
     name: lint
     runs-on: ubuntu-latest
