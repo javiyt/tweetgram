@@ -17,8 +17,34 @@ type Telegram struct {
 	q   pubsub.Queue
 }
 
-func NewTelegram(cfg config.EnvConfig, bot bot.TelegramBot, q pubsub.Queue) *Telegram {
-	return &Telegram{bot: bot, cfg: cfg, q: q}
+type Option func(b *Telegram)
+
+func WithTelegramBot(tb bot.TelegramBot) Option {
+	return func(b *Telegram) {
+		b.bot = tb
+	}
+}
+
+func WithConfig(cfg config.EnvConfig) Option {
+	return func(b *Telegram) {
+		b.cfg = cfg
+	}
+}
+
+func WithQueue(q pubsub.Queue) Option {
+	return func(b *Telegram) {
+		b.q = q
+	}
+}
+
+func NewTelegram(options ...Option) *Telegram {
+	t := &Telegram{}
+
+	for _, o := range options {
+		o(t)
+	}
+
+	return t
 }
 
 func (t *Telegram) ExecuteHandlers() {
