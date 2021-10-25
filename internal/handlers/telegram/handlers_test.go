@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
+	"github.com/javiyt/tweetgram/internal/bot"
 	"github.com/javiyt/tweetgram/internal/config"
 	ht "github.com/javiyt/tweetgram/internal/handlers/telegram"
 	"github.com/javiyt/tweetgram/internal/pubsub"
@@ -12,7 +13,7 @@ import (
 	mq "github.com/javiyt/tweetgram/mocks/pubsub"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	tb "gopkg.in/tucnak/telebot.v2"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -100,9 +101,9 @@ func TestTelegram_ExecuteHandlers(t *testing.T) {
 			return string(m.Payload) == "{\"error\":\"couldn't send message to telegram\"}"
 		})).Once().
 			Return(nil)
-		mockedBot.On("Send", tb.ChatID(cfg.BroadcastChannel), "testing message").
+		mockedBot.On("Send", strconv.Itoa(int(cfg.BroadcastChannel)), "testing message").
 			Once().
-			Return(nil, errors.New("couldn't send message to telegram"))
+			Return(errors.New("couldn't send message to telegram"))
 
 		th.ExecuteHandlers()
 		newMessage := message.NewMessage(watermill.NewUUID(), []byte("{\"text\":\"testing message\"}"))
@@ -134,7 +135,7 @@ func TestTelegram_ExecuteHandlers(t *testing.T) {
 			Return(func(context.Context, string) <-chan *message.Message {
 				return photoChannel
 			}, nil)
-		mockedBot.On("Send", tb.ChatID(cfg.BroadcastChannel), "testing message").
+		mockedBot.On("Send", strconv.FormatInt(cfg.BroadcastChannel, 10), "testing message").
 			Once().
 			Return(nil, nil)
 
@@ -206,10 +207,10 @@ func TestTelegram_ExecuteHandlers(t *testing.T) {
 			return string(m.Payload) == "{\"error\":\"couldn't send message to telegram\"}"
 		})).Once().
 			Return(nil)
-		mockedBot.On("Send", tb.ChatID(cfg.BroadcastChannel), mock.MatchedBy(func(m interface{}) bool {
-			var p *tb.Photo
+		mockedBot.On("Send", strconv.Itoa(int(cfg.BroadcastChannel)), mock.MatchedBy(func(m interface{}) bool {
+			var p *bot.TelegramPhoto
 			var ok bool
-			if p, ok = m.(*tb.Photo); !ok {
+			if p, ok = m.(*bot.TelegramPhoto); !ok {
 				return false
 			}
 
@@ -217,7 +218,7 @@ func TestTelegram_ExecuteHandlers(t *testing.T) {
 				p.FileID == "blablabla" &&
 				p.FileURL == "http://photo.url" &&
 				p.FileSize == 1234
-		})).Once().Return(nil, errors.New("couldn't send message to telegram"))
+		})).Once().Return(errors.New("couldn't send message to telegram"))
 
 		th.ExecuteHandlers()
 		newMessage := message.NewMessage(watermill.NewUUID(), []byte("{\"caption\":\"testing message\",\"file_id\":\"blablabla\",\"file_url\":\"http://photo.url\",\"file_size\":1234}"))
@@ -249,10 +250,10 @@ func TestTelegram_ExecuteHandlers(t *testing.T) {
 			Return(func(context.Context, string) <-chan *message.Message {
 				return photoChannel
 			}, nil)
-		mockedBot.On("Send", tb.ChatID(cfg.BroadcastChannel), mock.MatchedBy(func(m interface{}) bool {
-			var p *tb.Photo
+		mockedBot.On("Send", strconv.FormatInt(cfg.BroadcastChannel, 10), mock.MatchedBy(func(m interface{}) bool {
+			var p *bot.TelegramPhoto
 			var ok bool
-			if p, ok = m.(*tb.Photo); !ok {
+			if p, ok = m.(*bot.TelegramPhoto); !ok {
 				return false
 			}
 

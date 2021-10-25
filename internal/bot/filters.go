@@ -1,14 +1,14 @@
 package bot
 
 import (
-	tb "gopkg.in/tucnak/telebot.v2"
+	"strconv"
 )
 
-type filterFunc func(f func(*tb.Message)) func(*tb.Message)
+type filterFunc func(f TelegramHandler) TelegramHandler
 
-func (b *Bot) onlyPrivate(f func(*tb.Message)) func(*tb.Message) {
-	return func(m *tb.Message) {
-		if !m.Private() {
+func (b *Bot) onlyPrivate(f TelegramHandler) TelegramHandler {
+	return func(m *TelegramMessage) {
+		if !m.IsPrivate {
 			return
 		}
 
@@ -16,9 +16,14 @@ func (b *Bot) onlyPrivate(f func(*tb.Message)) func(*tb.Message) {
 	}
 }
 
-func (b *Bot) onlyAdmins(f func(*tb.Message)) func(*tb.Message) {
-	return func(m *tb.Message) {
-		if !b.cfg.IsAdmin(m.Sender.ID) {
+func (b *Bot) onlyAdmins(f TelegramHandler) TelegramHandler {
+	return func(m *TelegramMessage) {
+		senderID, err := strconv.Atoi(m.SenderID)
+		if err != nil {
+			return
+		}
+
+		if !b.cfg.IsAdmin(senderID) {
 			return
 		}
 

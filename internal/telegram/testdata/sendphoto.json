@@ -1,0 +1,41 @@
+{
+  "ok": true,
+  "result": {
+    "message_id": 59,
+    "sender_chat": {
+      "id": -1234569575326,
+      "title": "Channel test",
+      "type": "channel"
+    },
+    "chat": {
+      "id": -1234578575326,
+      "title": "Channel test",
+      "type": "channel"
+    },
+    "date": 1634470233,
+    "photo": [
+      {
+        "file_id": "AfABAgRAAylBAAO-YVAgo5sElcBZcWmEpVO5k7ZwIz4AAsK4MRtid1hTD2c_VoWrHuMBAAMCAAN4AAMhBA",
+        "file_unique_id": "AZBDxrrxG5J2iTN8",
+        "file_size": 1837,
+        "width": 90,
+        "height": 60
+      },
+      {
+        "file_id": "AfABAgRAAylBAAO-YVAgo5sElcBZcWmEpVO5k7ZwIz4AAsK4MRtid1hTD2c_VoWrHuMBAAMCAAN4AAMhBA",
+        "file_unique_id": "AZBDxrrxG5J2iTN8",
+        "file_size": 22012,
+        "width": 320,
+        "height": 213
+      },
+      {
+        "file_id": "AfABAgRAAylBAAO-YVAgo5sElcBZcWmEpVO5k7ZwIz4AAsK4MRtid1hTD2c_VoWrHuMBAAMCAAN4AAMhBA",
+        "file_unique_id": "AZBDxrrxG5J2iTN8",
+        "file_size": 49417,
+        "width": 640,
+        "height": 426
+      }
+    ],
+    "caption": "image"
+  }
+}

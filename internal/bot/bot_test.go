@@ -16,7 +16,7 @@ func TestStart(t *testing.T) {
 	mockedBot := new(mb.TelegramBot)
 	mockedTwitter := new(mb.TwitterClient)
 
-	cmds := []tb.Command{
+	cmds := []bot.TelegramBotCommand{
 		{
 			Text:        "help",
 			Description: "Show help",
@@ -36,10 +36,10 @@ func TestStart(t *testing.T) {
 
 		mockedBot.AssertExpectations(t)
 		mockedBot.AssertNotCalled(t, "Handle", "/start", mock.Anything)
-		mockedBot.AssertNotCalled(t,"Handle", "/help", mock.Anything)
-		mockedBot.AssertNotCalled(t,"Handle", tb.OnPhoto, mock.Anything)
-		mockedBot.AssertNotCalled(t,"Handle", tb.OnText, mock.Anything)
-		mockedBot.AssertNotCalled(t,"Start")
+		mockedBot.AssertNotCalled(t, "Handle", "/help", mock.Anything)
+		mockedBot.AssertNotCalled(t, "Handle", tb.OnPhoto, mock.Anything)
+		mockedBot.AssertNotCalled(t, "Handle", tb.OnText, mock.Anything)
+		mockedBot.AssertNotCalled(t, "Start")
 	})
 
 	t.Run("it should start the bot successfully", func(t *testing.T) {
@@ -58,7 +58,7 @@ func TestStart(t *testing.T) {
 func TestRun(t *testing.T) {
 	mockedBot := new(mb.TelegramBot)
 	mockedBot.On("Start").Once()
-	
+
 	bot.NewBot(bot.WithTelegramBot(mockedBot)).Run()
 
 	mockedBot.AssertExpectations(t)

@@ -2,13 +2,13 @@ package handlers_telegram
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/javiyt/tweetgram/internal/bot"
 	"github.com/javiyt/tweetgram/internal/config"
 	"github.com/javiyt/tweetgram/internal/handlers"
 	"github.com/javiyt/tweetgram/internal/pubsub"
 	"github.com/mailru/easyjson"
-	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 type Telegram struct {
@@ -67,7 +67,7 @@ func (t *Telegram) handleText() {
 				continue
 			}
 
-			if _, err := t.bot.Send(tb.ChatID(t.cfg.BroadcastChannel), m.Text); err != nil {
+			if err := t.bot.Send(strconv.Itoa(int(t.cfg.BroadcastChannel)), m.Text); err != nil {
 				handlers.SendError(t.q, err)
 				msg.Nack()
 				continue
@@ -93,13 +93,11 @@ func (t *Telegram) handlePhoto() {
 				continue
 			}
 
-			if _, err := t.bot.Send(tb.ChatID(t.cfg.BroadcastChannel), &tb.Photo{
-				Caption: m.Caption,
-				File: tb.File{
-					FileID:   m.FileID,
-					FileURL:  m.FileURL,
-					FileSize: m.FileSize,
-				},
+			if err := t.bot.Send(strconv.Itoa(int(t.cfg.BroadcastChannel)), &bot.TelegramPhoto{
+				Caption:  m.Caption,
+				FileID:   m.FileID,
+				FileURL:  m.FileURL,
+				FileSize: m.FileSize,
 			}); err != nil {
 				handlers.SendError(t.q, err)
 				msg.Nack()
