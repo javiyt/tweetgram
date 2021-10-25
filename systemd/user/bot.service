@@ -1,16 +1,16 @@
 [Unit]
 Description=Tweetgram Bot
-ConditionPathExists=/home/tweetgram/bin/tweetgram
+ConditionPathExists=/home/tweetgram/bin/tweetgram_bin
 After=network.target
 [Service]
 Type=simple
 WorkingDirectory=/home/tweetgram/bin/
-ExecStart=/home/tweetgram/bin/tweetgram
+ExecStart=/home/tweetgram/bin/tweetgram_bin
 Restart=always
 RestartSec=5
 RuntimeMaxSec=21600
 StartLimitInterval=400
 StartLimitBurst=5
-SyslogIdentifier=tweetgram
+SyslogIdentifier=tweetgram_bin
 [Install]
 WantedBy=multi-user.target

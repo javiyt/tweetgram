@@ -63,3 +63,4 @@ There's an action called deploy that you can trigger to deploy the bot. Some [se
 | PASSPHRASE    | Passphrase to decrypt the SSH key            |
 | FOLDER        | Folder to deploy the bot binary              |
 | BINARY_NAME   | Name for the generated binary                |
+| BOT_NAME      | Name given to the bot                        |
