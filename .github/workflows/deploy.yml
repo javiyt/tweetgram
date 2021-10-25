@@ -53,6 +53,14 @@ jobs:
           regex: false
           include: "systemd/user/*"
           exclude: ".git/"
+      - name: Find and Replace bot name
+        uses: jacobtomlinson/gha-find-replace@v2
+        with:
+          find: "Tweetgram"
+          replace: ${{secrets.BOT_NAME}}
+          regex: false
+          include: "systemd/user/*"
+          exclude: ".git/"
       - name: Rename service file
         run: mv systemd/user/bot.service systemd/user/${{secrets.BINARY_NAME}}.service
       - name: Copy binary
