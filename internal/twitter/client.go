@@ -2,16 +2,17 @@ package twitter
 
 import (
 	"fmt"
-	gt "github.com/javiyt/go-twitter/twitter"
-	"github.com/javiyt/twitter-text-go/validate"
 	"io"
 	"net/http"
 	"strings"
+
+	gt "github.com/javiyt/go-twitter/twitter"
+	"github.com/javiyt/twitter-text-go/validate"
 )
 
 const (
 	tweetMaxLength = 280
-	joinString = "..."
+	joinString     = "..."
 )
 
 type Client struct {
@@ -28,9 +29,13 @@ func (c *Client) SendUpdate(s string) error {
 
 func (c *Client) SendUpdateWithPhoto(s string, pic []byte) error {
 	uploadResult, resp, err := c.tc.Media.Upload(pic, http.DetectContentType(pic))
+
+	defer func() { _ = resp.Body.Close() }()
+
 	if err != nil {
 		buf := new(strings.Builder)
 		_, _ = io.Copy(buf, resp.Body)
+
 		return fmt.Errorf(
 			"error sending status update: %w. Response status code: %v and body: %s",
 			err,
@@ -51,11 +56,12 @@ func (c *Client) publishTweet(s string, params *gt.StatusUpdateParams) error {
 		return fmt.Errorf("error sending status update: %w", err)
 	}
 
-	var replyToId int64
+	var replyToID int64
 	for _, ts := range c.chunks(s, tweetMaxLength-len(joinString)) {
-		if replyToId > 0 {
-			params.InReplyToStatusID = replyToId
+		if replyToID > 0 {
+			params.InReplyToStatusID = replyToID
 		}
+
 		if len(ts) == tweetMaxLength-len(joinString) {
 			ts += joinString
 		}
@@ -64,6 +70,8 @@ func (c *Client) publishTweet(s string, params *gt.StatusUpdateParams) error {
 		if err != nil {
 			buf := new(strings.Builder)
 			_, _ = io.Copy(buf, resp.Body)
+			_ = resp.Body.Close()
+
 			return fmt.Errorf(
 				"error sending status update: %w. Response status code: %v and body: %s",
 				err,
@@ -72,7 +80,7 @@ func (c *Client) publishTweet(s string, params *gt.StatusUpdateParams) error {
 			)
 		}
 
-		replyToId = tweet.ID
+		replyToID = tweet.ID
 	}
 
 	return nil
@@ -86,6 +94,7 @@ func (c *Client) chunks(s string, chunkSize int) []string {
 	chunks := make([]string, 0, (len(s)-1)/chunkSize+1)
 	currentLen := 0
 	currentStart := 0
+
 	for i := range s {
 		if currentLen == chunkSize {
 			chunks = append(chunks, s[currentStart:i])
@@ -94,6 +103,7 @@ func (c *Client) chunks(s string, chunkSize int) []string {
 		}
 		currentLen++
 	}
+
 	chunks = append(chunks, s[currentStart:])
 
 	return chunks

@@ -20,7 +20,7 @@ func TestNewEnvConfig(t *testing.T) {
 		"TWITTER_BEARER_TOKEN":  "qwertyui",
 		"TWITTER_ACCESS_TOKEN":  "zxcvbnm",
 		"TWITTER_ACCESS_SECRET": "lkjhgfd",
-		"ENVIRONMENT": "testing",
+		"ENVIRONMENT":           "testing",
 	}
 
 	for k, v := range mocked {
@@ -36,17 +36,18 @@ func TestNewEnvConfig(t *testing.T) {
 			BotToken:            "asdfg",
 			Admins:              []int{12345},
 			BroadcastChannel:    9876543,
-			TwitterApiKey:       "asdfg1234",
-			TwitterApiSecret:    "poiuyt",
+			TwitterAPIKey:       "asdfg1234",
+			TwitterAPISecret:    "poiuyt",
 			TwitterBearerToken:  "qwertyui",
 			TwitterAccessToken:  "zxcvbnm",
 			TwitterAccessSecret: "lkjhgfd",
-			Environment: "testing",
-			LogFile:     "",
+			Environment:         "testing",
+			LogFile:             "",
 		}, c)
 	})
 
-	for k, mv := range mocked {
+	for k := range mocked {
+		k := k
 		t.Run(fmt.Sprintf("it should fail when %s not present", k), func(t *testing.T) {
 			_ = os.Unsetenv(k)
 
@@ -54,7 +55,7 @@ func TestNewEnvConfig(t *testing.T) {
 
 			require.EqualError(t, err, fmt.Sprintf("required key %s missing value", k))
 
-			_ = os.Setenv(k, mv)
+			_ = os.Setenv(k, mocked[k])
 		})
 	}
 
@@ -74,7 +75,7 @@ func TestEnvConfig_IsAdmin(t *testing.T) {
 		"TWITTER_BEARER_TOKEN":  "qwertyui",
 		"TWITTER_ACCESS_TOKEN":  "zxcvbnm",
 		"TWITTER_ACCESS_SECRET": "lkjhgfd",
-		"ENVIRONMENT": "testing",
+		"ENVIRONMENT":           "testing",
 	}
 
 	for k, v := range mocked {
@@ -108,7 +109,7 @@ func TestEnvConfig_IsProd(t *testing.T) {
 		"TWITTER_BEARER_TOKEN":  "qwertyui",
 		"TWITTER_ACCESS_TOKEN":  "zxcvbnm",
 		"TWITTER_ACCESS_SECRET": "lkjhgfd",
-		"ENVIRONMENT": "testing",
+		"ENVIRONMENT":           "testing",
 	}
 
 	for k, v := range mocked {

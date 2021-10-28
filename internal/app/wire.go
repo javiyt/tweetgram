@@ -87,7 +87,7 @@ func provideTwitterClient(*http.Client) *twitter.Client {
 }
 
 func provideTwitterHttpClient(cfg config.EnvConfig) *http.Client {
-	return oauth1.NewConfig(cfg.TwitterApiKey, cfg.TwitterApiSecret).
+	return oauth1.NewConfig(cfg.TwitterAPIKey, cfg.TwitterAPISecret).
 		Client(oauth1.NoContext, oauth1.NewToken(cfg.TwitterAccessToken, cfg.TwitterAccessSecret))
 }
 
@@ -128,7 +128,7 @@ func provideLogger(cfg config.EnvConfig) (*logrus.Logger, func()) {
 		lvl = logrus.ErrorLevel
 
 		if cfg.LogFile != "" {
-			file, err = os.OpenFile(cfg.LogFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0755)
+			file, err = os.OpenFile(cfg.LogFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0o755)
 			if err != nil {
 				logger.Fatal(err)
 			}

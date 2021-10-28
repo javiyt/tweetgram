@@ -1,4 +1,4 @@
-package handlers_telegram
+package handlerstelegram
 
 import (
 	"context"
@@ -61,15 +61,18 @@ func (t *Telegram) handleText() {
 	go func() {
 		for msg := range messages {
 			var m pubsub.TextEvent
+
 			if err := easyjson.Unmarshal(msg.Payload, &m); err != nil {
 				handlers.SendError(t.q, err)
 				msg.Ack()
+
 				continue
 			}
 
 			if _, err := t.bot.Send(tb.ChatID(t.cfg.BroadcastChannel), m.Text); err != nil {
 				handlers.SendError(t.q, err)
 				msg.Nack()
+
 				continue
 			}
 
@@ -90,6 +93,7 @@ func (t *Telegram) handlePhoto() {
 			if err := easyjson.Unmarshal(msg.Payload, &m); err != nil {
 				handlers.SendError(t.q, err)
 				msg.Ack()
+
 				continue
 			}
 
@@ -103,6 +107,7 @@ func (t *Telegram) handlePhoto() {
 			}); err != nil {
 				handlers.SendError(t.q, err)
 				msg.Nack()
+
 				continue
 			}
 

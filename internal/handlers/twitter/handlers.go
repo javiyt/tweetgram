@@ -1,4 +1,4 @@
-package handlers_twitter
+package handlerstwitter
 
 import (
 	"context"
@@ -55,12 +55,14 @@ func (t *Twitter) handleText() {
 			if err := easyjson.Unmarshal(msg.Payload, &m); err != nil {
 				handlers.SendError(t.q, err)
 				msg.Ack()
+
 				continue
 			}
 
 			if err := t.tc.SendUpdate(m.Text); err != nil {
 				handlers.SendError(t.q, err)
 				msg.Nack()
+
 				continue
 			}
 
@@ -81,12 +83,14 @@ func (t *Twitter) handlePhoto() {
 			if err := easyjson.Unmarshal(msg.Payload, &m); err != nil {
 				handlers.SendError(t.q, err)
 				msg.Ack()
+
 				continue
 			}
 
 			if err := t.tc.SendUpdateWithPhoto(m.Caption, m.FileContent); err != nil {
 				handlers.SendError(t.q, err)
 				msg.Nack()
+
 				continue
 			}
 

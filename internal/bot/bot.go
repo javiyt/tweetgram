@@ -134,6 +134,7 @@ func (b *Bot) getHandlers() map[string]botHandler {
 
 func (b *Bot) getCommands() []tb.Command {
 	var cmds []tb.Command
+
 	for c, h := range b.getHandlers() {
 		if strings.TrimSpace(h.help) != "" {
 			cmds = append(cmds, tb.Command{
