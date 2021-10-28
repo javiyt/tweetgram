@@ -2,11 +2,12 @@ package bot
 
 import (
 	"bytes"
+	"strings"
+
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/javiyt/tweetgram/internal/pubsub"
 	"github.com/mailru/easyjson"
-	"strings"
 
 	tb "gopkg.in/tucnak/telebot.v2"
 )
@@ -39,10 +40,10 @@ func (b *Bot) handlePhoto(m *tb.Message) {
 	_, _ = fileContent.ReadFrom(fileReader)
 
 	mb, _ := easyjson.Marshal(pubsub.PhotoEvent{
-		Caption:  caption,
-		FileID:   m.Photo.FileID,
-		FileURL:  m.Photo.FileURL,
-		FileSize: m.Photo.FileSize,
+		Caption:     caption,
+		FileID:      m.Photo.FileID,
+		FileURL:     m.Photo.FileURL,
+		FileSize:    m.Photo.FileSize,
 		FileContent: fileContent.Bytes(),
 	})
 

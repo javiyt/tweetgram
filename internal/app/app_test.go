@@ -1,7 +1,6 @@
 package app_test
 
 import (
-	"errors"
 	"os"
 	"testing"
 
@@ -12,6 +11,18 @@ import (
 
 	mockBot "github.com/javiyt/tweetgram/mocks/bot"
 )
+
+type startAppError struct{}
+
+func (m startAppError) Error() string {
+	return "could not start"
+}
+
+type botInstanceError struct{}
+
+func (m botInstanceError) Error() string {
+	return "bot instance not ready"
+}
 
 func TestInitializeConfiguration(t *testing.T) {
 	envFile := []byte("BOT_TOKEN=asdfg")
@@ -50,7 +61,7 @@ func TestInitializeConfiguration(t *testing.T) {
 func TestStart(t *testing.T) {
 	t.Run("it should fail when getting bot instance", func(t *testing.T) {
 		mbp := func() (bot.AppBot, error) {
-			return nil, errors.New("bot instance not ready")
+			return nil, botInstanceError{}
 		}
 
 		a := app.NewApp(mbp, handlers.NewHandlersManager())
@@ -64,7 +75,7 @@ func TestStart(t *testing.T) {
 		mbp := func() (bot.AppBot, error) {
 			return mb, nil
 		}
-		mb.On("Start").Once().Return(errors.New("could not start"))
+		mb.On("Start").Once().Return(startAppError{})
 
 		a := app.NewApp(mbp, handlers.NewHandlersManager())
 		e := a.Start()
@@ -93,6 +104,7 @@ func TestRun(t *testing.T) {
 	mbp := func() (bot.AppBot, error) {
 		return mb, nil
 	}
+
 	mb.On("Start").Once().Return(nil)
 	mb.On("Run").Once()
 
@@ -108,6 +120,7 @@ func TestStop(t *testing.T) {
 	mbp := func() (bot.AppBot, error) {
 		return mb, nil
 	}
+
 	mb.On("Start").Once().Return(nil)
 	mb.On("Stop").Once()
 

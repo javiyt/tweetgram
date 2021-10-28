@@ -87,7 +87,7 @@ func provideTwitterClient(*http.Client) *twitter.Client {
 }
 
 func provideTwitterHttpClient(cfg config.EnvConfig) *http.Client {
-	return oauth1.NewConfig(cfg.TwitterApiKey, cfg.TwitterApiSecret).
+	return oauth1.NewConfig(cfg.TwitterAPIKey, cfg.TwitterAPISecret).
 		Client(oauth1.NoContext, oauth1.NewToken(cfg.TwitterAccessToken, cfg.TwitterAccessSecret))
 }
 

@@ -8,17 +8,18 @@ type EnvConfig struct {
 	BotToken            string `required:"true" split_words:"true"`
 	Admins              []int  `required:"true" split_words:"true"`
 	BroadcastChannel    int64  `required:"true" split_words:"true"`
-	TwitterApiKey       string `required:"true" split_words:"true"`
-	TwitterApiSecret    string `required:"true" split_words:"true"`
+	TwitterAPIKey       string `required:"true" split_words:"true"`
+	TwitterAPISecret    string `required:"true" split_words:"true"`
 	TwitterBearerToken  string `required:"true" split_words:"true"`
 	TwitterAccessToken  string `required:"true" split_words:"true"`
 	TwitterAccessSecret string `required:"true" split_words:"true"`
 	Environment         string `required:"true" split_words:"true"`
-	LogFile				string `split_words:"true"`
+	LogFile             string `split_words:"true"`
 }
 
 func NewEnvConfig() (EnvConfig, error) {
 	var e EnvConfig
+
 	err := envconfig.Process("", &e)
 	if err != nil {
 		return EnvConfig{}, err
