@@ -113,8 +113,8 @@ func TestTelegram_ExecuteHandlersPhoto(t *testing.T) {
 	cfg := config.EnvConfig{
 		BroadcastChannel: 1234,
 	}
-	eventMsg := []byte("{\"caption\":\"testing message\",\"file_id\":\"blablabla\",\"file_url\":\"http://photo.url\"," +
-		"\"file_size\":1234}")
+	eventMsg := []byte("{\"caption\":\"testing message\",\"fileId\":\"blablabla\",\"fileUrl\":\"http://photo.url\"," +
+		"\"fileSize\":1234}")
 
 	t.Run("it should fail unmarshaling photo event", func(t *testing.T) {
 		th, mockedQueue, _, _, photoChannel := generateHandlerAndMocks(cfg, true)

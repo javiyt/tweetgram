@@ -20,10 +20,10 @@ const (
 	adminID          = 12345
 	broadcastChannel = int64(987654)
 	imagePayload     = "{\"caption\":\"testing\"," +
-		"\"file_id\":\"blablabla\"," +
-		"\"file_url\":\"http://myimage.com/test.jpg\"," +
-		"\"file_size\":1234," +
-		"\"file_content\":\"iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAQklEQVR4nGJWTd9ZaWdyOfW69Y8z" +
+		"\"fileId\":\"blablabla\"," +
+		"\"fileUrl\":\"http://myimage.com/test.jpg\"," +
+		"\"fileSize\":1234," +
+		"\"fileContent\":\"iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAQklEQVR4nGJWTd9ZaWdyOfW69Y8z" +
 		"DF5sfALun5c7SL+8ysQUqp7euSxThUtU5v9FJg2PoueTrrw5Vyt36AYgAAD//yOnFnjB+cHEAAAAAElFTkSuQmCC\"}"
 )
 
