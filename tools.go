@@ -10,4 +10,5 @@ import (
 	_ "github.com/vektra/mockery/v2"
 	_ "github.com/zimmski/go-mutesting/cmd/go-mutesting"
 	_ "golang.org/x/tools/cmd/stringer"
+	_ "mvdan.cc/gofumpt"
 )

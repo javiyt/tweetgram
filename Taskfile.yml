@@ -68,6 +68,12 @@ tasks:
       - generate
     cmds:
       - go run github.com/golangci/golangci-lint/cmd/golangci-lint run cmd internal
+  gofumpt:
+    desc: Run gofumpt
+    deps:
+      - install
+    cmds:
+      - go run mvdan.cc/gofumpt -l -w cmd internal
   wire:
     desc: Execute wire binary to generate DI
     run: once

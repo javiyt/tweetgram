@@ -67,7 +67,6 @@ func (c *Client) publishTweet(s string, params *gt.StatusUpdateParams) error {
 		}
 
 		tweet, resp, err := c.tc.Statuses.Update(ts, params)
-
 		if err != nil {
 			buf := new(strings.Builder)
 			_, _ = io.Copy(buf, resp.Body)

@@ -87,6 +87,7 @@ func sendMessageToChannel(t *testing.T, errorChannel chan *message.Message, errM
 
 	require.Eventually(t, func() bool {
 		<-newMessage.Acked()
+
 		return true
 	}, time.Second, time.Millisecond)
 }

@@ -18,4 +18,7 @@ output:
 
 linters:
   enable-all: true
+  disable:
+    - paralleltest
+    - gci
   fast: true

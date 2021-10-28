@@ -49,7 +49,7 @@ func TestHandlerStartAndHelpCommand(t *testing.T) {
 	}
 	for i := range commands {
 		i := i
-		handler, mockedBot, _ := generateHandlerAndMockedBot(commands[i].command, config.EnvConfig{})
+		handler, mockedBot, _ := generateHandlerAndMockedBot(t, commands[i].command, config.EnvConfig{})
 
 		t.Run("it should do nothing when not in private conversation", func(t *testing.T) {
 			handler(&tb.Message{
@@ -88,7 +88,7 @@ func TestHandlersFilters(t *testing.T) {
 		broadcastChannel := int64(987654)
 
 		mockedQueue := new(mq.Queue)
-		handler, mockedBot, _ := generateHandlerAndMockedBot(commands[i], config.EnvConfig{
+		handler, mockedBot, _ := generateHandlerAndMockedBot(t, commands[i], config.EnvConfig{
 			Admins:           []int{adminID},
 			BroadcastChannel: broadcastChannel,
 		})
@@ -126,7 +126,7 @@ func TestHandlersFilters(t *testing.T) {
 }
 
 func TestHandlerPhoto(t *testing.T) {
-	handler, mockedBot, mockedQueue := generateHandlerAndMockedBot(tb.OnPhoto, config.EnvConfig{
+	handler, mockedBot, mockedQueue := generateHandlerAndMockedBot(t, tb.OnPhoto, config.EnvConfig{
 		Admins:           []int{adminID},
 		BroadcastChannel: broadcastChannel,
 	})
@@ -187,7 +187,7 @@ func TestHandlerPhoto(t *testing.T) {
 }
 
 func TestHandlerText(t *testing.T) {
-	handler, mockedBot, mockedQueue := generateHandlerAndMockedBot(tb.OnText, config.EnvConfig{
+	handler, mockedBot, mockedQueue := generateHandlerAndMockedBot(t, tb.OnText, config.EnvConfig{
 		Admins:           []int{adminID},
 		BroadcastChannel: broadcastChannel,
 	})
@@ -224,14 +224,17 @@ func TestHandlerText(t *testing.T) {
 	})
 }
 
-func generateHandlerAndMockedBot(toHandle string, cfg config.EnvConfig) (
-	func(*tb.Message),
-	*mb.TelegramBot,
-	*mq.Queue,
-) {
+func generateHandlerAndMockedBot(
+	t *testing.T,
+	toHandle string,
+	cfg config.EnvConfig,
+) (func(*tb.Message), *mb.TelegramBot, *mq.Queue) {
 	allHandlers := []string{"/start", "/help", tb.OnPhoto, tb.OnText}
 
-	var handler func(*tb.Message)
+	var (
+		handler func(*tb.Message)
+		ok      bool
+	)
 
 	mockedQueue := new(mq.Queue)
 
@@ -244,7 +247,10 @@ func generateHandlerAndMockedBot(toHandle string, cfg config.EnvConfig) (
 				Once().
 				Return(nil, nil).
 				Run(func(args mock.Arguments) {
-					handler = args.Get(1).(func(*tb.Message))
+					handler, ok = args.Get(1).(func(*tb.Message))
+					if !ok {
+						t.Fatal("given handler is not valid")
+					}
 				})
 		} else {
 			mockedBot.On("Handle", v, mock.Anything).Once().Return(nil, nil)

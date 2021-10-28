@@ -128,7 +128,7 @@ func provideLogger(cfg config.EnvConfig) (*logrus.Logger, func()) {
 		lvl = logrus.ErrorLevel
 
 		if cfg.LogFile != "" {
-			file, err = os.OpenFile(cfg.LogFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0755)
+			file, err = os.OpenFile(cfg.LogFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0o755)
 			if err != nil {
 				logger.Fatal(err)
 			}
