@@ -8,7 +8,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.17.1
+          go-version: 1.17.3
       - name: Install Task
         uses: arduino/setup-task@v1
         with:
@@ -43,7 +43,7 @@ jobs:
           find: "/home/tweetgram/bin"
           replace: ${{secrets.FOLDER}}
           regex: false
-          include: "systemd/user/*"
+          include: "system/*"
           exclude: ".git/"
       - name: Find and Replace binary name
         uses: jacobtomlinson/gha-find-replace@v2
@@ -51,7 +51,7 @@ jobs:
           find: "tweetgram_bin"
           replace: ${{secrets.BINARY_NAME}}
           regex: false
-          include: "systemd/user/*"
+          include: "system/*"
           exclude: ".git/"
       - name: Find and Replace bot name
         uses: jacobtomlinson/gha-find-replace@v2
@@ -59,10 +59,8 @@ jobs:
           find: "Tweetgram"
           replace: ${{secrets.BOT_NAME}}
           regex: false
-          include: "systemd/user/*"
+          include: "system/*"
           exclude: ".git/"
-      - name: Rename service file
-        run: mv systemd/user/bot.service systemd/user/${{secrets.BINARY_NAME}}.service
       - name: Copy binary
         uses: appleboy/scp-action@master
         with:
@@ -73,16 +71,45 @@ jobs:
           passphrase: ${{secrets.PASSPHRASE}}
           source: ${{secrets.BINARY_NAME}}
           target: ${{secrets.FOLDER}}
-      - name: Copy systemd file
+      - name: Generate configuration folder locally
+        run: |
+          cp system/bot.conf ${{secrets.BINARY_NAME}}.conf
+          cp system/bot.service ${{secrets.BINARY_NAME}}.service
+      - name: Copy supervisor configuration file
         uses: appleboy/scp-action@master
+        env:
+          SERVICE_SYS: ${{secrets.SERVICE_SYS}}
+        if: "${{ env.SERVICE_SYS == 'supervisor' }}"
         with:
           host: ${{secrets.HOST}}
           username: ${{secrets.USERNAME}}
           key: ${{secrets.SSHKEY}}
           port: ${{secrets.PORT}}
           passphrase: ${{secrets.PASSPHRASE}}
-          source: systemd/
-          target: /home/${{secrets.USERNAME}}/.config/
+          source: ${{secrets.BINARY_NAME}}.conf
+          target: ${{secrets.SUPERVISOR_FOLDER}}
+      - name: Copy systemd configuration file
+        uses: appleboy/scp-action@master
+        env:
+          SERVICE_SYS: ${{secrets.SERVICE_SYS}}
+        if: "${{ env.SERVICE_SYS == 'systemd' }}"
+        with:
+          host: ${{secrets.HOST}}
+          username: ${{secrets.USERNAME}}
+          key: ${{secrets.SSHKEY}}
+          port: ${{secrets.PORT}}
+          passphrase: ${{secrets.PASSPHRASE}}
+          source: ${{secrets.BINARY_NAME}}.service
+          target: /home/${{secrets.USERNAME}}/.config/user
+
+  deploy-systemd:
+    name: Deploy systemd configuration
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_SYS: ${{secrets.SERVICE_SYS}}
+    if: "${{ env.SERVICE_SYS == 'systemd' }}"
+    steps:
       - name: Run new bot version
         uses: appleboy/ssh-action@master
         with:
@@ -96,3 +123,23 @@ jobs:
             systemctl --user daemon-reload
             systemctl --user start ${{secrets.BINARY_NAME}}.service   
             systemctl --user status ${{secrets.BINARY_NAME}}.service
+
+  deploy-supervisor:
+    name: Deploy supervisor configuration
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_SYS: ${{secrets.SERVICE_SYS}}
+    if: "${{ env.SERVICE_SYS == 'supervisor' }}"
+    steps:
+      - name: Run new bot version
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.HOST}}
+          username: ${{secrets.USERNAME}}
+          key: ${{secrets.SSHKEY}}
+          port: ${{secrets.PORT}}
+          passphrase: ${{secrets.PASSPHRASE}}
+          script: |
+            supervisorctl reload
+            supervisorctl status

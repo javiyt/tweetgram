@@ -5,13 +5,13 @@ on:
       - main
 name: Mutation Testing
 jobs:
-  build:
+  mutate:
     runs-on: ubuntu-latest
     steps:
       - name: Install Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.17.1
+          go-version: 1.17.3
       - name: Install Task
         uses: arduino/setup-task@v1
         with:

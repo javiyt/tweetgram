@@ -52,15 +52,17 @@ Remember all env variables will be overridden by the ones defined in env.test
 
 ## Deploying the bot
 There's an action called deploy that you can trigger to deploy the bot. Some [secrets should be added](https://docs.github.com/en/actions/security-guides/encrypted-secrets) to your account before running the deployment script. The variables that should be added are:
-| Variable      | Description                                  |
-|---------------|----------------------------------------------|
-| ENV_FILE      | cmd/env file content                         |
-| ENV_TEST_FILE | cmd/env.test file content                    |
-| HOST          | Host of the server to deploy the bot         |
-| USERNAME      | User to connect to the server                |
-| SSHKEY        | SSH key of the user to login onto the server |
-| PORT          | Port where the SSH server is running         |
-| PASSPHRASE    | Passphrase to decrypt the SSH key            |
-| FOLDER        | Folder to deploy the bot binary              |
-| BINARY_NAME   | Name for the generated binary                |
-| BOT_NAME      | Name given to the bot                        |
+| Variable          | Description                                                         |
+|-------------------|---------------------------------------------------------------------|
+| ENV_FILE          | cmd/env file content                                                |
+| ENV_TEST_FILE     | cmd/env.test file content                                           |
+| HOST              | Host of the server to deploy the bot                                |
+| USERNAME          | User to connect to the server                                       |
+| SSHKEY            | SSH key of the user to login onto the server                        |
+| PORT              | Port where the SSH server is running                                |
+| PASSPHRASE        | Passphrase to decrypt the SSH key                                   |
+| FOLDER            | Folder to deploy the bot binary                                     |
+| BINARY_NAME       | Name for the generated binary                                       |
+| BOT_NAME          | Name given to the bot                                               |
+| SERVICE_SYS       | Name of service used to keep process running: systemd or supervisor |
+| SUPERVISOR_FOLDER | Folder where supervisor configuration files are stored              |
