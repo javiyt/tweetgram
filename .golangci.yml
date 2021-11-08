@@ -21,4 +21,5 @@ linters:
   disable:
     - paralleltest
     - gci
+    - nolintlint
   fast: true
