@@ -1,7 +1,6 @@
 package bot_test
 
 import (
-	"errors"
 	"testing"
 
 	"github.com/javiyt/tweetgram/internal/bot"
@@ -11,6 +10,12 @@ import (
 	"github.com/stretchr/testify/require"
 	tb "gopkg.in/tucnak/telebot.v2"
 )
+
+type settingCommandError struct{}
+
+func (m settingCommandError) Error() string {
+	return "not setting commands"
+}
 
 func TestStart(t *testing.T) {
 	mockedBot := new(mb.TelegramBot)
@@ -30,7 +35,7 @@ func TestStart(t *testing.T) {
 	b := bot.NewBot(bot.WithTelegramBot(mockedBot), bot.WithTwitterClient(mockedTwitter))
 
 	t.Run("it should fail setting up the commands", func(t *testing.T) {
-		mockedBot.On("SetCommands", cmds).Once().Return(errors.New("not setting commands"))
+		mockedBot.On("SetCommands", cmds).Once().Return(settingCommandError{})
 
 		require.EqualError(t, b.Start(), "not setting commands")
 
@@ -67,6 +72,7 @@ func TestRun(t *testing.T) {
 func TestStop(t *testing.T) {
 	mockedBot := new(mb.TelegramBot)
 	mockedBot.On("Stop").Once()
+
 	mockedQueue := new(mq.Queue)
 	mockedQueue.On("Close").Once().Return(nil)
 

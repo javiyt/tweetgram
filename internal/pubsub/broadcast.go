@@ -28,10 +28,10 @@ type ErrorEvent struct {
 //easyjson:json
 type PhotoEvent struct {
 	Caption     string `json:"caption"`
-	FileID      string `json:"file_id"`
-	FileURL     string `json:"file_url"`
-	FileSize    int    `json:"file_size"`
-	FileContent []byte `json:"file_content"`
+	FileID      string `json:"fileId"`
+	FileURL     string `json:"fileUrl"`
+	FileSize    int    `json:"fileSize"`
+	FileContent []byte `json:"fileContent"`
 }
 
 //easyjson:json

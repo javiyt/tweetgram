@@ -4,11 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/jarcoal/httpmock"
-	"github.com/javiyt/tweetgram/internal/bot"
-	"github.com/javiyt/tweetgram/internal/telegram"
-	"github.com/stretchr/testify/require"
-	tb "gopkg.in/tucnak/telebot.v2"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -16,6 +11,12 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
+
+	"github.com/jarcoal/httpmock"
+	"github.com/javiyt/tweetgram/internal/bot"
+	"github.com/javiyt/tweetgram/internal/telegram"
+	"github.com/stretchr/testify/require"
+	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 func TestMain(m *testing.M) {

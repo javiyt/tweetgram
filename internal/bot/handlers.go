@@ -2,11 +2,12 @@ package bot
 
 import (
 	"bytes"
+	"strings"
+
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/javiyt/tweetgram/internal/pubsub"
 	"github.com/mailru/easyjson"
-	"strings"
 )
 
 func (b *Bot) handleStartCommand(m *TelegramMessage) {
