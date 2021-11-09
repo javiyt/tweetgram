@@ -141,5 +141,5 @@ jobs:
           port: ${{secrets.PORT}}
           passphrase: ${{secrets.PASSPHRASE}}
           script: |
-            supervisorctl reload
-            supervisorctl status
+            supervisorctl update
+            supervisorctl restart ${{secrets.BOT_NAME}}
