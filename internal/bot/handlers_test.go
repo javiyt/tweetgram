@@ -152,7 +152,7 @@ func TestHandlerPhoto(t *testing.T) {
 	})
 
 	t.Run("it should do nothing when error getting image", func(t *testing.T) {
-		mockedBot.On("GetFile", &successPhoto.Photo).Once().
+		mockedBot.On("GetFile", successPhoto.Photo.FileID).Once().
 			Return(nil, downloadImageError{})
 
 		handler(successPhoto)
@@ -165,7 +165,7 @@ func TestHandlerPhoto(t *testing.T) {
 		file, _ := os.Open("testdata/test.png")
 		defer func() { _ = file.Close() }()
 
-		mockedBot.On("GetFile", &successPhoto.Photo).Once().Return(file, nil)
+		mockedBot.On("GetFile", successPhoto.Photo.FileID).Once().Return(file, nil)
 		mockedQueue.On(
 			"Publish",
 			pubsub.PhotoTopic.String(),
