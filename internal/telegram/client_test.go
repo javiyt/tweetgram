@@ -172,6 +172,10 @@ func TestBot_Send(t *testing.T) {
 		require.EqualError(t, bt.Send("1234567890", tb.File{}), "unsupported type")
 	})
 
+	t.Run("it should fail when recipient could not be converted to float", func(t *testing.T) {
+		require.EqualError(t, bt.Send("asdfg", "test message"), "strconv.ParseFloat: parsing \"asdfg\": invalid syntax")
+	})
+
 	t.Run("it sends a text message", func(t *testing.T) {
 		require.NoError(t, bt.Send("1234567890", "test message"))
 		require.Eventually(t, func() bool {
