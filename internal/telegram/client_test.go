@@ -173,25 +173,21 @@ func TestBot_Send(t *testing.T) {
 	})
 
 	t.Run("it should fail when recipient could not be converted to float", func(t *testing.T) {
-		require.EqualError(t, bt.Send("asdfg", "test message"), "strconv.ParseFloat: parsing \"asdfg\": invalid syntax")
+		require.EqualError(
+			t,
+			bt.Send("asdfg", "test message"),
+			"strconv.ParseFloat: parsing \"asdfg\": invalid syntax",
+		)
 	})
 
 	t.Run("it sends a text message", func(t *testing.T) {
 		require.NoError(t, bt.Send("1234567890", "test message"))
-		require.Eventually(t, func() bool {
-			b, ok := testMessageSent.Load().(bool)
-
-			return ok && b
-		}, time.Second, time.Millisecond)
+		require.Eventually(t, checkResponderCalled(&testMessageSent), time.Second, time.Millisecond)
 	})
 
 	t.Run("it send a text message longer than expected", func(t *testing.T) {
 		require.NoError(t, bt.Send("1234567890", string(generateRandomString())))
-		require.Eventually(t, func() bool {
-			b, ok := testLongMessageSent.Load().(bool)
-
-			return ok && b
-		}, time.Second, time.Millisecond)
+		require.Eventually(t, checkResponderCalled(&testLongMessageSent), time.Second, time.Millisecond)
 	})
 
 	t.Run("it should send a picture", func(t *testing.T) {
@@ -201,11 +197,7 @@ func TestBot_Send(t *testing.T) {
 			FileURL:  "http://image.url",
 			FileSize: 1234,
 		}))
-		require.Eventually(t, func() bool {
-			b, ok := photoSent.Load().(bool)
-
-			return ok && b
-		}, time.Second, time.Millisecond)
+		require.Eventually(t, checkResponderCalled(&photoSent), time.Second, time.Millisecond)
 	})
 }
 
@@ -308,4 +300,12 @@ func generateRandomString() []byte {
 	}
 
 	return b
+}
+
+func checkResponderCalled(b *atomic.Value) func() bool {
+	return func() bool {
+		b, ok := b.Load().(bool)
+
+		return ok && b
+	}
 }
