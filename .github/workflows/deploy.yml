@@ -106,11 +106,11 @@ jobs:
     name: Deploy systemd configuration
     needs: build
     runs-on: ubuntu-latest
-    env:
-      SERVICE_SYS: ${{secrets.SERVICE_SYS}}
-    if: env.SERVICE_SYS == 'systemd'
     steps:
       - name: Run new bot version
+        env:
+          SERVICE_SYS: ${{secrets.SERVICE_SYS}}
+        if: env.SERVICE_SYS == 'systemd'
         uses: appleboy/ssh-action@master
         with:
           host: ${{secrets.HOST}}
@@ -128,11 +128,11 @@ jobs:
     name: Deploy supervisor configuration
     needs: build
     runs-on: ubuntu-latest
-    env:
-      SERVICE_SYS: ${{secrets.SERVICE_SYS}}
-    if: env.SERVICE_SYS == 'supervisor'
     steps:
       - name: Run new bot version
+        env:
+          SERVICE_SYS: ${{secrets.SERVICE_SYS}}
+        if: env.SERVICE_SYS == 'supervisor'
         uses: appleboy/ssh-action@master
         with:
           host: ${{secrets.HOST}}
