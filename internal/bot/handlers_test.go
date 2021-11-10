@@ -109,6 +109,13 @@ func TestHandlersFilters(t *testing.T) {
 					SenderID:  "54321",
 				},
 			},
+			{
+				name: "it should fail when in private conversation but sender can't be converted to int",
+				m: &bot.TelegramMessage{
+					IsPrivate: true,
+					SenderID:  "asdfg",
+				},
+			},
 		}
 
 		for i := range testCases {

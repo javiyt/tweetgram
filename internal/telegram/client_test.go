@@ -168,6 +168,10 @@ func TestBot_Send(t *testing.T) {
 
 	registerResponders(&testMessageSent, &testLongMessageSent, &photoSent, &firstLongMessage)
 
+	t.Run("it should fail when unsupported message sent", func(t *testing.T) {
+		require.EqualError(t, bt.Send("1234567890", tb.File{}), "unsupported type")
+	})
+
 	t.Run("it sends a text message", func(t *testing.T) {
 		require.NoError(t, bt.Send("1234567890", "test message"))
 		require.Eventually(t, func() bool {
