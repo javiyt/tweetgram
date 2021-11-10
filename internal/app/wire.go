@@ -8,6 +8,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/javiyt/tweetgram/internal/telegram"
+
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/pubsub/gochannel"
 	"github.com/javiyt/tweetgram/internal/handlers"
@@ -29,7 +31,6 @@ import (
 
 var (
 	twitterClient = wire.NewSet(provideTwitterHttpClient, provideTwitterClient, wire.Bind(new(bot.TwitterClient), new(*twitter.Client)))
-	telegramBot   = wire.NewSet(provideTBot, wire.Bind(new(bot.TelegramBot), new(*tb.Bot)))
 	queue         = wire.NewSet(provideGoChannelQueue, wire.Bind(new(pubsub.Queue), new(*gochannel.GoChannel)))
 	queueInstance *gochannel.GoChannel
 )
@@ -39,7 +40,7 @@ func ProvideApp() (*App, func(), error) {
 		provideBotProvider,
 		twitterClient,
 		provideConfiguration,
-		telegramBot,
+		provideTBot,
 		queue,
 		provideLogger,
 		provideTelegramHandler,
@@ -57,7 +58,7 @@ func provideBotProvider() botProvider {
 func provideBot() (bot.AppBot, error) {
 	panic(wire.Build(
 		provideConfiguration,
-		telegramBot,
+		provideTBot,
 		twitterClient,
 		queue,
 		provideBotOptions,
@@ -69,8 +70,8 @@ func provideConfiguration() (config.EnvConfig, error) {
 	panic(wire.Build(config.NewEnvConfig))
 }
 
-func provideTBot() (*tb.Bot, error) {
-	panic(wire.Build(provideConfiguration, provideTBotSettings, tb.NewBot))
+func provideTBot() (bot.TelegramBot, error) {
+	panic(wire.Build(provideConfiguration, provideTBotSettings, tb.NewBot, telegram.NewBot))
 }
 
 func provideTBotSettings(cfg config.EnvConfig) tb.Settings {
@@ -140,7 +141,7 @@ func provideLogger(cfg config.EnvConfig) (*logrus.Logger, func()) {
 
 	return logger, func() {
 		logger.Exit(0)
-		file.Close()
+		_ = file.Close()
 	}
 }
 

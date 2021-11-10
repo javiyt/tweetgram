@@ -2,11 +2,13 @@ package handlerstelegram_test
 
 import (
 	"context"
+	"strconv"
 	"testing"
 	"time"
 
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
+	"github.com/javiyt/tweetgram/internal/bot"
 	"github.com/javiyt/tweetgram/internal/config"
 	ht "github.com/javiyt/tweetgram/internal/handlers/telegram"
 	"github.com/javiyt/tweetgram/internal/pubsub"
@@ -14,7 +16,6 @@ import (
 	mq "github.com/javiyt/tweetgram/mocks/pubsub"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 type messageNotSendError struct{}
@@ -82,12 +83,12 @@ func TestTelegram_ExecuteHandlersText(t *testing.T) {
 			return string(m.Payload) == "{\"error\":\"couldn't send message to telegram\"}"
 		})).Once().
 			Return(nil)
-		mockedBot.On("Send", tb.ChatID(cfg.BroadcastChannel), "testing message").
+		mockedBot.On("Send", strconv.Itoa(int(cfg.BroadcastChannel)), "failing message").
 			Once().
-			Return(nil, messageNotSendError{})
+			Return(messageNotSendError{})
 
 		th.ExecuteHandlers()
-		sendMessageToChannel(t, textChannel, []byte("{\"text\":\"testing message\"}"), false)
+		sendMessageToChannel(t, textChannel, []byte("{\"text\":\"failing message\"}"), false)
 
 		mockedQueue.AssertExpectations(t)
 		mockedBot.AssertExpectations(t)
@@ -96,7 +97,7 @@ func TestTelegram_ExecuteHandlersText(t *testing.T) {
 	t.Run("it should send text message to telegram", func(t *testing.T) {
 		th, mockedQueue, mockedBot, textChannel, _ := generateHandlerAndMocks(cfg, true)
 
-		mockedBot.On("Send", tb.ChatID(cfg.BroadcastChannel), "testing message").
+		mockedBot.On("Send", strconv.Itoa(int(cfg.BroadcastChannel)), "testing message").
 			Once().
 			Return(nil, nil)
 
@@ -139,8 +140,8 @@ func TestTelegram_ExecuteHandlersPhoto(t *testing.T) {
 			return string(m.Payload) == "{\"error\":\"couldn't send message to telegram\"}"
 		})).Once().
 			Return(nil)
-		mockedBot.On("Send", tb.ChatID(cfg.BroadcastChannel), mock.MatchedBy(matchTelegramPhoto())).
-			Once().Return(nil, messageNotSendError{})
+		mockedBot.On("Send", strconv.Itoa(int(cfg.BroadcastChannel)), mock.MatchedBy(matchTelegramPhoto())).
+			Once().Return(messageNotSendError{})
 
 		th.ExecuteHandlers()
 
@@ -153,8 +154,8 @@ func TestTelegram_ExecuteHandlersPhoto(t *testing.T) {
 	t.Run("it should send photo message to telegram", func(t *testing.T) {
 		th, mockedQueue, mockedBot, _, photoChannel := generateHandlerAndMocks(cfg, true)
 
-		mockedBot.On("Send", tb.ChatID(cfg.BroadcastChannel), mock.MatchedBy(matchTelegramPhoto())).
-			Once().Return(nil, nil)
+		mockedBot.On("Send", strconv.Itoa(int(cfg.BroadcastChannel)), mock.MatchedBy(matchTelegramPhoto())).
+			Once().Return(nil)
 
 		th.ExecuteHandlers()
 		sendMessageToChannel(t, photoChannel, eventMsg, true)
@@ -213,11 +214,11 @@ func sendMessageToChannel(t *testing.T, channel chan *message.Message, eventMsg 
 func matchTelegramPhoto() func(m interface{}) bool {
 	return func(m interface{}) bool {
 		var (
-			p  *tb.Photo
+			p  *bot.TelegramPhoto
 			ok bool
 		)
 
-		if p, ok = m.(*tb.Photo); !ok {
+		if p, ok = m.(*bot.TelegramPhoto); !ok {
 			return false
 		}
 

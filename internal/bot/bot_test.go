@@ -21,7 +21,7 @@ func TestStart(t *testing.T) {
 	mockedBot := new(mb.TelegramBot)
 	mockedTwitter := new(mb.TwitterClient)
 
-	cmds := []tb.Command{
+	cmds := []bot.TelegramBotCommand{
 		{
 			Text:        "help",
 			Description: "Show help",

@@ -2,15 +2,15 @@ package bot_test
 
 import (
 	"os"
+	"strconv"
 	"testing"
 
 	"github.com/ThreeDotsLabs/watermill/message"
-	"github.com/javiyt/tweetgram/internal/pubsub"
-	mq "github.com/javiyt/tweetgram/mocks/pubsub"
-
 	"github.com/javiyt/tweetgram/internal/bot"
 	"github.com/javiyt/tweetgram/internal/config"
+	"github.com/javiyt/tweetgram/internal/pubsub"
 	mb "github.com/javiyt/tweetgram/mocks/bot"
+	mq "github.com/javiyt/tweetgram/mocks/pubsub"
 	"github.com/stretchr/testify/mock"
 
 	tb "gopkg.in/tucnak/telebot.v2"
@@ -52,26 +52,24 @@ func TestHandlerStartAndHelpCommand(t *testing.T) {
 		handler, mockedBot, _ := generateHandlerAndMockedBot(t, commands[i].command, config.EnvConfig{})
 
 		t.Run("it should do nothing when not in private conversation", func(t *testing.T) {
-			handler(&tb.Message{
-				Chat: &tb.Chat{
-					Type: tb.ChatGroup,
-				},
+			handler(&bot.TelegramMessage{
+				IsPrivate: false,
 			})
 
 			mockedBot.AssertExpectations(t)
 			mockedBot.AssertNotCalled(t, "Send", mock.Anything, mock.Anything)
 		})
 
-		t.Run("it should send message when in private conversation", func(t *testing.T) {
-			m := &tb.Message{
-				Chat: &tb.Chat{
-					Type: tb.ChatPrivate,
-				},
-				Sender: &tb.User{
-					ID: 1234,
-				},
+		t.Run("it should message when in private conversation", func(t *testing.T) {
+			m := &bot.TelegramMessage{
+				IsPrivate: true,
+				SenderID:  "1234",
 			}
-			mockedBot.On("Send", m.Sender, commands[i].expected).Once().Return(nil, nil)
+			mockedBot.On(
+				"Send",
+				m.SenderID,
+				commands[i].expected,
+			).Once().Return(nil, nil)
 
 			handler(m)
 
@@ -95,20 +93,27 @@ func TestHandlersFilters(t *testing.T) {
 
 		testCases := []struct {
 			name string
-			m    *tb.Message
+			m    *bot.TelegramMessage
 		}{
 			{
 				name: "it should do nothing when not in private conversation",
-				m: &tb.Message{
-					Chat:   &tb.Chat{Type: tb.ChatGroup},
-					Sender: &tb.User{ID: 1234},
+				m: &bot.TelegramMessage{
+					IsPrivate: false,
+					SenderID:  "1234",
 				},
 			},
 			{
 				name: "it should do nothing when in private conversation but not admin",
-				m: &tb.Message{
-					Chat:   &tb.Chat{Type: tb.ChatPrivate},
-					Sender: &tb.User{ID: 54321},
+				m: &bot.TelegramMessage{
+					IsPrivate: true,
+					SenderID:  "54321",
+				},
+			},
+			{
+				name: "it should fail when in private conversation but sender can't be converted to int",
+				m: &bot.TelegramMessage{
+					IsPrivate: true,
+					SenderID:  "asdfg",
 				},
 			},
 		}
@@ -131,25 +136,22 @@ func TestHandlerPhoto(t *testing.T) {
 		BroadcastChannel: broadcastChannel,
 	})
 
-	successPhoto := &tb.Message{
-		Chat:    &tb.Chat{Type: tb.ChatPrivate},
-		Sender:  &tb.User{ID: adminID},
-		Caption: "testing",
-		Photo: &tb.Photo{
-			Caption: "testing",
-			File: tb.File{
-				FileID:   "blablabla",
-				FileURL:  "http://myimage.com/test.jpg",
-				FileSize: 1234,
-			},
+	successPhoto := &bot.TelegramMessage{
+		IsPrivate: true,
+		SenderID:  strconv.Itoa(adminID),
+		Photo: bot.TelegramPhoto{
+			Caption:  "testing",
+			FileID:   "blablabla",
+			FileURL:  "http://myimage.com/test.jpg",
+			FileSize: 1234,
 		},
 	}
 
 	t.Run("it should do nothing when caption no present", func(t *testing.T) {
-		handler(&tb.Message{
-			Chat:    &tb.Chat{Type: tb.ChatPrivate},
-			Sender:  &tb.User{ID: adminID},
-			Caption: "",
+		handler(&bot.TelegramMessage{
+			IsPrivate: true,
+			SenderID:  strconv.Itoa(adminID),
+			Photo:     bot.TelegramPhoto{Caption: ""},
 		})
 
 		mockedBot.AssertExpectations(t)
@@ -157,7 +159,7 @@ func TestHandlerPhoto(t *testing.T) {
 	})
 
 	t.Run("it should do nothing when error getting image", func(t *testing.T) {
-		mockedBot.On("GetFile", &successPhoto.Photo.File).Once().
+		mockedBot.On("GetFile", successPhoto.Photo.FileID).Once().
 			Return(nil, downloadImageError{})
 
 		handler(successPhoto)
@@ -170,7 +172,7 @@ func TestHandlerPhoto(t *testing.T) {
 		file, _ := os.Open("testdata/test.png")
 		defer func() { _ = file.Close() }()
 
-		mockedBot.On("GetFile", &successPhoto.Photo.File).Once().Return(file, nil)
+		mockedBot.On("GetFile", successPhoto.Photo.FileID).Once().Return(file, nil)
 		mockedQueue.On(
 			"Publish",
 			pubsub.PhotoTopic.String(),
@@ -193,10 +195,10 @@ func TestHandlerText(t *testing.T) {
 	})
 
 	t.Run("it should do nothing when text no present", func(t *testing.T) {
-		handler(&tb.Message{
-			Chat:   &tb.Chat{Type: tb.ChatPrivate},
-			Sender: &tb.User{ID: adminID},
-			Text:   "",
+		handler(&bot.TelegramMessage{
+			IsPrivate: true,
+			SenderID:  strconv.Itoa(adminID),
+			Text:      "",
 		})
 
 		mockedBot.AssertExpectations(t)
@@ -204,10 +206,10 @@ func TestHandlerText(t *testing.T) {
 	})
 
 	t.Run("it should send text when present", func(t *testing.T) {
-		m := &tb.Message{
-			Chat:   &tb.Chat{Type: tb.ChatPrivate},
-			Sender: &tb.User{ID: adminID},
-			Text:   "testing",
+		m := &bot.TelegramMessage{
+			IsPrivate: true,
+			SenderID:  strconv.Itoa(adminID),
+			Text:      "testing",
 		}
 		mockedQueue.On(
 			"Publish",
@@ -228,11 +230,11 @@ func generateHandlerAndMockedBot(
 	t *testing.T,
 	toHandle string,
 	cfg config.EnvConfig,
-) (func(*tb.Message), *mb.TelegramBot, *mq.Queue) {
+) (bot.TelegramHandler, *mb.TelegramBot, *mq.Queue) {
 	allHandlers := []string{"/start", "/help", tb.OnPhoto, tb.OnText}
 
 	var (
-		handler func(*tb.Message)
+		handler bot.TelegramHandler
 		ok      bool
 	)
 
@@ -247,7 +249,7 @@ func generateHandlerAndMockedBot(
 				Once().
 				Return(nil, nil).
 				Run(func(args mock.Arguments) {
-					handler, ok = args.Get(1).(func(*tb.Message))
+					handler, ok = args.Get(1).(bot.TelegramHandler)
 					if !ok {
 						t.Fatal("given handler is not valid")
 					}

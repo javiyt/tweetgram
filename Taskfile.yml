@@ -67,7 +67,7 @@ tasks:
       - install
       - generate
     cmds:
-      - go run github.com/golangci/golangci-lint/cmd/golangci-lint run cmd internal
+      - go run github.com/golangci/golangci-lint/cmd/golangci-lint run
   gofumpt:
     desc: Run gofumpt
     deps:

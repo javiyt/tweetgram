@@ -8,30 +8,28 @@ import (
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/javiyt/tweetgram/internal/pubsub"
 	"github.com/mailru/easyjson"
-
-	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-func (b *Bot) handleStartCommand(m *tb.Message) {
-	_, _ = b.bot.Send(m.Sender, "Thanks for using the bot! You can type /help command to know what can I do")
+func (b *Bot) handleStartCommand(m *TelegramMessage) {
+	_ = b.bot.Send(m.SenderID, "Thanks for using the bot! You can type /help command to know what can I do")
 }
 
-func (b *Bot) handleHelpCommand(m *tb.Message) {
+func (b *Bot) handleHelpCommand(m *TelegramMessage) {
 	var helpText string
 	for _, h := range b.getCommands() {
 		helpText += "/" + h.Text + " - " + h.Description + "\n"
 	}
 
-	_, _ = b.bot.Send(m.Sender, helpText)
+	_ = b.bot.Send(m.SenderID, helpText)
 }
 
-func (b *Bot) handlePhoto(m *tb.Message) {
-	caption := strings.TrimSpace(m.Caption)
+func (b *Bot) handlePhoto(m *TelegramMessage) {
+	caption := strings.TrimSpace(m.Photo.Caption)
 	if caption == "" {
 		return
 	}
 
-	fileReader, err := b.bot.GetFile(m.Photo.MediaFile())
+	fileReader, err := b.bot.GetFile(m.Photo.FileID)
 	if err != nil {
 		return
 	}
@@ -50,15 +48,13 @@ func (b *Bot) handlePhoto(m *tb.Message) {
 	_ = b.q.Publish(pubsub.PhotoTopic.String(), message.NewMessage(watermill.NewUUID(), mb))
 }
 
-func (b *Bot) handleText(m *tb.Message) {
+func (b *Bot) handleText(m *TelegramMessage) {
 	msg := strings.TrimSpace(m.Text)
 	if msg == "" {
 		return
 	}
 
-	mb, _ := easyjson.Marshal(pubsub.TextEvent{
-		Text: msg,
-	})
+	mb, _ := easyjson.Marshal(pubsub.TextEvent{Text: msg})
 
 	_ = b.q.Publish(pubsub.TextTopic.String(), message.NewMessage(watermill.NewUUID(), mb))
 }
