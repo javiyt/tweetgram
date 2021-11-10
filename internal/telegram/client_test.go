@@ -185,6 +185,10 @@ func TestBot_Send(t *testing.T) {
 		require.Eventually(t, checkResponderCalled(&testMessageSent), time.Second, time.Millisecond)
 	})
 
+	t.Run("it should fail sending a text message", func(t *testing.T) {
+		require.EqualError(t, bt.Send("1234567890", "fail message"), "telegram unknown:  (0)")
+	})
+
 	t.Run("it send a text message longer than expected", func(t *testing.T) {
 		require.NoError(t, bt.Send("1234567890", string(generateRandomString())))
 		require.Eventually(t, checkResponderCalled(&testLongMessageSent), time.Second, time.Millisecond)
@@ -260,6 +264,8 @@ func registerResponders(testMessageSent, testLongMessageSent, photoSent, firstLo
 				messageSent, _ := ioutil.ReadFile("testdata/sendmessage.json")
 
 				return httpmock.NewStringResponse(200, string(messageSent)), nil
+			} else if requestBody.ChatID == "1234567890" && requestBody.Text == "fail message" {
+				return httpmock.NewStringResponse(429, "{}"), nil
 			} else if len(requestBody.Text) == 4096 {
 				firstLongMessage.Store(true)
 				messageSent, _ := ioutil.ReadFile("testdata/sendmessage.json")
