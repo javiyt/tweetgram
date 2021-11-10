@@ -63,7 +63,6 @@ jobs:
         uses: golangci/golangci-lint-action@v2
         with:
           version: v1.43.0
-          args: cmd internal
           skip-pkg-cache: true
           skip-go-installation: true
           skip-build-cache: true
