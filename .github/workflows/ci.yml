@@ -4,7 +4,7 @@ jobs:
   test:
     strategy:
       matrix:
-        go-version: [ 1.16.x, 1.17.x ]
+        go-version: [1.17.x]
     runs-on: ubuntu-latest
     steps:
       - name: Install Go
@@ -29,8 +29,11 @@ jobs:
           version: 3.7.3
       - name: Test
         run: task test
-      - name: Upload coverage to Codecov
-        run: bash <(curl -s https://codecov.io/bash)
+      - name: Upload report to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          verbose: true
+          files: coverage.txt
   golangci:
     name: lint
     runs-on: ubuntu-latest
@@ -59,4 +62,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2
         with:
-          version: v1.42.1      
+          version: v1.43.0
+          skip-pkg-cache: true
+          skip-go-installation: true
+          skip-build-cache: true

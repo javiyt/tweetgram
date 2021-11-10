@@ -24,3 +24,4 @@ wire_gen.go
 coverage.txt
 .idea
 .task
+*.secret

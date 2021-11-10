@@ -23,14 +23,16 @@ tasks:
         TWITTER_BEARER_TOKEN=hIlQI351HEPT6xbA4xHnYRfgOsF8jqcPT5m6Ec0VeCXtUyOY9Mzy6uFYevH%4ys86GL3KfO1ZRBwichZOlGDYyZ52Ht2BXh2WgUFvywJKbRq9lMH
         TWITTER_ACCESS_TOKEN=123456789-0xW7uNw2mEykTVTTKHS32y3oIXHab5hSh7POa0Wf
         TWITTER_ACCESS_SECRET=BWa9T8hkEEj5yCutPwJTs7Vk4f1wfj690Dq3UGCyf9YQB
+        ENVIRONMENT=TEST
+        LOG_FILE=/var/log/tweetgram.log
     cmds:
-      - Writing content for env files
+      - echo "Writing content for env files"
       - |
         {{range $line := .CONTENT | trim | splitLines -}}
           echo {{$line}} >> env
           echo {{$line}} >> env.test
-        {{end}} 
-      - Env files generated, set up proper values for vars
+        {{end}}
+      - echo "Env files generated, set up proper values for vars"
   setup:
     desc: Set up bot environment to work with
     silent: true
@@ -65,7 +67,13 @@ tasks:
       - install
       - generate
     cmds:
-      - go run github.com/golangci/golangci-lint/cmd/golangci-lint run cmd internal
+      - go run github.com/golangci/golangci-lint/cmd/golangci-lint run
+  gofumpt:
+    desc: Run gofumpt
+    deps:
+      - install
+    cmds:
+      - go run mvdan.cc/gofumpt -l -w cmd internal
   wire:
     desc: Execute wire binary to generate DI
     run: once
@@ -106,7 +114,15 @@ tasks:
       - install
       - generate
     cmds:
-      - go test -timeout 10s -race -count 5 -coverprofile=coverage.txt -covermode=atomic ./...
+      - go test -timeout 10s -race -count 5 -coverprofile=coverage.txt -covermode=atomic -shuffle on ./...
+  mutation:
+    desc: Run mutation testing
+    deps:
+      - clean
+      - install
+      - generate
+    cmds:
+      - go run github.com/zimmski/go-mutesting/cmd/go-mutesting internal/bot/ internal/config/ internal/handlers/... internal/twitter/
   run-test:
     desc: Execute test mode for the bot
     deps:
@@ -117,6 +133,16 @@ tasks:
       - task: json
       - task: wire
       - go run cmd/main.go -test=true
+  run:
+    desc: Execute the bot
+    deps:
+      - clean
+      - install
+    cmds:
+      - task: stringer
+      - task: json
+      - task: wire
+      - go run cmd/main.go
   clean:
     desc: Clean all auto generated files
     run: once

@@ -8,12 +8,14 @@ import (
 
 	_ "embed"
 
-	"github.com/javiyt/tweettgram/internal/app"
+	"github.com/javiyt/tweetgram/internal/app"
 )
 
+//nolint:gochecknoglobals
 //go:embed env
 var envFile []byte
 
+//nolint:gochecknoglobals
 //go:embed env.test
 var envTestFile []byte
 

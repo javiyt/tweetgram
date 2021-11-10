@@ -1,22 +1,27 @@
 package bot_test
 
 import (
-	"errors"
 	"testing"
 
-	"github.com/javiyt/tweettgram/internal/bot"
-	mb "github.com/javiyt/tweettgram/mocks/bot"
-	mq "github.com/javiyt/tweettgram/mocks/pubsub"
+	"github.com/javiyt/tweetgram/internal/bot"
+	mb "github.com/javiyt/tweetgram/mocks/bot"
+	mq "github.com/javiyt/tweetgram/mocks/pubsub"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
+type settingCommandError struct{}
+
+func (m settingCommandError) Error() string {
+	return "not setting commands"
+}
+
 func TestStart(t *testing.T) {
 	mockedBot := new(mb.TelegramBot)
 	mockedTwitter := new(mb.TwitterClient)
 
-	cmds := []tb.Command{
+	cmds := []bot.TelegramBotCommand{
 		{
 			Text:        "help",
 			Description: "Show help",
@@ -30,16 +35,16 @@ func TestStart(t *testing.T) {
 	b := bot.NewBot(bot.WithTelegramBot(mockedBot), bot.WithTwitterClient(mockedTwitter))
 
 	t.Run("it should fail setting up the commands", func(t *testing.T) {
-		mockedBot.On("SetCommands", cmds).Once().Return(errors.New("not setting commands"))
+		mockedBot.On("SetCommands", cmds).Once().Return(settingCommandError{})
 
 		require.EqualError(t, b.Start(), "not setting commands")
 
 		mockedBot.AssertExpectations(t)
 		mockedBot.AssertNotCalled(t, "Handle", "/start", mock.Anything)
-		mockedBot.AssertNotCalled(t,"Handle", "/help", mock.Anything)
-		mockedBot.AssertNotCalled(t,"Handle", tb.OnPhoto, mock.Anything)
-		mockedBot.AssertNotCalled(t,"Handle", tb.OnText, mock.Anything)
-		mockedBot.AssertNotCalled(t,"Start")
+		mockedBot.AssertNotCalled(t, "Handle", "/help", mock.Anything)
+		mockedBot.AssertNotCalled(t, "Handle", tb.OnPhoto, mock.Anything)
+		mockedBot.AssertNotCalled(t, "Handle", tb.OnText, mock.Anything)
+		mockedBot.AssertNotCalled(t, "Start")
 	})
 
 	t.Run("it should start the bot successfully", func(t *testing.T) {
@@ -58,7 +63,7 @@ func TestStart(t *testing.T) {
 func TestRun(t *testing.T) {
 	mockedBot := new(mb.TelegramBot)
 	mockedBot.On("Start").Once()
-	
+
 	bot.NewBot(bot.WithTelegramBot(mockedBot)).Run()
 
 	mockedBot.AssertExpectations(t)
@@ -67,6 +72,7 @@ func TestRun(t *testing.T) {
 func TestStop(t *testing.T) {
 	mockedBot := new(mb.TelegramBot)
 	mockedBot.On("Stop").Once()
+
 	mockedQueue := new(mq.Queue)
 	mockedQueue.On("Close").Once().Return(nil)
 

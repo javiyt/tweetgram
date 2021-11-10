@@ -1,22 +1,45 @@
 package bot
 
 import (
+	"io"
 	"sort"
 	"strings"
 
-	"github.com/javiyt/tweettgram/internal/pubsub"
+	"github.com/javiyt/tweetgram/internal/pubsub"
 
-	"github.com/javiyt/tweettgram/internal/config"
+	"github.com/javiyt/tweetgram/internal/config"
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 type TelegramBot interface {
 	Start()
 	Stop()
-	SetCommands([]tb.Command) error
-	Handle(endpoint interface{}, handler interface{})
-	Send(to tb.Recipient, what interface{}, options ...interface{}) (*tb.Message, error)
-	SendAlbum(to tb.Recipient, a tb.Album, options ...interface{}) ([]tb.Message, error)
+	SetCommands([]TelegramBotCommand) error
+	Handle(string, TelegramHandler)
+	Send(string, interface{}, ...interface{}) error
+	GetFile(string) (io.ReadCloser, error)
+	SendAlbum(to string, a tb.Album, options ...interface{}) ([]tb.Message, error)
+}
+
+type TelegramHandler func(*TelegramMessage)
+
+type TelegramBotCommand struct {
+	Text        string
+	Description string
+}
+
+type TelegramMessage struct {
+	SenderID  string
+	Text      string
+	Photo     TelegramPhoto
+	IsPrivate bool
+}
+
+type TelegramPhoto struct {
+	Caption  string
+	FileID   string
+	FileURL  string
+	FileSize int
 }
 
 type AppBot interface {
@@ -27,6 +50,7 @@ type AppBot interface {
 
 type TwitterClient interface {
 	SendUpdate(string) error
+	SendUpdateWithPhoto(string, []byte) error
 }
 
 type Bot struct {
@@ -40,7 +64,7 @@ type Bot struct {
 type Option func(b *Bot)
 
 type botHandler struct {
-	handlerFunc func(*tb.Message)
+	handlerFunc TelegramHandler
 	help        string
 	filters     []filterFunc
 }
@@ -99,7 +123,7 @@ func (b *Bot) Run() {
 func (b *Bot) Stop() {
 	close(b.albumChan)
 	b.bot.Stop()
-	b.q.Close()
+	_ = b.q.Close()
 }
 
 func (b *Bot) getHandlers() map[string]botHandler {
@@ -135,22 +159,23 @@ func (b *Bot) getHandlers() map[string]botHandler {
 	}
 }
 
-func (b *Bot) getCommands() []tb.Command {
-	var cmds []tb.Command
+func (b *Bot) getCommands() []TelegramBotCommand {
+	var cmd []TelegramBotCommand
+
 	for c, h := range b.getHandlers() {
 		if strings.TrimSpace(h.help) != "" {
-			cmds = append(cmds, tb.Command{
+			cmd = append(cmd, TelegramBotCommand{
 				Text:        strings.Replace(c, "/", "", 1),
 				Description: h.help,
 			})
 		}
 	}
 
-	sort.Slice(cmds, func(i, j int) bool {
-		return cmds[i].Text < cmds[j].Text
+	sort.Slice(cmd, func(i, j int) bool {
+		return cmd[i].Text < cmd[j].Text
 	})
 
-	return cmds
+	return cmd
 }
 
 func (b *Bot) setCommandList() error {

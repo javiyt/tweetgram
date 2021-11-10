@@ -1,14 +1,14 @@
-package handlers_telegram
+package handlerstelegram
 
 import (
 	"context"
+	"strconv"
 
-	"github.com/javiyt/tweettgram/internal/bot"
-	"github.com/javiyt/tweettgram/internal/config"
-	"github.com/javiyt/tweettgram/internal/handlers"
-	"github.com/javiyt/tweettgram/internal/pubsub"
+	"github.com/javiyt/tweetgram/internal/bot"
+	"github.com/javiyt/tweetgram/internal/config"
+	"github.com/javiyt/tweetgram/internal/handlers"
+	"github.com/javiyt/tweetgram/internal/pubsub"
 	"github.com/mailru/easyjson"
-	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 type Telegram struct {
@@ -17,8 +17,34 @@ type Telegram struct {
 	q   pubsub.Queue
 }
 
-func NewTelegram(cfg config.EnvConfig, bot bot.TelegramBot, q pubsub.Queue) *Telegram {
-	return &Telegram{bot: bot, cfg: cfg, q: q}
+type Option func(b *Telegram)
+
+func WithTelegramBot(tb bot.TelegramBot) Option {
+	return func(b *Telegram) {
+		b.bot = tb
+	}
+}
+
+func WithConfig(cfg config.EnvConfig) Option {
+	return func(b *Telegram) {
+		b.cfg = cfg
+	}
+}
+
+func WithQueue(q pubsub.Queue) Option {
+	return func(b *Telegram) {
+		b.q = q
+	}
+}
+
+func NewTelegram(options ...Option) *Telegram {
+	t := &Telegram{}
+
+	for _, o := range options {
+		o(t)
+	}
+
+	return t
 }
 
 func (t *Telegram) ExecuteHandlers() {
@@ -35,15 +61,18 @@ func (t *Telegram) handleText() {
 	go func() {
 		for msg := range messages {
 			var m pubsub.TextEvent
+
 			if err := easyjson.Unmarshal(msg.Payload, &m); err != nil {
 				handlers.SendError(t.q, err)
 				msg.Ack()
+
 				continue
 			}
 
-			if _, err := t.bot.Send(tb.ChatID(t.cfg.BroadcastChannel), m.Text); err != nil {
+			if err := t.bot.Send(strconv.Itoa(int(t.cfg.BroadcastChannel)), m.Text); err != nil {
 				handlers.SendError(t.q, err)
 				msg.Nack()
+
 				continue
 			}
 
@@ -64,19 +93,19 @@ func (t *Telegram) handlePhoto() {
 			if err := easyjson.Unmarshal(msg.Payload, &m); err != nil {
 				handlers.SendError(t.q, err)
 				msg.Ack()
+
 				continue
 			}
 
-			if _, err := t.bot.Send(tb.ChatID(t.cfg.BroadcastChannel), &tb.Photo{
-				Caption: m.Caption,
-				File: tb.File{
-					FileID:   m.FileID,
-					FileURL:  m.FileURL,
-					FileSize: m.FileSize,
-				},
+			if err := t.bot.Send(strconv.Itoa(int(t.cfg.BroadcastChannel)), &bot.TelegramPhoto{
+				Caption:  m.Caption,
+				FileID:   m.FileID,
+				FileURL:  m.FileURL,
+				FileSize: m.FileSize,
 			}); err != nil {
 				handlers.SendError(t.q, err)
 				msg.Nack()
+
 				continue
 			}
 

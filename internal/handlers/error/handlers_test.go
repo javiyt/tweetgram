@@ -1,31 +1,33 @@
-package handlers_error_test
+package handlerserror_test
 
 import (
 	"context"
-	"errors"
 	"testing"
 	"time"
 
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
-	hse "github.com/javiyt/tweettgram/internal/handlers/error"
-	"github.com/javiyt/tweettgram/internal/pubsub"
-	mq "github.com/javiyt/tweettgram/mocks/pubsub"
+	hse "github.com/javiyt/tweetgram/internal/handlers/error"
+	"github.com/javiyt/tweetgram/internal/pubsub"
+	mq "github.com/javiyt/tweetgram/mocks/pubsub"
 	"github.com/sirupsen/logrus"
 	logrusTest "github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/require"
 )
 
+type gettingChannelError struct{}
+
+func (m gettingChannelError) Error() string {
+	return "error getting channel error"
+}
+
 func TestError_ExecuteHandlers(t *testing.T) {
 	t.Run("it should fail getting channel for text notifications", func(t *testing.T) {
-		mockedLogger, _ := logrusTest.NewNullLogger()
-		mockedQueue := new(mq.Queue)
-
-		th := hse.NewErrorHandler(mockedLogger, mockedQueue)
+		_, mockedQueue, th, _ := generateMocksAndErrorChannel()
 
 		mockedQueue.On("Subscribe", context.Background(), pubsub.ErrorTopic.String()).
 			Once().
-			Return(nil, errors.New("error getting channel error"))
+			Return(nil, gettingChannelError{})
 
 		th.ExecuteHandlers()
 
@@ -33,12 +35,8 @@ func TestError_ExecuteHandlers(t *testing.T) {
 	})
 
 	t.Run("it should fail unmarshaling text event", func(t *testing.T) {
-		mockedLogger, hook := logrusTest.NewNullLogger()
-		mockedQueue := new(mq.Queue)
+		hook, mockedQueue, th, errorChannel := generateMocksAndErrorChannel()
 
-		th := hse.NewErrorHandler(mockedLogger, mockedQueue)
-
-		errorChannel := make(chan *message.Message)
 		mockedQueue.On("Subscribe", context.Background(), pubsub.ErrorTopic.String()).
 			Once().
 			Return(func(context.Context, string) <-chan *message.Message {
@@ -46,29 +44,18 @@ func TestError_ExecuteHandlers(t *testing.T) {
 			}, nil)
 
 		th.ExecuteHandlers()
-		newMessage := message.NewMessage(watermill.NewUUID(), []byte("{\"asd\":\"qwer"))
-		errorChannel <- newMessage
+		sendMessageToChannel(t, errorChannel, []byte("{\"asd\":\"qwer"))
 
-		require.Eventually(t, func() bool {
-			<-newMessage.Acked()
-			return true
-		}, time.Second, time.Millisecond)
-		require.Equal(t, 1, len(hook.Entries))
-		require.Equal(t, logrus.ErrorLevel, hook.LastEntry().Level)
-		require.Equal(t, "parse error: unterminated string literal near offset 12 of '{\"asd\":\"qwer'", hook.LastEntry().Message)
-	  
-		hook.Reset()
-
+		assertLogMessage(
+			t,
+			hook,
+			"parse error: unterminated string literal near offset 12 of '{\"asd\":\"qwer'",
+		)
 		mockedQueue.AssertExpectations(t)
 	})
 
 	t.Run("it should log error message", func(t *testing.T) {
-		mockedLogger, hook := logrusTest.NewNullLogger()
-		mockedQueue := new(mq.Queue)
-
-		th := hse.NewErrorHandler(mockedLogger, mockedQueue)
-
-		errorChannel := make(chan *message.Message)
+		hook, mockedQueue, th, errorChannel := generateMocksAndErrorChannel()
 		mockedQueue.On("Subscribe", context.Background(), pubsub.ErrorTopic.String()).
 			Once().
 			Return(func(context.Context, string) <-chan *message.Message {
@@ -76,19 +63,43 @@ func TestError_ExecuteHandlers(t *testing.T) {
 			}, nil)
 
 		th.ExecuteHandlers()
-		newMessage := message.NewMessage(watermill.NewUUID(), []byte("{\"error\":\"an error message\"}"))
-		errorChannel <- newMessage
+		sendMessageToChannel(t, errorChannel, []byte("{\"error\":\"an error message\"}"))
 
-		require.Eventually(t, func() bool {
-			<-newMessage.Acked()
-			return true
-		}, time.Second, time.Millisecond)
-		require.Equal(t, 1, len(hook.Entries))
-		require.Equal(t, logrus.ErrorLevel, hook.LastEntry().Level)
-		require.Equal(t, "an error message", hook.LastEntry().Message)
-	  
-		hook.Reset()
-
+		assertLogMessage(t, hook, "an error message")
 		mockedQueue.AssertExpectations(t)
 	})
+}
+
+func generateMocksAndErrorChannel() (*logrusTest.Hook, *mq.Queue, *hse.ErrorHandler, chan *message.Message) {
+	mockedLogger, hook := logrusTest.NewNullLogger()
+	mockedQueue := new(mq.Queue)
+
+	th := hse.NewErrorHandler(mockedLogger, mockedQueue)
+
+	errorChannel := make(chan *message.Message)
+
+	return hook, mockedQueue, th, errorChannel
+}
+
+func sendMessageToChannel(t *testing.T, errorChannel chan *message.Message, errMsg []byte) {
+	newMessage := message.NewMessage(watermill.NewUUID(), errMsg)
+	errorChannel <- newMessage
+
+	require.Eventually(t, func() bool {
+		<-newMessage.Acked()
+
+		return true
+	}, time.Second, time.Millisecond)
+}
+
+func assertLogMessage(t *testing.T, hook *logrusTest.Hook, logMsg string) {
+	require.Equal(t, 1, len(hook.Entries))
+	require.Equal(t, logrus.ErrorLevel, hook.LastEntry().Level)
+	require.Equal(
+		t,
+		logMsg,
+		hook.LastEntry().Message,
+	)
+
+	hook.Reset()
 }

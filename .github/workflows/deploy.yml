@@ -1,0 +1,145 @@
+on:
+  workflow_dispatch: # on button click
+name: Build and Deploy
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17.3
+      - name: Install Task
+        uses: arduino/setup-task@v1
+        with:
+          version: 3.7.3
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Generate env file
+        run: 'echo "$ENV_FILE" > cmd/env'
+        shell: bash
+        env:
+          ENV_FILE: ${{secrets.ENV_FILE}}
+      - name: Generate env.test file
+        run: 'echo "$ENV_TEST_FILE" > cmd/env.test'
+        shell: bash
+        env:
+          ENV_TEST_FILE: ${{secrets.ENV_TEST}}
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Test
+        run: task test
+      - name: Build Binary
+        run: go build -o ${{secrets.BINARY_NAME}} cmd/main.go
+      - name: Find and Replace binary folder
+        uses: jacobtomlinson/gha-find-replace@v2
+        with:
+          find: "/home/tweetgram/bin"
+          replace: ${{secrets.FOLDER}}
+          regex: false
+          include: "system/*"
+          exclude: ".git/"
+      - name: Find and Replace binary name
+        uses: jacobtomlinson/gha-find-replace@v2
+        with:
+          find: "tweetgram_bin"
+          replace: ${{secrets.BINARY_NAME}}
+          regex: false
+          include: "system/*"
+          exclude: ".git/"
+      - name: Find and Replace bot name
+        uses: jacobtomlinson/gha-find-replace@v2
+        with:
+          find: "Tweetgram"
+          replace: ${{secrets.BOT_NAME}}
+          regex: false
+          include: "system/*"
+          exclude: ".git/"
+      - name: Copy binary
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{secrets.HOST}}
+          username: ${{secrets.USERNAME}}
+          key: ${{secrets.SSHKEY}}
+          port: ${{secrets.PORT}}
+          passphrase: ${{secrets.PASSPHRASE}}
+          source: ${{secrets.BINARY_NAME}}
+          target: ${{secrets.FOLDER}}
+      - name: Generate configuration folder locally
+        run: |
+          cp system/bot.conf ${{secrets.BINARY_NAME}}.conf
+          cp system/bot.service ${{secrets.BINARY_NAME}}.service
+      - name: Copy supervisor configuration file
+        uses: appleboy/scp-action@master
+        env:
+          SERVICE_SYS: ${{secrets.SERVICE_SYS}}
+        if: env.SERVICE_SYS == 'supervisor'
+        with:
+          host: ${{secrets.HOST}}
+          username: ${{secrets.USERNAME}}
+          key: ${{secrets.SSHKEY}}
+          port: ${{secrets.PORT}}
+          passphrase: ${{secrets.PASSPHRASE}}
+          source: ${{secrets.BINARY_NAME}}.conf
+          target: ${{secrets.SUPERVISOR_FOLDER}}
+      - name: Copy systemd configuration file
+        uses: appleboy/scp-action@master
+        env:
+          SERVICE_SYS: ${{secrets.SERVICE_SYS}}
+        if: env.SERVICE_SYS == 'systemd'
+        with:
+          host: ${{secrets.HOST}}
+          username: ${{secrets.USERNAME}}
+          key: ${{secrets.SSHKEY}}
+          port: ${{secrets.PORT}}
+          passphrase: ${{secrets.PASSPHRASE}}
+          source: ${{secrets.BINARY_NAME}}.service
+          target: /home/${{secrets.USERNAME}}/.config/user
+
+  deploy-systemd:
+    name: Deploy systemd configuration
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_SYS: ${{secrets.SERVICE_SYS}}
+    if: env.SERVICE_SYS == 'systemd'
+    steps:
+      - name: Run new bot version
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.HOST}}
+          username: ${{secrets.USERNAME}}
+          key: ${{secrets.SSHKEY}}
+          port: ${{secrets.PORT}}
+          passphrase: ${{secrets.PASSPHRASE}}
+          script: |
+            systemctl --user stop ${{secrets.BINARY_NAME}}.service   
+            systemctl --user daemon-reload
+            systemctl --user start ${{secrets.BINARY_NAME}}.service   
+            systemctl --user status ${{secrets.BINARY_NAME}}.service
+
+  deploy-supervisor:
+    name: Deploy supervisor configuration
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_SYS: ${{secrets.SERVICE_SYS}}
+    if: env.SERVICE_SYS == 'supervisor'
+    steps:
+      - name: Run new bot version
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.HOST}}
+          username: ${{secrets.USERNAME}}
+          key: ${{secrets.SSHKEY}}
+          port: ${{secrets.PORT}}
+          passphrase: ${{secrets.PASSPHRASE}}
+          script: |
+            supervisorctl update
+            supervisorctl restart ${{secrets.BOT_NAME}}

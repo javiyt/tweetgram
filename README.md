@@ -1,7 +1,7 @@
-# tweettgram
+# Tweetgram
 
-[![codecov](https://codecov.io/gh/javiyt/tweettgram/branch/main/graph/badge.svg?token=Q15YVM2SMC)](https://codecov.io/gh/javiyt/tweettgram)
-[![Test](https://github.com/javiyt/tweettgram/actions/workflows/ci.yml/badge.svg)](https://github.com/javiyt/tweettgram/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/javiyt/tweetgram/branch/main/graph/badge.svg?token=Q15YVM2SMC)](https://codecov.io/gh/javiyt/tweetgram)
+[![Test](https://github.com/javiyt/tweetgram/actions/workflows/ci.yml/badge.svg)](https://github.com/javiyt/tweetgram/actions/workflows/ci.yml)
 
 Telegram bot to publish post to twitter
 
@@ -31,10 +31,13 @@ TWITTER_API_SECRET=LYzF53kJoVK46rp859rQCw6Dqw6TpQV668aemPb2KI9GUxTTU0
 TWITTER_BEARER_TOKEN=hIlQI351HEPT6xbA4xHnYRfgOsF8jqcPT5m6Ec0VeCXtUyOY9Mzy6uFYevH%4ys86GL3KfO1ZRBwichZOlGDYyZ52Ht2BXh2WgUFvywJKbRq9lMH
 TWITTER_ACCESS_TOKEN=123456789-0xW7uNw2mEykTVTTKHS32y3oIXHab5hSh7POa0Wf
 TWITTER_ACCESS_SECRET=BWa9T8hkEEj5yCutPwJTs7Vk4f1wfj690Dq3UGCyf9YQB
+ENVIRONMENT=TEST
+LOG_FILE=/var/log/tweetgram.log
 ```
+Env file variables are self-explanatory
 
-Check env.test file, you only need there all the variables that should be override in order to run a test instance of
-the bot. Take into account env.test file is not needed to run the test case they set up the appropiate variables to run
+Check env.test file, you only need there all the variables that should be overridden in order to run a test instance of
+the bot. Take into account env.test file is not needed to run the test case they set up the appropriate variables to run
 them. Remove all not needed variables from env.test file
 
 ### Running a local instance of the bot
@@ -45,4 +48,21 @@ You just need to run the following command:
 task run-test
 ```
 
-Remember all env variables will be overrriden by the ones defined in env.test
+Remember all env variables will be overridden by the ones defined in env.test
+
+## Deploying the bot
+There's an action called deploy that you can trigger to deploy the bot. Some [secrets should be added](https://docs.github.com/en/actions/security-guides/encrypted-secrets) to your account before running the deployment script. The variables that should be added are:
+| Variable          | Description                                                         |
+|-------------------|---------------------------------------------------------------------|
+| ENV_FILE          | cmd/env file content                                                |
+| ENV_TEST_FILE     | cmd/env.test file content                                           |
+| HOST              | Host of the server to deploy the bot                                |
+| USERNAME          | User to connect to the server                                       |
+| SSHKEY            | SSH key of the user to login onto the server                        |
+| PORT              | Port where the SSH server is running                                |
+| PASSPHRASE        | Passphrase to decrypt the SSH key                                   |
+| FOLDER            | Folder to deploy the bot binary                                     |
+| BINARY_NAME       | Name for the generated binary                                       |
+| BOT_NAME          | Name given to the bot                                               |
+| SERVICE_SYS       | Name of service used to keep process running: systemd or supervisor |
+| SUPERVISOR_FOLDER | Folder where supervisor configuration files are stored              |

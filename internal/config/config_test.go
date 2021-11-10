@@ -5,11 +5,11 @@ import (
 	"os"
 	"testing"
 
-	"github.com/javiyt/tweettgram/internal/config"
+	"github.com/javiyt/tweetgram/internal/config"
 	"github.com/stretchr/testify/require"
 )
 
-func TestNewConfig(t *testing.T) {
+func TestNewEnvConfig(t *testing.T) {
 	original := map[string]string{}
 	mocked := map[string]string{
 		"BOT_TOKEN":             "asdfg",
@@ -20,11 +20,12 @@ func TestNewConfig(t *testing.T) {
 		"TWITTER_BEARER_TOKEN":  "qwertyui",
 		"TWITTER_ACCESS_TOKEN":  "zxcvbnm",
 		"TWITTER_ACCESS_SECRET": "lkjhgfd",
+		"ENVIRONMENT":           "testing",
 	}
 
 	for k, v := range mocked {
 		original[k] = os.Getenv(k)
-		os.Setenv(k, v)
+		_ = os.Setenv(k, v)
 	}
 
 	t.Run("it should get whole configuration", func(t *testing.T) {
@@ -35,32 +36,35 @@ func TestNewConfig(t *testing.T) {
 			BotToken:            "asdfg",
 			Admins:              []int{12345},
 			BroadcastChannel:    9876543,
-			TwitterApiKey:       "asdfg1234",
-			TwitterApiSecret:    "poiuyt",
+			TwitterAPIKey:       "asdfg1234",
+			TwitterAPISecret:    "poiuyt",
 			TwitterBearerToken:  "qwertyui",
 			TwitterAccessToken:  "zxcvbnm",
 			TwitterAccessSecret: "lkjhgfd",
+			Environment:         "testing",
+			LogFile:             "",
 		}, c)
 	})
 
-	for k, mv := range mocked {
+	for k := range mocked {
+		k := k
 		t.Run(fmt.Sprintf("it should fail when %s not present", k), func(t *testing.T) {
-			os.Unsetenv(k)
+			_ = os.Unsetenv(k)
 
 			_, err := config.NewEnvConfig()
 
 			require.EqualError(t, err, fmt.Sprintf("required key %s missing value", k))
 
-			os.Setenv(k, mv)
+			_ = os.Setenv(k, mocked[k])
 		})
 	}
 
 	for k, v := range original {
-		os.Setenv(k, v)
+		_ = os.Setenv(k, v)
 	}
 }
 
-func TestIsAdmin(t *testing.T) {
+func TestEnvConfig_IsAdmin(t *testing.T) {
 	original := map[string]string{}
 	mocked := map[string]string{
 		"BOT_TOKEN":             "asdfg",
@@ -71,11 +75,12 @@ func TestIsAdmin(t *testing.T) {
 		"TWITTER_BEARER_TOKEN":  "qwertyui",
 		"TWITTER_ACCESS_TOKEN":  "zxcvbnm",
 		"TWITTER_ACCESS_SECRET": "lkjhgfd",
+		"ENVIRONMENT":           "testing",
 	}
 
 	for k, v := range mocked {
 		original[k] = os.Getenv(k)
-		os.Setenv(k, v)
+		_ = os.Setenv(k, v)
 	}
 
 	c, _ := config.NewEnvConfig()
@@ -89,6 +94,42 @@ func TestIsAdmin(t *testing.T) {
 	})
 
 	for k, v := range original {
-		os.Setenv(k, v)
+		_ = os.Setenv(k, v)
+	}
+}
+
+func TestEnvConfig_IsProd(t *testing.T) {
+	original := map[string]string{}
+	mocked := map[string]string{
+		"BOT_TOKEN":             "asdfg",
+		"ADMINS":                "12345",
+		"BROADCAST_CHANNEL":     "9876543",
+		"TWITTER_API_KEY":       "asdfg1234",
+		"TWITTER_API_SECRET":    "poiuyt",
+		"TWITTER_BEARER_TOKEN":  "qwertyui",
+		"TWITTER_ACCESS_TOKEN":  "zxcvbnm",
+		"TWITTER_ACCESS_SECRET": "lkjhgfd",
+		"ENVIRONMENT":           "testing",
+	}
+
+	for k, v := range mocked {
+		original[k] = os.Getenv(k)
+		_ = os.Setenv(k, v)
+	}
+
+	t.Run("it should return true when environment is prod", func(t *testing.T) {
+		_ = os.Setenv("ENVIRONMENT", "PROD")
+		c, _ := config.NewEnvConfig()
+		require.True(t, c.IsProd())
+	})
+
+	t.Run("it should return false when environment is not prod", func(t *testing.T) {
+		_ = os.Setenv("ENVIRONMENT", "testing")
+		c, _ := config.NewEnvConfig()
+		require.False(t, c.IsProd())
+	})
+
+	for k, v := range original {
+		_ = os.Setenv(k, v)
 	}
 }

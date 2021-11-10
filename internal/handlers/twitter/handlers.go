@@ -1,25 +1,46 @@
-package handlers_twitter
+package handlerstwitter
 
 import (
 	"context"
 
-	"github.com/javiyt/tweettgram/internal/bot"
-	"github.com/javiyt/tweettgram/internal/handlers"
-	"github.com/javiyt/tweettgram/internal/pubsub"
+	"github.com/javiyt/tweetgram/internal/bot"
+	"github.com/javiyt/tweetgram/internal/handlers"
+	"github.com/javiyt/tweetgram/internal/pubsub"
 	"github.com/mailru/easyjson"
 )
 
 type Twitter struct {
 	tc bot.TwitterClient
-	q   pubsub.Queue
+	q  pubsub.Queue
 }
 
-func NewTwitter(tc bot.TwitterClient, q pubsub.Queue) *Twitter {
-	return &Twitter{tc: tc, q: q}
+type Option func(b *Twitter)
+
+func WithTwitterClient(tc bot.TwitterClient) Option {
+	return func(t *Twitter) {
+		t.tc = tc
+	}
+}
+
+func WithQueue(q pubsub.Queue) Option {
+	return func(t *Twitter) {
+		t.q = q
+	}
+}
+
+func NewTwitter(options ...Option) *Twitter {
+	t := &Twitter{}
+
+	for _, o := range options {
+		o(t)
+	}
+
+	return t
 }
 
 func (t *Twitter) ExecuteHandlers() {
 	t.handleText()
+	t.handlePhoto()
 }
 
 func (t *Twitter) handleText() {
@@ -34,12 +55,14 @@ func (t *Twitter) handleText() {
 			if err := easyjson.Unmarshal(msg.Payload, &m); err != nil {
 				handlers.SendError(t.q, err)
 				msg.Ack()
+
 				continue
 			}
 
 			if err := t.tc.SendUpdate(m.Text); err != nil {
 				handlers.SendError(t.q, err)
 				msg.Nack()
+
 				continue
 			}
 
@@ -48,4 +71,30 @@ func (t *Twitter) handleText() {
 	}()
 }
 
+func (t *Twitter) handlePhoto() {
+	messages, err := t.q.Subscribe(context.Background(), pubsub.PhotoTopic.String())
+	if err != nil {
+		handlers.SendError(t.q, err)
+	}
 
+	go func() {
+		for msg := range messages {
+			var m pubsub.PhotoEvent
+			if err := easyjson.Unmarshal(msg.Payload, &m); err != nil {
+				handlers.SendError(t.q, err)
+				msg.Ack()
+
+				continue
+			}
+
+			if err := t.tc.SendUpdateWithPhoto(m.Caption, m.FileContent); err != nil {
+				handlers.SendError(t.q, err)
+				msg.Nack()
+
+				continue
+			}
+
+			msg.Ack()
+		}
+	}()
+}

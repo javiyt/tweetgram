@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "result": {
+    "message_id": 59,
+    "sender_chat": {
+      "id": -1234569575326,
+      "title": "Channel test",
+      "type": "channel"
+    },
+    "chat": {
+      "id": -1234578575326,
+      "title": "Channel test",
+      "type": "channel"
+    },
+    "date": 1634470233,
+    "text": "bla"
+  }
+}

@@ -1,0 +1,25 @@
+run:
+  issues-exit-code: 1
+  skip-dirs-use-default: true
+  skip-files:
+    - ".*_string\\.go$"
+    - ".*_easyjson\\.go$"
+    - "wire_gen.go"
+
+  modules-download-mode: vendor
+  allow-parallel-runners: false
+
+
+output:
+  print-issued-lines: true
+  print-linter-name: true
+  uniq-by-line: true
+  sort-results: true
+
+linters:
+  enable-all: true
+  disable:
+    - paralleltest
+    - gci
+    - nolintlint
+  fast: true
