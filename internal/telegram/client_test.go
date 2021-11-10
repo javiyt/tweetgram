@@ -137,7 +137,9 @@ func TestBot_Handle(t *testing.T) {
 	go bt.Start()
 
 	require.Eventually(t, func() bool {
-		return handled.Load().(bool)
+		b, ok := handled.Load().(bool)
+
+		return ok && b
 	}, time.Second, time.Millisecond)
 }
 
@@ -167,34 +169,34 @@ func TestBot_Send(t *testing.T) {
 	registerResponders(&testMessageSent, &testLongMessageSent, &photoSent, &firstLongMessage)
 
 	t.Run("it sends a text message", func(t *testing.T) {
-		err := bt.Send("1234567890", "test message")
-
-		require.NoError(t, err)
+		require.NoError(t, bt.Send("1234567890", "test message"))
 		require.Eventually(t, func() bool {
-			return testMessageSent.Load().(bool)
+			b, ok := testMessageSent.Load().(bool)
+
+			return ok && b
 		}, time.Second, time.Millisecond)
 	})
 
 	t.Run("it send a text message longer than expected", func(t *testing.T) {
-		err := bt.Send("1234567890", string(generateRandomString()))
-
-		require.NoError(t, err)
+		require.NoError(t, bt.Send("1234567890", string(generateRandomString())))
 		require.Eventually(t, func() bool {
-			return testLongMessageSent.Load().(bool)
+			b, ok := testLongMessageSent.Load().(bool)
+
+			return ok && b
 		}, time.Second, time.Millisecond)
 	})
 
 	t.Run("it should send a picture", func(t *testing.T) {
-		err := bt.Send("1234567890", bot.TelegramPhoto{
+		require.NoError(t, bt.Send("1234567890", bot.TelegramPhoto{
 			Caption:  "test",
 			FileID:   "123456",
 			FileURL:  "http://image.url",
 			FileSize: 1234,
-		})
-
-		require.NoError(t, err)
+		}))
 		require.Eventually(t, func() bool {
-			return photoSent.Load().(bool)
+			b, ok := photoSent.Load().(bool)
+
+			return ok && b
 		}, time.Second, time.Millisecond)
 	})
 }
@@ -251,30 +253,23 @@ func registerResponders(testMessageSent, testLongMessageSent, photoSent, firstLo
 				ReplyTo string `json:"reply_to_message_id"`
 			}
 			_ = json.Unmarshal(buf.Bytes(), &requestBody)
+			firstLongMessageBool, ok := firstLongMessage.Load().(bool)
+
 			if requestBody.ChatID == "1234567890" && requestBody.Text == "test message" {
 				testMessageSent.Store(true)
 				messageSent, _ := ioutil.ReadFile("testdata/sendmessage.json")
 
-				return httpmock.NewStringResponse(
-					200,
-					string(messageSent),
-				), nil
+				return httpmock.NewStringResponse(200, string(messageSent)), nil
 			} else if len(requestBody.Text) == 4096 {
 				firstLongMessage.Store(true)
 				messageSent, _ := ioutil.ReadFile("testdata/sendmessage.json")
 
-				return httpmock.NewStringResponse(
-					200,
-					string(messageSent),
-				), nil
-			} else if firstLongMessage.Load().(bool) && requestBody.ReplyTo == "59" {
+				return httpmock.NewStringResponse(200, string(messageSent)), nil
+			} else if ok && firstLongMessageBool && requestBody.ReplyTo == "59" {
 				testLongMessageSent.Store(true)
 				messageSent, _ := ioutil.ReadFile("testdata/sendmessage.json")
 
-				return httpmock.NewStringResponse(
-					200,
-					string(messageSent),
-				), nil
+				return httpmock.NewStringResponse(200, string(messageSent)), nil
 			}
 
 			return httpmock.NewStringResponse(500, "response not found"),
@@ -290,10 +285,7 @@ func registerResponders(testMessageSent, testLongMessageSent, photoSent, firstLo
 		func(req *http.Request) (*http.Response, error) {
 			photoSent.Store(true)
 
-			return httpmock.NewStringResponse(
-				200,
-				string(photoUpdate),
-			), nil
+			return httpmock.NewStringResponse(200, string(photoUpdate)), nil
 		},
 	)
 }
