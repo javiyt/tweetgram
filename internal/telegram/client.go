@@ -29,7 +29,8 @@ func (b *Bot) Stop() {
 }
 
 func (b *Bot) SetCommands(commands []bot.TelegramBotCommand) error {
-	var cmd []tb.Command
+	cmd := make([]tb.Command, 0, len(commands))
+
 	for i := range commands {
 		cmd = append(cmd, tb.Command{
 			Text:        commands[i].Text,
@@ -69,11 +70,14 @@ func (b *Bot) Send(to string, what interface{}, options ...interface{}) error {
 	}
 
 	var whatTB interface{}
+
 	switch v := what.(type) {
 	case string:
 		var replyTo *tb.Message
+
 		for _, ts := range b.chunks(v, telegramMessageLength) {
 			options = append(options, &tb.SendOptions{ReplyTo: replyTo})
+
 			replyTo, err = b.b.Send(tb.ChatID(toInt), ts, options...)
 			if err != nil {
 				return err
@@ -95,6 +99,7 @@ func (b *Bot) Send(to string, what interface{}, options ...interface{}) error {
 	}
 
 	_, err = b.b.Send(tb.ChatID(toInt), whatTB, options...)
+
 	return err
 }
 
@@ -108,8 +113,8 @@ func (b *Bot) chunks(s string, chunkSize int) []string {
 	}
 
 	chunks := make([]string, 0, (len(s)-1)/chunkSize+1)
-	currentLen := 0
-	currentStart := 0
+	currentLen, currentStart := 0, 0
+
 	for i := range s {
 		if currentLen == chunkSize {
 			chunks = append(chunks, s[currentStart:i])
@@ -118,6 +123,7 @@ func (b *Bot) chunks(s string, chunkSize int) []string {
 		}
 		currentLen++
 	}
+
 	chunks = append(chunks, s[currentStart:])
 
 	return chunks

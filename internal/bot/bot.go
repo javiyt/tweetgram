@@ -155,6 +155,7 @@ func (b *Bot) getHandlers() map[string]botHandler {
 
 func (b *Bot) getCommands() []TelegramBotCommand {
 	var cmd []TelegramBotCommand
+
 	for c, h := range b.getHandlers() {
 		if strings.TrimSpace(h.help) != "" {
 			cmd = append(cmd, TelegramBotCommand{

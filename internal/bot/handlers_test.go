@@ -219,7 +219,11 @@ func TestHandlerText(t *testing.T) {
 	})
 }
 
-func generateHandlerAndMockedBot(t *testing.T, toHandle string, cfg config.EnvConfig) (bot.TelegramHandler, *mb.TelegramBot, *mq.Queue) {
+func generateHandlerAndMockedBot(
+	t *testing.T,
+	toHandle string,
+	cfg config.EnvConfig,
+) (bot.TelegramHandler, *mb.TelegramBot, *mq.Queue) {
 	allHandlers := []string{"/start", "/help", tb.OnPhoto, tb.OnText}
 
 	var (

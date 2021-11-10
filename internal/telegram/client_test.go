@@ -70,6 +70,7 @@ func TestBot_Start(t *testing.T) {
 	require.Eventually(t, func() bool {
 		countInfo := httpmock.GetCallCountInfo()
 		_, ok := countInfo["POST https://api.telegram.mock/botasdfg:12345/getMe"]
+
 		return ok
 	}, time.Second, time.Millisecond)
 }
@@ -96,6 +97,7 @@ func TestBot_SetCommands(t *testing.T) {
 	require.Eventually(t, func() bool {
 		countInfo := httpmock.GetCallCountInfo()
 		_, ok := countInfo["POST https://api.telegram.mock/botasdfg:12345/setMyCommands"]
+
 		return ok
 	}, time.Second, time.Millisecond)
 	require.NoError(t, err)
@@ -124,6 +126,7 @@ func TestBot_Handle(t *testing.T) {
 	bt := telegram.NewBot(tlgmbot)
 
 	var handled atomic.Value
+
 	handled.Store(false)
 
 	bt.Handle(tb.OnPhoto, func(m *bot.TelegramMessage) {
@@ -139,80 +142,32 @@ func TestBot_Handle(t *testing.T) {
 }
 
 func TestBot_Send(t *testing.T) {
-	tlgmbot, err := tb.NewBot(tb.Settings{
+	tlgmbot, _ := tb.NewBot(tb.Settings{
 		URL:   "https://api.telegram.mock",
 		Token: "asdfg:12345",
 		Poller: &tb.LongPoller{
 			Timeout: 10 * time.Second,
 		},
 	})
-	require.NoError(t, err)
 
 	bt := telegram.NewBot(tlgmbot)
 
-	var testMessageSent atomic.Value
+	var (
+		testMessageSent     atomic.Value
+		testLongMessageSent atomic.Value
+		photoSent           atomic.Value
+		firstLongMessage    atomic.Value
+	)
+
 	testMessageSent.Store(false)
-	var testLongMessageSent atomic.Value
 	testLongMessageSent.Store(false)
-	var photoSent atomic.Value
 	photoSent.Store(false)
+	firstLongMessage.Store(false)
 
-	firstLongMessageSent := false
-	httpmock.RegisterResponder(
-		"POST",
-		"https://api.telegram.mock/botasdfg:12345/sendMessage",
-		func(req *http.Request) (*http.Response, error) {
-			buf := new(bytes.Buffer)
-			_, _ = buf.ReadFrom(req.Body)
-			var requestBody struct {
-				ChatID  string `json:"chat_id"`
-				Text    string `json:"text"`
-				ReplyTo string `json:"reply_to_message_id"`
-			}
-			_ = json.Unmarshal(buf.Bytes(), &requestBody)
-			if requestBody.ChatID == "1234567890" && requestBody.Text == "test message" {
-				testMessageSent.Store(true)
-				messageSent, _ := ioutil.ReadFile("testdata/sendmessage.json")
-				return httpmock.NewStringResponse(
-					200,
-					string(messageSent),
-				), nil
-			} else if len(requestBody.Text) == 4096 {
-				firstLongMessageSent = true
-				messageSent, _ := ioutil.ReadFile("testdata/sendmessage.json")
-				return httpmock.NewStringResponse(
-					200,
-					string(messageSent),
-				), nil
-			} else if firstLongMessageSent && requestBody.ReplyTo == "59" {
-				testLongMessageSent.Store(true)
-				messageSent, _ := ioutil.ReadFile("testdata/sendmessage.json")
-				return httpmock.NewStringResponse(
-					200,
-					string(messageSent),
-				), nil
-			}
-
-			return httpmock.NewStringResponse(500, "response not found"),
-				errors.New("response not found")
-		},
-	)
-
-	photoUpdate, _ := ioutil.ReadFile("testdata/sendphoto.json")
-	httpmock.RegisterResponder(
-		"POST",
-		"https://api.telegram.mock/botasdfg:12345/sendPhoto",
-		func(req *http.Request) (*http.Response, error) {
-			photoSent.Store(true)
-			return httpmock.NewStringResponse(
-				200,
-				string(photoUpdate),
-			), nil
-		},
-	)
+	registerResponders(&testMessageSent, &testLongMessageSent, &photoSent, &firstLongMessage)
 
 	t.Run("it sends a text message", func(t *testing.T) {
-		err = bt.Send("1234567890", "test message")
+		err := bt.Send("1234567890", "test message")
 
 		require.NoError(t, err)
 		require.Eventually(t, func() bool {
@@ -221,13 +176,7 @@ func TestBot_Send(t *testing.T) {
 	})
 
 	t.Run("it send a text message longer than expected", func(t *testing.T) {
-		const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-		b := make([]byte, 5000)
-		for i := range b {
-			b[i] = letters[rand.Intn(len(letters))]
-		}
-
-		err = bt.Send("1234567890", string(b))
+		err := bt.Send("1234567890", string(generateRandomString()))
 
 		require.NoError(t, err)
 		require.Eventually(t, func() bool {
@@ -236,7 +185,7 @@ func TestBot_Send(t *testing.T) {
 	})
 
 	t.Run("it should send a picture", func(t *testing.T) {
-		err = bt.Send("1234567890", bot.TelegramPhoto{
+		err := bt.Send("1234567890", bot.TelegramPhoto{
 			Caption:  "test",
 			FileID:   "123456",
 			FileURL:  "http://image.url",
@@ -285,4 +234,78 @@ func TestBot_GetFile(t *testing.T) {
 	_, err = bt.GetFile("AZCDxruqG7J3iTM9")
 
 	require.NoError(t, err)
+}
+
+func registerResponders(testMessageSent, testLongMessageSent, photoSent, firstLongMessage *atomic.Value) {
+	httpmock.RegisterResponder(
+		"POST",
+		"https://api.telegram.mock/botasdfg:12345/sendMessage",
+		func(req *http.Request) (*http.Response, error) {
+			buf := new(bytes.Buffer)
+			_, _ = buf.ReadFrom(req.Body)
+
+			//nolint:tagliatelle
+			var requestBody struct {
+				ChatID  string `json:"chat_id"`
+				Text    string `json:"text"`
+				ReplyTo string `json:"reply_to_message_id"`
+			}
+			_ = json.Unmarshal(buf.Bytes(), &requestBody)
+			if requestBody.ChatID == "1234567890" && requestBody.Text == "test message" {
+				testMessageSent.Store(true)
+				messageSent, _ := ioutil.ReadFile("testdata/sendmessage.json")
+
+				return httpmock.NewStringResponse(
+					200,
+					string(messageSent),
+				), nil
+			} else if len(requestBody.Text) == 4096 {
+				firstLongMessage.Store(true)
+				messageSent, _ := ioutil.ReadFile("testdata/sendmessage.json")
+
+				return httpmock.NewStringResponse(
+					200,
+					string(messageSent),
+				), nil
+			} else if firstLongMessage.Load().(bool) && requestBody.ReplyTo == "59" {
+				testLongMessageSent.Store(true)
+				messageSent, _ := ioutil.ReadFile("testdata/sendmessage.json")
+
+				return httpmock.NewStringResponse(
+					200,
+					string(messageSent),
+				), nil
+			}
+
+			return httpmock.NewStringResponse(500, "response not found"),
+				errors.New("response not found")
+		},
+	)
+
+	photoUpdate, _ := ioutil.ReadFile("testdata/sendphoto.json")
+
+	httpmock.RegisterResponder(
+		"POST",
+		"https://api.telegram.mock/botasdfg:12345/sendPhoto",
+		func(req *http.Request) (*http.Response, error) {
+			photoSent.Store(true)
+
+			return httpmock.NewStringResponse(
+				200,
+				string(photoUpdate),
+			), nil
+		},
+	)
+}
+
+func generateRandomString() []byte {
+	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+	b := make([]byte, 5000)
+
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+
+	return b
 }
