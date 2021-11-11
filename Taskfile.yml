@@ -82,6 +82,18 @@ tasks:
       - install
     cmds:
       - go run github.com/google/wire/cmd/wire ./...
+    sources:
+      - internal/app/wire.go
+    generates:
+      - internal/app/wire_gen.go
+  clean-wire:
+    desc: Remove all wire generated files
+    run: once
+    cmds:
+      - find ./internal -type f -name '*_gen.go' -delete
+    sources:
+      - internal/app/wire.go
+    silent: true
   stringer:
     desc: Stringify all enums
     run: once
@@ -90,6 +102,18 @@ tasks:
       - install
     cmds:
       - go run golang.org/x/tools/cmd/stringer -type=TopicName internal/pubsub/broadcast.go
+    sources:
+      - internal/pubsub/broadcast.go
+    generates:
+      - internal/pubsub/topicname_string.go
+  clean-stringer:
+    desc: Remove all stringer generated files
+    run: once
+    cmds:
+      - find ./internal -type f -name '*_string.go' -delete
+    sources:
+      - internal/pubsub/broadcast.go
+    silent: true
   json:
     desc: Generate json Marshal/Unmarshal functions
     run: once
@@ -98,6 +122,18 @@ tasks:
       - install
     cmds:
       - go run github.com/mailru/easyjson/easyjson internal/pubsub/broadcast.go
+    sources:
+      - internal/pubsub/broadcast.go
+    generates:
+      - internal/pubsub/broadcast_easyjson.go
+  clean-json:
+    desc: Remove all json generated files
+    run: once
+    cmds:
+      - find ./internal -type f -name '*_easyjson.go' -delete
+    sources:
+      - internal/pubsub/broadcast.go
+    silent: true
   mock:
     desc: Generate all mocks for testing
     run: once
@@ -107,6 +143,18 @@ tasks:
     cmds:
       - echo "Generating mocks for all interfaces"
       - go run github.com/vektra/mockery/v2/ --all --inpackage --keeptree --dir=internal
+    sources:
+      - internal/**/*.go
+    generates:
+      - mocks/**/*.go
+  clean-mock:
+    desc: Remove all mocks
+    run: once
+    cmds:
+      - rm -Rf mocks
+    sources:
+      - internal/**/*.go
+    silent: true
   test:
     desc: Run all tests
     deps:
@@ -146,12 +194,13 @@ tasks:
   clean:
     desc: Clean all auto generated files
     run: once
+    deps:
+      - clean-json
+      - clean-stringer
+      - clean-wire
+      - clean-mock
     cmds:
       - echo "Removing auto generated files"
       - rm -f coverage.txt
-      - find ./internal -type f -name '*_gen.go' -delete
-      - find ./internal -type f -name '*_string.go' -delete
-      - find ./internal -type f -name '*_easyjson.go' -delete
-      - rm -Rf mocks
       - echo "Files removed"
     silent: true
