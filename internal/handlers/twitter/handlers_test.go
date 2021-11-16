@@ -119,17 +119,15 @@ func TestTwitter_ExecuteHandlersPhoto(t *testing.T) {
 		FileContent: photoContent,
 	})
 
-	ctx := context.Background()
-
 	t.Run("it should fail unmarshaling photo event", func(t *testing.T) {
-		th, mockedQueue, _, _, photoChannel := getTwitterHandlerAndMocks(ctx, true)
+		th, mockedQueue, _, _, photoChannel := getTwitterHandlerAndMocks(context.Background(), true)
 
 		mockedQueue.On("Publish", pubsub.ErrorTopic.String(), mock.MatchedBy(func(m *message.Message) bool {
 			return string(m.Payload) ==
 				"{\"error\":\"parse error: unterminated string literal near offset 12 of '{\\\"asd\\\":\\\"qwer'\"}"
 		})).Once().Return(nil)
 
-		th.ExecuteHandlers(ctx)
+		th.ExecuteHandlers(context.Background())
 
 		sendMessageToChannel(t, photoChannel, []byte("{\"asd\":\"qwer"), true)
 
@@ -137,7 +135,7 @@ func TestTwitter_ExecuteHandlersPhoto(t *testing.T) {
 	})
 
 	t.Run("it should fail sending photo to twitter", func(t *testing.T) {
-		th, mockedQueue, mockedTwitter, _, photoChannel := getTwitterHandlerAndMocks(ctx, true)
+		th, mockedQueue, mockedTwitter, _, photoChannel := getTwitterHandlerAndMocks(context.Background(), true)
 
 		mockedQueue.On(
 			"Publish",
@@ -149,7 +147,7 @@ func TestTwitter_ExecuteHandlersPhoto(t *testing.T) {
 		mockedTwitter.On("SendUpdateWithPhoto", "testing caption", photoContent).
 			Once().Return(messageNotSendError{})
 
-		th.ExecuteHandlers(ctx)
+		th.ExecuteHandlers(context.Background())
 
 		sendMessageToChannel(t, photoChannel, bytes, false)
 
@@ -158,12 +156,12 @@ func TestTwitter_ExecuteHandlersPhoto(t *testing.T) {
 	})
 
 	t.Run("it should send photo to twitter", func(t *testing.T) {
-		th, mockedQueue, mockedTwitter, _, photoChannel := getTwitterHandlerAndMocks(ctx, true)
+		th, mockedQueue, mockedTwitter, _, photoChannel := getTwitterHandlerAndMocks(context.Background(), true)
 
 		mockedTwitter.On("SendUpdateWithPhoto", "testing caption", photoContent).
 			Once().Return(nil)
 
-		th.ExecuteHandlers(ctx)
+		th.ExecuteHandlers(context.Background())
 
 		sendMessageToChannel(t, photoChannel, bytes, true)
 
