@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"context"
+
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/javiyt/tweetgram/internal/pubsub"
@@ -8,7 +10,7 @@ import (
 )
 
 type EventHandler interface {
-	ExecuteHandlers()
+	ExecuteHandlers(context.Context)
 }
 
 type Manager struct {
@@ -19,9 +21,9 @@ func NewHandlersManager(hs ...EventHandler) *Manager {
 	return &Manager{hs: hs}
 }
 
-func (hm *Manager) StartHandlers() {
+func (hm *Manager) StartHandlers(ctx context.Context) {
 	for _, v := range hm.hs {
-		v.ExecuteHandlers()
+		v.ExecuteHandlers(ctx)
 	}
 }
 

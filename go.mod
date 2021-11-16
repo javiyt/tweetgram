@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/golangci/golangci-lint v1.43.0
-	github.com/javiyt/go-twitter v0.0.1
+	github.com/javiyt/go-twitter v0.0.2
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/stretchr/testify v1.7.0
 	github.com/subosito/gotenv v1.2.0
@@ -47,7 +47,6 @@ require (
 
 require (
 	github.com/ThreeDotsLabs/watermill v1.1.1
-	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/go-toolsmith/pkgload v1.0.1 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/subcommands v1.2.0 // indirect
@@ -74,12 +73,13 @@ require (
 	github.com/bombsimon/wsl/v3 v3.3.0 // indirect
 	github.com/breml/bidichk v0.1.1 // indirect
 	github.com/butuzov/ireturn v0.1.1 // indirect
+	github.com/cenkalti/backoff/v4 v4.1.2 // indirect
 	github.com/charithe/durationcheck v0.0.9 // indirect
 	github.com/chavacava/garif v0.0.0-20210405164556-e8a0a408d6af // indirect
 	github.com/daixiang0/gci v0.2.9 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/denis-tingajkin/go-header v0.4.2 // indirect
-	github.com/dghubble/sling v1.3.0 // indirect
+	github.com/dghubble/sling v1.4.0 // indirect
 	github.com/esimonov/ifshort v1.0.3 // indirect
 	github.com/ettle/strcase v0.1.1 // indirect
 	github.com/fatih/color v1.13.0 // indirect

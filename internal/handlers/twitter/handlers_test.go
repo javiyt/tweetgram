@@ -30,7 +30,9 @@ func (c channelError) Error() string {
 
 func TestTwitter_ExecuteHandlers(t *testing.T) {
 	t.Run("it should fail getting channel for text and photo notifications", func(t *testing.T) {
-		th, mockedQueue, _, _, _ := getTwitterHandlerAndMocks(false)
+		ctx := context.Background()
+
+		th, mockedQueue, _, _, _ := getTwitterHandlerAndMocks(ctx, false)
 
 		mockedQueue.On("Subscribe", context.Background(), pubsub.TextTopic.String()).
 			Once().
@@ -43,15 +45,17 @@ func TestTwitter_ExecuteHandlers(t *testing.T) {
 		})).Times(2).
 			Return(nil)
 
-		th.ExecuteHandlers()
+		th.ExecuteHandlers(ctx)
 
 		mockedQueue.AssertExpectations(t)
 	})
 }
 
 func TestTwitter_ExecuteHandlersText(t *testing.T) {
+	ctx := context.Background()
+
 	t.Run("it should fail unmarshaling text event", func(t *testing.T) {
-		th, mockedQueue, _, textChannel, _ := getTwitterHandlerAndMocks(true)
+		th, mockedQueue, _, textChannel, _ := getTwitterHandlerAndMocks(ctx, true)
 
 		mockedQueue.On("Publish", pubsub.ErrorTopic.String(), mock.MatchedBy(func(m *message.Message) bool {
 			return string(m.Payload) ==
@@ -59,7 +63,7 @@ func TestTwitter_ExecuteHandlersText(t *testing.T) {
 		})).Once().
 			Return(nil)
 
-		th.ExecuteHandlers()
+		th.ExecuteHandlers(ctx)
 
 		sendMessageToChannel(t, textChannel, []byte("{\"asd\":\"qwer"), true)
 
@@ -67,7 +71,7 @@ func TestTwitter_ExecuteHandlersText(t *testing.T) {
 	})
 
 	t.Run("it should fail sending text message to twitter", func(t *testing.T) {
-		th, mockedQueue, mockedTwitter, textChannel, _ := getTwitterHandlerAndMocks(true)
+		th, mockedQueue, mockedTwitter, textChannel, _ := getTwitterHandlerAndMocks(ctx, true)
 
 		mockedQueue.On(
 			"Publish",
@@ -81,7 +85,7 @@ func TestTwitter_ExecuteHandlersText(t *testing.T) {
 			Once().
 			Return(messageNotSendError{})
 
-		th.ExecuteHandlers()
+		th.ExecuteHandlers(ctx)
 
 		sendMessageToChannel(t, textChannel, []byte("{\"text\":\"testing message\"}"), false)
 
@@ -90,11 +94,11 @@ func TestTwitter_ExecuteHandlersText(t *testing.T) {
 	})
 
 	t.Run("it should send text message to twitter", func(t *testing.T) {
-		th, mockedQueue, mockedTwitter, textChannel, _ := getTwitterHandlerAndMocks(true)
+		th, mockedQueue, mockedTwitter, textChannel, _ := getTwitterHandlerAndMocks(ctx, true)
 
 		mockedTwitter.On("SendUpdate", "testing message").Once().Return(nil)
 
-		th.ExecuteHandlers()
+		th.ExecuteHandlers(ctx)
 
 		sendMessageToChannel(t, textChannel, []byte("{\"text\":\"testing message\"}"), true)
 
@@ -116,14 +120,14 @@ func TestTwitter_ExecuteHandlersPhoto(t *testing.T) {
 	})
 
 	t.Run("it should fail unmarshaling photo event", func(t *testing.T) {
-		th, mockedQueue, _, _, photoChannel := getTwitterHandlerAndMocks(true)
+		th, mockedQueue, _, _, photoChannel := getTwitterHandlerAndMocks(context.Background(), true)
 
 		mockedQueue.On("Publish", pubsub.ErrorTopic.String(), mock.MatchedBy(func(m *message.Message) bool {
 			return string(m.Payload) ==
 				"{\"error\":\"parse error: unterminated string literal near offset 12 of '{\\\"asd\\\":\\\"qwer'\"}"
 		})).Once().Return(nil)
 
-		th.ExecuteHandlers()
+		th.ExecuteHandlers(context.Background())
 
 		sendMessageToChannel(t, photoChannel, []byte("{\"asd\":\"qwer"), true)
 
@@ -131,7 +135,7 @@ func TestTwitter_ExecuteHandlersPhoto(t *testing.T) {
 	})
 
 	t.Run("it should fail sending photo to twitter", func(t *testing.T) {
-		th, mockedQueue, mockedTwitter, _, photoChannel := getTwitterHandlerAndMocks(true)
+		th, mockedQueue, mockedTwitter, _, photoChannel := getTwitterHandlerAndMocks(context.Background(), true)
 
 		mockedQueue.On(
 			"Publish",
@@ -143,7 +147,7 @@ func TestTwitter_ExecuteHandlersPhoto(t *testing.T) {
 		mockedTwitter.On("SendUpdateWithPhoto", "testing caption", photoContent).
 			Once().Return(messageNotSendError{})
 
-		th.ExecuteHandlers()
+		th.ExecuteHandlers(context.Background())
 
 		sendMessageToChannel(t, photoChannel, bytes, false)
 
@@ -152,12 +156,12 @@ func TestTwitter_ExecuteHandlersPhoto(t *testing.T) {
 	})
 
 	t.Run("it should send photo to twitter", func(t *testing.T) {
-		th, mockedQueue, mockedTwitter, _, photoChannel := getTwitterHandlerAndMocks(true)
+		th, mockedQueue, mockedTwitter, _, photoChannel := getTwitterHandlerAndMocks(context.Background(), true)
 
 		mockedTwitter.On("SendUpdateWithPhoto", "testing caption", photoContent).
 			Once().Return(nil)
 
-		th.ExecuteHandlers()
+		th.ExecuteHandlers(context.Background())
 
 		sendMessageToChannel(t, photoChannel, bytes, true)
 
@@ -166,7 +170,7 @@ func TestTwitter_ExecuteHandlersPhoto(t *testing.T) {
 	})
 }
 
-func getTwitterHandlerAndMocks(returnChannels bool) (
+func getTwitterHandlerAndMocks(ctx context.Context, returnChannels bool) (
 	*ht.Twitter,
 	*mq.Queue,
 	*mb.TwitterClient,
@@ -182,12 +186,12 @@ func getTwitterHandlerAndMocks(returnChannels bool) (
 	photoChannel := make(chan *message.Message)
 
 	if returnChannels {
-		mockedQueue.On("Subscribe", context.Background(), pubsub.TextTopic.String()).
+		mockedQueue.On("Subscribe", ctx, pubsub.TextTopic.String()).
 			Once().
 			Return(func(context.Context, string) <-chan *message.Message {
 				return textChannel
 			}, nil)
-		mockedQueue.On("Subscribe", context.Background(), pubsub.PhotoTopic.String()).
+		mockedQueue.On("Subscribe", ctx, pubsub.PhotoTopic.String()).
 			Once().
 			Return(func(context.Context, string) <-chan *message.Message {
 				return photoChannel

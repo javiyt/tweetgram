@@ -2,6 +2,7 @@ package app
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 
 	"github.com/javiyt/tweetgram/internal/bot"
@@ -41,17 +42,17 @@ func NewApp(bp botProvider, hm *handlers.Manager) *App {
 	return &App{bp: bp, hm: hm}
 }
 
-func (a *App) Start() error {
+func (a *App) Start(ctx context.Context) error {
 	tBot, err := a.bp()
 	if err != nil {
 		return fmt.Errorf("error getting bot instance: %w", err)
 	}
 
-	if err := tBot.Start(); err != nil {
+	if err := tBot.Start(ctx); err != nil {
 		return fmt.Errorf("error starting bot: %w", err)
 	}
 
-	a.hm.StartHandlers()
+	a.hm.StartHandlers(ctx)
 	a.tb = tBot
 
 	return nil
