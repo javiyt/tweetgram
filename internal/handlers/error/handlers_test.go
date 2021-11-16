@@ -22,14 +22,16 @@ func (m gettingChannelError) Error() string {
 }
 
 func TestError_ExecuteHandlers(t *testing.T) {
+	ctx := context.Background()
+
 	t.Run("it should fail getting channel for text notifications", func(t *testing.T) {
 		_, mockedQueue, th, _ := generateMocksAndErrorChannel()
 
-		mockedQueue.On("Subscribe", context.Background(), pubsub.ErrorTopic.String()).
+		mockedQueue.On("Subscribe", ctx, pubsub.ErrorTopic.String()).
 			Once().
 			Return(nil, gettingChannelError{})
 
-		th.ExecuteHandlers()
+		th.ExecuteHandlers(ctx)
 
 		mockedQueue.AssertExpectations(t)
 	})
@@ -37,13 +39,13 @@ func TestError_ExecuteHandlers(t *testing.T) {
 	t.Run("it should fail unmarshaling text event", func(t *testing.T) {
 		hook, mockedQueue, th, errorChannel := generateMocksAndErrorChannel()
 
-		mockedQueue.On("Subscribe", context.Background(), pubsub.ErrorTopic.String()).
+		mockedQueue.On("Subscribe", ctx, pubsub.ErrorTopic.String()).
 			Once().
 			Return(func(context.Context, string) <-chan *message.Message {
 				return errorChannel
 			}, nil)
 
-		th.ExecuteHandlers()
+		th.ExecuteHandlers(ctx)
 		sendMessageToChannel(t, errorChannel, []byte("{\"asd\":\"qwer"))
 
 		assertLogMessage(
@@ -56,13 +58,13 @@ func TestError_ExecuteHandlers(t *testing.T) {
 
 	t.Run("it should log error message", func(t *testing.T) {
 		hook, mockedQueue, th, errorChannel := generateMocksAndErrorChannel()
-		mockedQueue.On("Subscribe", context.Background(), pubsub.ErrorTopic.String()).
+		mockedQueue.On("Subscribe", ctx, pubsub.ErrorTopic.String()).
 			Once().
 			Return(func(context.Context, string) <-chan *message.Message {
 				return errorChannel
 			}, nil)
 
-		th.ExecuteHandlers()
+		th.ExecuteHandlers(ctx)
 		sendMessageToChannel(t, errorChannel, []byte("{\"error\":\"an error message\"}"))
 
 		assertLogMessage(t, hook, "an error message")

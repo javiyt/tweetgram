@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 	"os"
@@ -32,7 +33,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := botApp.Start(); err != nil {
+	if err := botApp.Start(context.Background()); err != nil {
 		log.Fatal(err)
 	}
 

@@ -1,6 +1,7 @@
 package app_test
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -65,7 +66,7 @@ func TestStart(t *testing.T) {
 		}
 
 		a := app.NewApp(mbp, handlers.NewHandlersManager())
-		e := a.Start()
+		e := a.Start(context.Background())
 
 		require.EqualError(t, e, "error getting bot instance: bot instance not ready")
 	})
@@ -75,10 +76,10 @@ func TestStart(t *testing.T) {
 		mbp := func() (bot.AppBot, error) {
 			return mb, nil
 		}
-		mb.On("Start").Once().Return(startAppError{})
+		mb.On("Start", context.Background()).Once().Return(startAppError{})
 
 		a := app.NewApp(mbp, handlers.NewHandlersManager())
-		e := a.Start()
+		e := a.Start(context.Background())
 
 		require.EqualError(t, e, "error starting bot: could not start")
 		mb.AssertExpectations(t)
@@ -89,10 +90,10 @@ func TestStart(t *testing.T) {
 		mbp := func() (bot.AppBot, error) {
 			return mb, nil
 		}
-		mb.On("Start").Once().Return(nil)
+		mb.On("Start", context.Background()).Once().Return(nil)
 
 		a := app.NewApp(mbp, handlers.NewHandlersManager())
-		e := a.Start()
+		e := a.Start(context.Background())
 
 		require.NoError(t, e)
 		mb.AssertExpectations(t)
@@ -105,11 +106,11 @@ func TestRun(t *testing.T) {
 		return mb, nil
 	}
 
-	mb.On("Start").Once().Return(nil)
+	mb.On("Start", context.Background()).Once().Return(nil)
 	mb.On("Run").Once()
 
 	a := app.NewApp(mbp, handlers.NewHandlersManager())
-	_ = a.Start()
+	_ = a.Start(context.Background())
 	a.Run()
 
 	mb.AssertExpectations(t)
@@ -121,11 +122,11 @@ func TestStop(t *testing.T) {
 		return mb, nil
 	}
 
-	mb.On("Start").Once().Return(nil)
+	mb.On("Start", context.Background()).Once().Return(nil)
 	mb.On("Stop").Once()
 
 	a := app.NewApp(mbp, handlers.NewHandlersManager())
-	e := a.Start()
+	e := a.Start(context.Background())
 	a.Stop()
 
 	require.NoError(t, e)

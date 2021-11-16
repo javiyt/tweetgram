@@ -263,7 +263,7 @@ func generateHandlerAndMockedBot(
 		bot.WithTelegramBot(mockedBot),
 		bot.WithConfig(cfg),
 		bot.WithQueue(mockedQueue),
-	).Start()
+	).Start(nil)
 
 	return handler, mockedBot, mockedQueue
 }

@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"context"
 	"io"
 	"sort"
 	"strings"
@@ -42,7 +43,7 @@ type TelegramPhoto struct {
 }
 
 type AppBot interface {
-	Start() error
+	Start(ctx context.Context) error
 	Run()
 	Stop()
 }
@@ -101,7 +102,7 @@ func NewBot(options ...Option) AppBot {
 	return b
 }
 
-func (b *Bot) Start() error {
+func (b *Bot) Start(context.Context) error {
 	if err := b.setCommandList(); err != nil {
 		return err
 	}
