@@ -37,7 +37,7 @@ func TestStart(t *testing.T) {
 	t.Run("it should fail setting up the commands", func(t *testing.T) {
 		mockedBot.On("SetCommands", cmds).Once().Return(settingCommandError{})
 
-		require.EqualError(t, b.Start(), "not setting commands")
+		require.EqualError(t, b.Start(nil), "not setting commands")
 
 		mockedBot.AssertExpectations(t)
 		mockedBot.AssertNotCalled(t, "Handle", "/start", mock.Anything)
@@ -54,7 +54,7 @@ func TestStart(t *testing.T) {
 		mockedBot.On("Handle", tb.OnPhoto, mock.Anything).Once().Return(nil, nil)
 		mockedBot.On("Handle", tb.OnText, mock.Anything).Once().Return(nil, nil)
 
-		require.Nil(t, b.Start())
+		require.Nil(t, b.Start(nil))
 
 		mockedBot.AssertExpectations(t)
 	})

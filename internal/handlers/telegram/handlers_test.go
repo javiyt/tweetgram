@@ -34,14 +34,15 @@ func TestTelegram_ExecuteHandlers(t *testing.T) {
 	cfg := config.EnvConfig{
 		BroadcastChannel: 1234,
 	}
+	ctx := context.Background()
 
 	t.Run("it should fail getting channel for text and photo notifications", func(t *testing.T) {
-		th, mockedQueue, _, _, _ := generateHandlerAndMocks(cfg, false)
+		th, mockedQueue, _, _, _ := generateHandlerAndMocks(ctx, cfg, false)
 
-		mockedQueue.On("Subscribe", context.Background(), pubsub.TextTopic.String()).
+		mockedQueue.On("Subscribe", ctx, pubsub.TextTopic.String()).
 			Once().
 			Return(nil, gettingChannelError{})
-		mockedQueue.On("Subscribe", context.Background(), pubsub.PhotoTopic.String()).
+		mockedQueue.On("Subscribe", ctx, pubsub.PhotoTopic.String()).
 			Once().
 			Return(nil, gettingChannelError{})
 		mockedQueue.On("Publish", pubsub.ErrorTopic.String(), mock.MatchedBy(func(m *message.Message) bool {
@@ -49,7 +50,7 @@ func TestTelegram_ExecuteHandlers(t *testing.T) {
 		})).Times(2).
 			Return(nil)
 
-		th.ExecuteHandlers()
+		th.ExecuteHandlers(ctx)
 
 		mockedQueue.AssertExpectations(t)
 	})
@@ -59,9 +60,10 @@ func TestTelegram_ExecuteHandlersText(t *testing.T) {
 	cfg := config.EnvConfig{
 		BroadcastChannel: 1234,
 	}
+	ctx := context.Background()
 
 	t.Run("it should fail unmarshaling text event", func(t *testing.T) {
-		th, mockedQueue, _, textChannel, _ := generateHandlerAndMocks(cfg, true)
+		th, mockedQueue, _, textChannel, _ := generateHandlerAndMocks(ctx, cfg, true)
 
 		mockedQueue.On("Publish", pubsub.ErrorTopic.String(), mock.MatchedBy(func(m *message.Message) bool {
 			return string(m.Payload) ==
@@ -69,7 +71,7 @@ func TestTelegram_ExecuteHandlersText(t *testing.T) {
 		})).Once().
 			Return(nil)
 
-		th.ExecuteHandlers()
+		th.ExecuteHandlers(ctx)
 
 		sendMessageToChannel(t, textChannel, []byte("{\"asd\":\"qwer"), true)
 
@@ -77,7 +79,7 @@ func TestTelegram_ExecuteHandlersText(t *testing.T) {
 	})
 
 	t.Run("it should fail sending text message to telegram", func(t *testing.T) {
-		th, mockedQueue, mockedBot, textChannel, _ := generateHandlerAndMocks(cfg, true)
+		th, mockedQueue, mockedBot, textChannel, _ := generateHandlerAndMocks(ctx, cfg, true)
 
 		mockedQueue.On("Publish", pubsub.ErrorTopic.String(), mock.MatchedBy(func(m *message.Message) bool {
 			return string(m.Payload) == "{\"error\":\"couldn't send message to telegram\"}"
@@ -87,7 +89,7 @@ func TestTelegram_ExecuteHandlersText(t *testing.T) {
 			Once().
 			Return(messageNotSendError{})
 
-		th.ExecuteHandlers()
+		th.ExecuteHandlers(ctx)
 		sendMessageToChannel(t, textChannel, []byte("{\"text\":\"failing message\"}"), false)
 
 		mockedQueue.AssertExpectations(t)
@@ -95,13 +97,13 @@ func TestTelegram_ExecuteHandlersText(t *testing.T) {
 	})
 
 	t.Run("it should send text message to telegram", func(t *testing.T) {
-		th, mockedQueue, mockedBot, textChannel, _ := generateHandlerAndMocks(cfg, true)
+		th, mockedQueue, mockedBot, textChannel, _ := generateHandlerAndMocks(ctx, cfg, true)
 
 		mockedBot.On("Send", strconv.Itoa(int(cfg.BroadcastChannel)), "testing message").
 			Once().
 			Return(nil, nil)
 
-		th.ExecuteHandlers()
+		th.ExecuteHandlers(ctx)
 
 		sendMessageToChannel(t, textChannel, []byte("{\"text\":\"testing message\"}"), true)
 
@@ -116,9 +118,10 @@ func TestTelegram_ExecuteHandlersPhoto(t *testing.T) {
 	}
 	eventMsg := []byte("{\"caption\":\"testing message\",\"fileId\":\"blablabla\",\"fileUrl\":\"http://photo.url\"," +
 		"\"fileSize\":1234}")
+	ctx := context.Background()
 
 	t.Run("it should fail unmarshaling photo event", func(t *testing.T) {
-		th, mockedQueue, _, _, photoChannel := generateHandlerAndMocks(cfg, true)
+		th, mockedQueue, _, _, photoChannel := generateHandlerAndMocks(ctx, cfg, true)
 
 		mockedQueue.On("Publish", pubsub.ErrorTopic.String(), mock.MatchedBy(func(m *message.Message) bool {
 			return string(m.Payload) ==
@@ -126,7 +129,7 @@ func TestTelegram_ExecuteHandlersPhoto(t *testing.T) {
 		})).Once().
 			Return(nil)
 
-		th.ExecuteHandlers()
+		th.ExecuteHandlers(ctx)
 
 		sendMessageToChannel(t, photoChannel, []byte("{\"asd\":\"qwer"), true)
 
@@ -134,7 +137,7 @@ func TestTelegram_ExecuteHandlersPhoto(t *testing.T) {
 	})
 
 	t.Run("it should fail sending photo message to telegram", func(t *testing.T) {
-		th, mockedQueue, mockedBot, _, photoChannel := generateHandlerAndMocks(cfg, true)
+		th, mockedQueue, mockedBot, _, photoChannel := generateHandlerAndMocks(ctx, cfg, true)
 
 		mockedQueue.On("Publish", pubsub.ErrorTopic.String(), mock.MatchedBy(func(m *message.Message) bool {
 			return string(m.Payload) == "{\"error\":\"couldn't send message to telegram\"}"
@@ -143,7 +146,7 @@ func TestTelegram_ExecuteHandlersPhoto(t *testing.T) {
 		mockedBot.On("Send", strconv.Itoa(int(cfg.BroadcastChannel)), mock.MatchedBy(matchTelegramPhoto())).
 			Once().Return(messageNotSendError{})
 
-		th.ExecuteHandlers()
+		th.ExecuteHandlers(ctx)
 
 		sendMessageToChannel(t, photoChannel, eventMsg, false)
 
@@ -152,12 +155,12 @@ func TestTelegram_ExecuteHandlersPhoto(t *testing.T) {
 	})
 
 	t.Run("it should send photo message to telegram", func(t *testing.T) {
-		th, mockedQueue, mockedBot, _, photoChannel := generateHandlerAndMocks(cfg, true)
+		th, mockedQueue, mockedBot, _, photoChannel := generateHandlerAndMocks(ctx, cfg, true)
 
 		mockedBot.On("Send", strconv.Itoa(int(cfg.BroadcastChannel)), mock.MatchedBy(matchTelegramPhoto())).
 			Once().Return(nil)
 
-		th.ExecuteHandlers()
+		th.ExecuteHandlers(ctx)
 		sendMessageToChannel(t, photoChannel, eventMsg, true)
 
 		mockedQueue.AssertExpectations(t)
@@ -165,13 +168,11 @@ func TestTelegram_ExecuteHandlersPhoto(t *testing.T) {
 	})
 }
 
-func generateHandlerAndMocks(cfg config.EnvConfig, returnChannels bool) (
-	*ht.Telegram,
-	*mq.Queue,
-	*mb.TelegramBot,
-	chan *message.Message,
-	chan *message.Message,
-) {
+func generateHandlerAndMocks(
+	ctx context.Context,
+	cfg config.EnvConfig,
+	returnChannels bool,
+) (*ht.Telegram, *mq.Queue, *mb.TelegramBot, chan *message.Message, chan *message.Message) {
 	mockedBot := new(mb.TelegramBot)
 	mockedQueue := new(mq.Queue)
 
@@ -181,12 +182,12 @@ func generateHandlerAndMocks(cfg config.EnvConfig, returnChannels bool) (
 	photoChannel := make(chan *message.Message)
 
 	if returnChannels {
-		mockedQueue.On("Subscribe", context.Background(), pubsub.TextTopic.String()).
+		mockedQueue.On("Subscribe", ctx, pubsub.TextTopic.String()).
 			Once().
 			Return(func(context.Context, string) <-chan *message.Message {
 				return textChannel
 			}, nil)
-		mockedQueue.On("Subscribe", context.Background(), pubsub.PhotoTopic.String()).
+		mockedQueue.On("Subscribe", ctx, pubsub.PhotoTopic.String()).
 			Once().
 			Return(func(context.Context, string) <-chan *message.Message {
 				return photoChannel

@@ -38,13 +38,13 @@ func NewTwitter(options ...Option) *Twitter {
 	return t
 }
 
-func (t *Twitter) ExecuteHandlers() {
-	t.handleText()
-	t.handlePhoto()
+func (t *Twitter) ExecuteHandlers(ctx context.Context) {
+	t.handleText(ctx)
+	t.handlePhoto(ctx)
 }
 
-func (t *Twitter) handleText() {
-	messages, err := t.q.Subscribe(context.Background(), pubsub.TextTopic.String())
+func (t *Twitter) handleText(ctx context.Context) {
+	messages, err := t.q.Subscribe(ctx, pubsub.TextTopic.String())
 	if err != nil {
 		handlers.SendError(t.q, err)
 	}
@@ -71,8 +71,8 @@ func (t *Twitter) handleText() {
 	}()
 }
 
-func (t *Twitter) handlePhoto() {
-	messages, err := t.q.Subscribe(context.Background(), pubsub.PhotoTopic.String())
+func (t *Twitter) handlePhoto(ctx context.Context) {
+	messages, err := t.q.Subscribe(ctx, pubsub.PhotoTopic.String())
 	if err != nil {
 		handlers.SendError(t.q, err)
 	}
