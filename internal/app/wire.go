@@ -29,23 +29,26 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
+type customHandlerGenerator func() []handlers.EventHandler
+
 var (
-	twitterClient = wire.NewSet(provideTwitterHttpClient, provideTwitterClient, wire.Bind(new(bot.TwitterClient), new(*twitter.Client)))
-	queue         = wire.NewSet(provideGoChannelQueue, wire.Bind(new(pubsub.Queue), new(*gochannel.GoChannel)))
 	queueInstance *gochannel.GoChannel
+	twitterClient = wire.NewSet(
+		provideTwitterHttpClient,
+		provideTwitterClient,
+		wire.Bind(new(bot.TwitterClient), new(*twitter.Client)),
+	)
+	queue        = wire.NewSet(provideGoChannelQueue, wire.Bind(new(pubsub.Queue), new(*gochannel.GoChannel)))
+	telegramDeps = wire.NewSet(provideConfiguration, provideTBot, queue)
+	twitterDeps  = wire.NewSet(provideConfiguration, twitterClient, queue)
+	errorDeps    = wire.NewSet(provideConfiguration, queue, provideLogger)
 )
 
 func ProvideApp() (*App, func(), error) {
 	panic(wire.Build(
 		provideBotProvider,
-		twitterClient,
-		provideConfiguration,
-		provideTBot,
-		queue,
-		provideLogger,
-		provideTelegramHandler,
-		provideTwitterHandler,
-		provideErrorHandler,
+		initializeCustomHandlers,
+		provideHandlers,
 		provideHandlerManager,
 		NewApp,
 	))
@@ -153,9 +156,8 @@ func provideTelegramOptions(cfg config.EnvConfig, tb bot.TelegramBot, pq pubsub.
 	}
 }
 
-func provideTelegramHandler(config.EnvConfig, bot.TelegramBot, pubsub.Queue) *hstl.Telegram {
-	wire.Build(provideTelegramOptions, hstl.NewTelegram)
-	return &hstl.Telegram{}
+func provideTelegramHandler() (*hstl.Telegram, error) {
+	panic(wire.Build(telegramDeps, provideTelegramOptions, hstl.NewTelegram))
 }
 
 func provideTwitterOptions(tc bot.TwitterClient, pq pubsub.Queue) []hstw.Option {
@@ -165,16 +167,41 @@ func provideTwitterOptions(tc bot.TwitterClient, pq pubsub.Queue) []hstw.Option 
 	}
 }
 
-func provideTwitterHandler(bot.TwitterClient, pubsub.Queue) *hstw.Twitter {
-	wire.Build(provideTwitterOptions, hstw.NewTwitter)
-	return &hstw.Twitter{}
+func provideTwitterHandler() (*hstw.Twitter, error) {
+	panic(wire.Build(twitterDeps, provideTwitterOptions, hstw.NewTwitter))
 }
 
-func provideErrorHandler(pubsub.Queue, *logrus.Logger) *hse.ErrorHandler {
-	wire.Build(hse.NewErrorHandler)
-	return &hse.ErrorHandler{}
+func provideErrorHandler() (*hse.ErrorHandler, func(), error) {
+	panic(wire.Build(errorDeps, hse.NewErrorHandler))
 }
 
-func provideHandlerManager(tlh *hstl.Telegram, twh *hstw.Twitter, eh *hse.ErrorHandler) *handlers.Manager {
-	return handlers.NewHandlersManager(tlh, twh, eh)
+func provideHandlers(customHandlers customHandlerGenerator) ([]handlers.EventHandler, func(), error) {
+	telegramHandler, err := provideTelegramHandler()
+	if err != nil {
+		return nil, nil, err
+	}
+	twitterHandler, err := provideTwitterHandler()
+	if err != nil {
+		return nil, nil, err
+	}
+	errorHandler, cleanup, err := provideErrorHandler()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return append(customHandlers(),
+		telegramHandler,
+		twitterHandler,
+		errorHandler,
+	), cleanup, nil
+}
+
+func provideHandlerManager(h []handlers.EventHandler) *handlers.Manager {
+	return handlers.NewHandlersManager(h...)
+}
+
+func initializeCustomHandlers() customHandlerGenerator {
+	return func() []handlers.EventHandler {
+		return nil
+	}
 }
