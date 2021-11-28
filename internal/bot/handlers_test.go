@@ -49,7 +49,7 @@ func TestHandlerStartAndHelpCommand(t *testing.T) {
 	}
 	for i := range commands {
 		i := i
-		handler, mockedBot, _ := generateHandlerAndMockedBot(t, commands[i].command, config.EnvConfig{})
+		handler, mockedBot, _ := generateHandlerAndMockedBot(t, commands[i].command, config.AppConfig{})
 
 		t.Run("it should do nothing when not in private conversation", func(t *testing.T) {
 			handler(&bot.TelegramMessage{
@@ -86,7 +86,7 @@ func TestHandlersFilters(t *testing.T) {
 		broadcastChannel := int64(987654)
 
 		mockedQueue := new(mq.Queue)
-		handler, mockedBot, _ := generateHandlerAndMockedBot(t, commands[i], config.EnvConfig{
+		handler, mockedBot, _ := generateHandlerAndMockedBot(t, commands[i], config.AppConfig{
 			Admins:           []int{adminID},
 			BroadcastChannel: broadcastChannel,
 		})
@@ -131,7 +131,7 @@ func TestHandlersFilters(t *testing.T) {
 }
 
 func TestHandlerPhoto(t *testing.T) {
-	handler, mockedBot, mockedQueue := generateHandlerAndMockedBot(t, tb.OnPhoto, config.EnvConfig{
+	handler, mockedBot, mockedQueue := generateHandlerAndMockedBot(t, tb.OnPhoto, config.AppConfig{
 		Admins:           []int{adminID},
 		BroadcastChannel: broadcastChannel,
 	})
@@ -189,7 +189,7 @@ func TestHandlerPhoto(t *testing.T) {
 }
 
 func TestHandlerText(t *testing.T) {
-	handler, mockedBot, mockedQueue := generateHandlerAndMockedBot(t, tb.OnText, config.EnvConfig{
+	handler, mockedBot, mockedQueue := generateHandlerAndMockedBot(t, tb.OnText, config.AppConfig{
 		Admins:           []int{adminID},
 		BroadcastChannel: broadcastChannel,
 	})
@@ -229,9 +229,9 @@ func TestHandlerText(t *testing.T) {
 func generateHandlerAndMockedBot(
 	t *testing.T,
 	toHandle string,
-	cfg config.EnvConfig,
+	cfg config.AppConfig,
 ) (bot.TelegramHandler, *mb.TelegramBot, *mq.Queue) {
-	allHandlers := []string{"/start", "/help", tb.OnPhoto, tb.OnText}
+	allHandlers := []string{"/start", "/help", "/stop", tb.OnPhoto, tb.OnText}
 
 	var (
 		handler bot.TelegramHandler

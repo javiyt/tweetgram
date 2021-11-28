@@ -2,6 +2,7 @@ package bot
 
 import (
 	"bytes"
+	"strconv"
 	"strings"
 
 	"github.com/ThreeDotsLabs/watermill"
@@ -15,12 +16,31 @@ func (b *Bot) handleStartCommand(m *TelegramMessage) {
 }
 
 func (b *Bot) handleHelpCommand(m *TelegramMessage) {
+	user, err := strconv.Atoi(m.SenderID)
+	if err != nil {
+		return
+	}
+
 	var helpText string
-	for _, h := range b.getCommands() {
+	for _, h := range b.getCommands(b.cfg.IsAdmin(user)) {
 		helpText += "/" + h.Text + " - " + h.Description + "\n"
 	}
 
 	_ = b.bot.Send(m.SenderID, helpText)
+}
+
+func (b *Bot) handleStopNotificationsCommand(m *TelegramMessage) {
+	ce := pubsub.CommandEvent{Command: pubsub.StopCommand}
+	if m.Payload != "" {
+		ce.Handler = m.Payload
+	}
+
+	marshal, err := easyjson.Marshal(ce)
+	if err != nil {
+		return
+	}
+
+	_ = b.q.Publish(pubsub.CommandTopic.String(), message.NewMessage(watermill.NewUUID(), marshal))
 }
 
 func (b *Bot) handlePhoto(m *TelegramMessage) {

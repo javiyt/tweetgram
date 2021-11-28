@@ -31,7 +31,7 @@ func (m gettingChannelError) Error() string {
 }
 
 func TestTelegram_ExecuteHandlers(t *testing.T) {
-	cfg := config.EnvConfig{
+	cfg := config.AppConfig{
 		BroadcastChannel: 1234,
 	}
 	ctx := context.Background()
@@ -57,7 +57,7 @@ func TestTelegram_ExecuteHandlers(t *testing.T) {
 }
 
 func TestTelegram_ExecuteHandlersText(t *testing.T) {
-	cfg := config.EnvConfig{
+	cfg := config.AppConfig{
 		BroadcastChannel: 1234,
 	}
 	ctx := context.Background()
@@ -113,7 +113,7 @@ func TestTelegram_ExecuteHandlersText(t *testing.T) {
 }
 
 func TestTelegram_ExecuteHandlersPhoto(t *testing.T) {
-	cfg := config.EnvConfig{
+	cfg := config.AppConfig{
 		BroadcastChannel: 1234,
 	}
 	eventMsg := []byte("{\"caption\":\"testing message\",\"fileId\":\"blablabla\",\"fileUrl\":\"http://photo.url\"," +
@@ -170,13 +170,13 @@ func TestTelegram_ExecuteHandlersPhoto(t *testing.T) {
 
 func generateHandlerAndMocks(
 	ctx context.Context,
-	cfg config.EnvConfig,
+	cfg config.AppConfig,
 	returnChannels bool,
 ) (*ht.Telegram, *mq.Queue, *mb.TelegramBot, chan *message.Message, chan *message.Message) {
 	mockedBot := new(mb.TelegramBot)
 	mockedQueue := new(mq.Queue)
 
-	th := ht.NewTelegram(ht.WithConfig(cfg), ht.WithTelegramBot(mockedBot), ht.WithQueue(mockedQueue))
+	th := ht.NewTelegram(ht.WithAppConfig(cfg), ht.WithTelegramBot(mockedBot), ht.WithQueue(mockedQueue))
 
 	textChannel := make(chan *message.Message)
 	photoChannel := make(chan *message.Message)
