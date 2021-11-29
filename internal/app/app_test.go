@@ -5,6 +5,10 @@ import (
 	"os"
 	"testing"
 
+	"github.com/ThreeDotsLabs/watermill/message"
+	pubsub2 "github.com/javiyt/tweetgram/internal/pubsub"
+	"github.com/javiyt/tweetgram/mocks/pubsub"
+
 	"github.com/javiyt/tweetgram/internal/app"
 	"github.com/javiyt/tweetgram/internal/bot"
 	"github.com/javiyt/tweetgram/internal/handlers"
@@ -65,7 +69,7 @@ func TestStart(t *testing.T) {
 			return nil, botInstanceError{}
 		}
 
-		a := app.NewApp(mbp, handlers.NewHandlersManager())
+		a := app.NewApp(mbp, handlers.NewHandlersManager(nil))
 		e := a.Start(context.Background())
 
 		require.EqualError(t, e, "error getting bot instance: bot instance not ready")
@@ -78,7 +82,7 @@ func TestStart(t *testing.T) {
 		}
 		mb.On("Start", context.Background()).Once().Return(startAppError{})
 
-		a := app.NewApp(mbp, handlers.NewHandlersManager())
+		a := app.NewApp(mbp, handlers.NewHandlersManager(nil))
 		e := a.Start(context.Background())
 
 		require.EqualError(t, e, "error starting bot: could not start")
@@ -86,13 +90,18 @@ func TestStart(t *testing.T) {
 	})
 
 	t.Run("it should start bot instance", func(t *testing.T) {
+		q := new(pubsub.Queue)
 		mb := new(mockBot.AppBot)
 		mbp := func() (bot.AppBot, error) {
 			return mb, nil
 		}
 		mb.On("Start", context.Background()).Once().Return(nil)
+		q.On("Subscribe", context.Background(), pubsub2.CommandTopic.String()).
+			Return(func(context.Context, string) <-chan *message.Message {
+				return make(chan *message.Message)
+			}, nil)
 
-		a := app.NewApp(mbp, handlers.NewHandlersManager())
+		a := app.NewApp(mbp, handlers.NewHandlersManager(q))
 		e := a.Start(context.Background())
 
 		require.NoError(t, e)
@@ -101,6 +110,7 @@ func TestStart(t *testing.T) {
 }
 
 func TestRun(t *testing.T) {
+	q := new(pubsub.Queue)
 	mb := new(mockBot.AppBot)
 	mbp := func() (bot.AppBot, error) {
 		return mb, nil
@@ -108,8 +118,12 @@ func TestRun(t *testing.T) {
 
 	mb.On("Start", context.Background()).Once().Return(nil)
 	mb.On("Run").Once()
+	q.On("Subscribe", context.Background(), pubsub2.CommandTopic.String()).
+		Return(func(context.Context, string) <-chan *message.Message {
+			return make(chan *message.Message)
+		}, nil)
 
-	a := app.NewApp(mbp, handlers.NewHandlersManager())
+	a := app.NewApp(mbp, handlers.NewHandlersManager(q))
 	_ = a.Start(context.Background())
 	a.Run()
 
@@ -117,6 +131,7 @@ func TestRun(t *testing.T) {
 }
 
 func TestStop(t *testing.T) {
+	q := new(pubsub.Queue)
 	mb := new(mockBot.AppBot)
 	mbp := func() (bot.AppBot, error) {
 		return mb, nil
@@ -124,8 +139,12 @@ func TestStop(t *testing.T) {
 
 	mb.On("Start", context.Background()).Once().Return(nil)
 	mb.On("Stop").Once()
+	q.On("Subscribe", context.Background(), pubsub2.CommandTopic.String()).
+		Return(func(context.Context, string) <-chan *message.Message {
+			return make(chan *message.Message)
+		}, nil)
 
-	a := app.NewApp(mbp, handlers.NewHandlersManager())
+	a := app.NewApp(mbp, handlers.NewHandlersManager(q))
 	e := a.Start(context.Background())
 	a.Stop()
 

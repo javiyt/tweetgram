@@ -30,8 +30,17 @@ func (m gettingChannelError) Error() string {
 	return "error getting channel error"
 }
 
+func TestTelegram_ID(t *testing.T) {
+	mockedBot := new(mb.TelegramBot)
+	mockedQueue := new(mq.Queue)
+
+	th := ht.NewTelegram(ht.WithAppConfig(config.AppConfig{}), ht.WithTelegramBot(mockedBot), ht.WithQueue(mockedQueue))
+
+	require.Equal(t, "telegram", th.ID())
+}
+
 func TestTelegram_ExecuteHandlers(t *testing.T) {
-	cfg := config.EnvConfig{
+	cfg := config.AppConfig{
 		BroadcastChannel: 1234,
 	}
 	ctx := context.Background()
@@ -57,7 +66,7 @@ func TestTelegram_ExecuteHandlers(t *testing.T) {
 }
 
 func TestTelegram_ExecuteHandlersText(t *testing.T) {
-	cfg := config.EnvConfig{
+	cfg := config.AppConfig{
 		BroadcastChannel: 1234,
 	}
 	ctx := context.Background()
@@ -113,7 +122,7 @@ func TestTelegram_ExecuteHandlersText(t *testing.T) {
 }
 
 func TestTelegram_ExecuteHandlersPhoto(t *testing.T) {
-	cfg := config.EnvConfig{
+	cfg := config.AppConfig{
 		BroadcastChannel: 1234,
 	}
 	eventMsg := []byte("{\"caption\":\"testing message\",\"fileId\":\"blablabla\",\"fileUrl\":\"http://photo.url\"," +
@@ -168,15 +177,48 @@ func TestTelegram_ExecuteHandlersPhoto(t *testing.T) {
 	})
 }
 
+func TestTelegram_ExecuteHandlersNotificationsDisabled(t *testing.T) {
+	cfg := config.AppConfig{
+		BroadcastChannel: 1234,
+	}
+	ctx := context.Background()
+
+	t.Run("it should not send text message to telegram when notification disabled", func(t *testing.T) {
+		th, mockedQueue, mockedBot, textChannel, _ := generateHandlerAndMocks(ctx, cfg, true)
+
+		th.StopNotifications()
+		th.ExecuteHandlers(ctx)
+
+		sendMessageToChannel(t, textChannel, []byte("{\"text\":\"testing message\"}"), true)
+
+		mockedQueue.AssertExpectations(t)
+		mockedBot.AssertNotCalled(t, "Send", strconv.Itoa(int(cfg.BroadcastChannel)), "testing message")
+	})
+
+	t.Run("it should not send photo message to telegram when notification disabled", func(t *testing.T) {
+		eventMsg := []byte("{\"caption\":\"testing message\",\"fileId\":\"blablabla\",\"fileUrl\":\"http://photo.url\"," +
+			"\"fileSize\":1234}")
+
+		th, mockedQueue, mockedBot, _, photoChannel := generateHandlerAndMocks(ctx, cfg, true)
+
+		th.StopNotifications()
+		th.ExecuteHandlers(ctx)
+		sendMessageToChannel(t, photoChannel, eventMsg, true)
+
+		mockedQueue.AssertExpectations(t)
+		mockedBot.AssertNotCalled(t, "Send", strconv.Itoa(int(cfg.BroadcastChannel)), mock.MatchedBy(matchTelegramPhoto()))
+	})
+}
+
 func generateHandlerAndMocks(
 	ctx context.Context,
-	cfg config.EnvConfig,
+	cfg config.AppConfig,
 	returnChannels bool,
 ) (*ht.Telegram, *mq.Queue, *mb.TelegramBot, chan *message.Message, chan *message.Message) {
 	mockedBot := new(mb.TelegramBot)
 	mockedQueue := new(mq.Queue)
 
-	th := ht.NewTelegram(ht.WithConfig(cfg), ht.WithTelegramBot(mockedBot), ht.WithQueue(mockedQueue))
+	th := ht.NewTelegram(ht.WithAppConfig(cfg), ht.WithTelegramBot(mockedBot), ht.WithQueue(mockedQueue))
 
 	textChannel := make(chan *message.Message)
 	photoChannel := make(chan *message.Message)

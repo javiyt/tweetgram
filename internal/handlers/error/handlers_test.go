@@ -21,6 +21,15 @@ func (m gettingChannelError) Error() string {
 	return "error getting channel error"
 }
 
+func TestErrorHandler_ID(t *testing.T) {
+	mockedLogger, _ := logrusTest.NewNullLogger()
+	mockedQueue := new(mq.Queue)
+
+	th := hse.NewErrorHandler(mockedLogger, mockedQueue)
+
+	require.Equal(t, "error", th.ID())
+}
+
 func TestError_ExecuteHandlers(t *testing.T) {
 	ctx := context.Background()
 
@@ -64,6 +73,26 @@ func TestError_ExecuteHandlers(t *testing.T) {
 				return errorChannel
 			}, nil)
 
+		th.ExecuteHandlers(ctx)
+		sendMessageToChannel(t, errorChannel, []byte("{\"error\":\"an error message\"}"))
+
+		assertLogMessage(t, hook, "an error message")
+		mockedQueue.AssertExpectations(t)
+	})
+}
+
+func TestErrorHandler_ExecuteHandlersNotificationsDisabled(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("it should send log error message even when notifications has been disabled", func(t *testing.T) {
+		hook, mockedQueue, th, errorChannel := generateMocksAndErrorChannel()
+		mockedQueue.On("Subscribe", ctx, pubsub.ErrorTopic.String()).
+			Once().
+			Return(func(context.Context, string) <-chan *message.Message {
+				return errorChannel
+			}, nil)
+
+		th.StopNotifications()
 		th.ExecuteHandlers(ctx)
 		sendMessageToChannel(t, errorChannel, []byte("{\"error\":\"an error message\"}"))
 

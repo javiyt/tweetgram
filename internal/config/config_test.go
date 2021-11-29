@@ -29,10 +29,10 @@ func TestNewEnvConfig(t *testing.T) {
 	}
 
 	t.Run("it should get whole configuration", func(t *testing.T) {
-		c, err := config.NewEnvConfig()
+		c, err := config.NewAppConfig()
 
 		require.NoError(t, err)
-		require.Equal(t, config.EnvConfig{
+		require.Equal(t, config.AppConfig{
 			BotToken:            "asdfg",
 			Admins:              []int{12345},
 			BroadcastChannel:    9876543,
@@ -51,7 +51,7 @@ func TestNewEnvConfig(t *testing.T) {
 		t.Run(fmt.Sprintf("it should fail when %s not present", k), func(t *testing.T) {
 			_ = os.Unsetenv(k)
 
-			_, err := config.NewEnvConfig()
+			_, err := config.NewAppConfig()
 
 			require.EqualError(t, err, fmt.Sprintf("required key %s missing value", k))
 
@@ -83,7 +83,7 @@ func TestEnvConfig_IsAdmin(t *testing.T) {
 		_ = os.Setenv(k, v)
 	}
 
-	c, _ := config.NewEnvConfig()
+	c, _ := config.NewAppConfig()
 
 	t.Run("it should return true when user is admin", func(t *testing.T) {
 		require.True(t, c.IsAdmin(12345))
@@ -119,13 +119,13 @@ func TestEnvConfig_IsProd(t *testing.T) {
 
 	t.Run("it should return true when environment is prod", func(t *testing.T) {
 		_ = os.Setenv("ENVIRONMENT", "PROD")
-		c, _ := config.NewEnvConfig()
+		c, _ := config.NewAppConfig()
 		require.True(t, c.IsProd())
 	})
 
 	t.Run("it should return false when environment is not prod", func(t *testing.T) {
 		_ = os.Setenv("ENVIRONMENT", "testing")
-		c, _ := config.NewEnvConfig()
+		c, _ := config.NewAppConfig()
 		require.False(t, c.IsProd())
 	})
 

@@ -6,12 +6,20 @@ import (
 	"github.com/ThreeDotsLabs/watermill/message"
 )
 
-type TopicName int
+type (
+	TopicName   int
+	CommandName int
+)
 
 const (
 	ErrorTopic TopicName = iota
 	PhotoTopic
 	TextTopic
+	CommandTopic
+)
+
+const (
+	StopCommand CommandName = iota
 )
 
 type Queue interface {
@@ -37,4 +45,10 @@ type PhotoEvent struct {
 //easyjson:json
 type TextEvent struct {
 	Text string `json:"text"`
+}
+
+//easyjson:json
+type CommandEvent struct {
+	Command CommandName `json:"command"`
+	Handler string      `json:"handler"`
 }

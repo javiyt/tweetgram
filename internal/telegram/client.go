@@ -55,6 +55,7 @@ func (b *Bot) Handle(endpoint string, handler bot.TelegramHandler) {
 		message := bot.TelegramMessage{
 			SenderID:  m.Sender.Recipient(),
 			Text:      m.Text,
+			Payload:   m.Payload,
 			Photo:     p,
 			IsPrivate: m.Private(),
 		}

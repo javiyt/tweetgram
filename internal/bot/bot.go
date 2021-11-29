@@ -26,11 +26,13 @@ type TelegramHandler func(*TelegramMessage)
 type TelegramBotCommand struct {
 	Text        string
 	Description string
+	IsAdmin     bool
 }
 
 type TelegramMessage struct {
 	SenderID  string
 	Text      string
+	Payload   string
 	Photo     TelegramPhoto
 	IsPrivate bool
 }
@@ -56,7 +58,7 @@ type TwitterClient interface {
 type Bot struct {
 	bot TelegramBot
 	tc  TwitterClient
-	cfg config.EnvConfig
+	cfg config.AppConfig
 	q   pubsub.Queue
 }
 
@@ -65,6 +67,7 @@ type Option func(b *Bot)
 type botHandler struct {
 	handlerFunc TelegramHandler
 	help        string
+	isAdmin     bool
 	filters     []filterFunc
 }
 
@@ -74,7 +77,7 @@ func WithTelegramBot(tb TelegramBot) Option {
 	}
 }
 
-func WithConfig(cfg config.EnvConfig) Option {
+func WithConfig(cfg config.AppConfig) Option {
 	return func(b *Bot) {
 		b.cfg = cfg
 	}
@@ -137,6 +140,15 @@ func (b *Bot) getHandlers() map[string]botHandler {
 				b.onlyPrivate,
 			},
 		},
+		"/stop": {
+			handlerFunc: b.handleStopNotificationsCommand,
+			help:        "Stop notifications for all handlers or specific handler",
+			filters: []filterFunc{
+				b.onlyPrivate,
+				b.onlyAdmins,
+			},
+			isAdmin: true,
+		},
 		tb.OnPhoto: {
 			handlerFunc: b.handlePhoto,
 			filters: []filterFunc{
@@ -154,10 +166,14 @@ func (b *Bot) getHandlers() map[string]botHandler {
 	}
 }
 
-func (b *Bot) getCommands() []TelegramBotCommand {
+func (b *Bot) getCommands(includeAdmin bool) []TelegramBotCommand {
 	var cmd []TelegramBotCommand
 
 	for c, h := range b.getHandlers() {
+		if !includeAdmin && h.isAdmin {
+			continue
+		}
+
 		if strings.TrimSpace(h.help) != "" {
 			cmd = append(cmd, TelegramBotCommand{
 				Text:        strings.Replace(c, "/", "", 1),
@@ -174,7 +190,7 @@ func (b *Bot) getCommands() []TelegramBotCommand {
 }
 
 func (b *Bot) setCommandList() error {
-	return b.bot.SetCommands(b.getCommands())
+	return b.bot.SetCommands(b.getCommands(false))
 }
 
 func (b *Bot) setUpHandlers() {

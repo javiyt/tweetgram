@@ -49,7 +49,7 @@ func ProvideApp() (*App, func(), error) {
 		provideBotProvider,
 		initializeCustomHandlers,
 		provideHandlers,
-		provideHandlerManager,
+		wire.NewSet(queue, provideHandlerManager),
 		NewApp,
 	))
 }
@@ -69,15 +69,15 @@ func provideBot() (bot.AppBot, error) {
 	))
 }
 
-func provideConfiguration() (config.EnvConfig, error) {
-	panic(wire.Build(config.NewEnvConfig))
+func provideConfiguration() (config.AppConfig, error) {
+	panic(wire.Build(config.NewAppConfig))
 }
 
 func provideTBot() (bot.TelegramBot, error) {
 	panic(wire.Build(provideConfiguration, provideTBotSettings, tb.NewBot, telegram.NewBot))
 }
 
-func provideTBotSettings(cfg config.EnvConfig) tb.Settings {
+func provideTBotSettings(cfg config.AppConfig) tb.Settings {
 	return tb.Settings{
 		Token:  cfg.BotToken,
 		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
@@ -90,7 +90,7 @@ func provideTwitterClient(*http.Client) *twitter.Client {
 	return &twitter.Client{}
 }
 
-func provideTwitterHttpClient(cfg config.EnvConfig) *http.Client {
+func provideTwitterHttpClient(cfg config.AppConfig) *http.Client {
 	return oauth1.NewConfig(cfg.TwitterAPIKey, cfg.TwitterAPISecret).
 		Client(oauth1.NoContext, oauth1.NewToken(cfg.TwitterAccessToken, cfg.TwitterAccessSecret))
 }
@@ -105,7 +105,7 @@ func provideGoChannelQueue() *gochannel.GoChannel {
 	return queueInstance
 }
 
-func provideBotOptions(b bot.TelegramBot, cfg config.EnvConfig, tc bot.TwitterClient, gq pubsub.Queue) []bot.Option {
+func provideBotOptions(b bot.TelegramBot, cfg config.AppConfig, tc bot.TwitterClient, gq pubsub.Queue) []bot.Option {
 	return []bot.Option{
 		bot.WithTelegramBot(b),
 		bot.WithConfig(cfg),
@@ -114,7 +114,7 @@ func provideBotOptions(b bot.TelegramBot, cfg config.EnvConfig, tc bot.TwitterCl
 	}
 }
 
-func provideLogger(cfg config.EnvConfig) (*logrus.Logger, func()) {
+func provideLogger(cfg config.AppConfig) (*logrus.Logger, func()) {
 	var (
 		file *os.File
 		err  error
@@ -148,9 +148,9 @@ func provideLogger(cfg config.EnvConfig) (*logrus.Logger, func()) {
 	}
 }
 
-func provideTelegramOptions(cfg config.EnvConfig, tb bot.TelegramBot, pq pubsub.Queue) []hstl.Option {
+func provideTelegramOptions(cfg config.AppConfig, tb bot.TelegramBot, pq pubsub.Queue) []hstl.Option {
 	return []hstl.Option{
-		hstl.WithConfig(cfg),
+		hstl.WithAppConfig(cfg),
 		hstl.WithTelegramBot(tb),
 		hstl.WithQueue(pq),
 	}
@@ -196,8 +196,8 @@ func provideHandlers(customHandlers customHandlerGenerator) ([]handlers.EventHan
 	), cleanup, nil
 }
 
-func provideHandlerManager(h []handlers.EventHandler) *handlers.Manager {
-	return handlers.NewHandlersManager(h...)
+func provideHandlerManager(q pubsub.Queue, h []handlers.EventHandler) *handlers.Manager {
+	return handlers.NewHandlersManager(q, h...)
 }
 
 func initializeCustomHandlers() customHandlerGenerator {
