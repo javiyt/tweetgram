@@ -81,6 +81,26 @@ func TestError_ExecuteHandlers(t *testing.T) {
 	})
 }
 
+func TestErrorHandler_ExecuteHandlersNotificationsDisabled(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("it should send log error message even when notifications has been disabled", func(t *testing.T) {
+		hook, mockedQueue, th, errorChannel := generateMocksAndErrorChannel()
+		mockedQueue.On("Subscribe", ctx, pubsub.ErrorTopic.String()).
+			Once().
+			Return(func(context.Context, string) <-chan *message.Message {
+				return errorChannel
+			}, nil)
+
+		th.StopNotifications()
+		th.ExecuteHandlers(ctx)
+		sendMessageToChannel(t, errorChannel, []byte("{\"error\":\"an error message\"}"))
+
+		assertLogMessage(t, hook, "an error message")
+		mockedQueue.AssertExpectations(t)
+	})
+}
+
 func generateMocksAndErrorChannel() (*logrusTest.Hook, *mq.Queue, *hse.ErrorHandler, chan *message.Message) {
 	mockedLogger, hook := logrusTest.NewNullLogger()
 	mockedQueue := new(mq.Queue)
