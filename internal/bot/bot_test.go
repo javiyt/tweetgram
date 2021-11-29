@@ -51,6 +51,7 @@ func TestStart(t *testing.T) {
 		mockedBot.On("SetCommands", cmds).Once().Return(nil)
 		mockedBot.On("Handle", "/start", mock.Anything).Once().Return(nil, nil)
 		mockedBot.On("Handle", "/help", mock.Anything).Once().Return(nil, nil)
+		mockedBot.On("Handle", "/stop", mock.Anything).Once().Return(nil, nil)
 		mockedBot.On("Handle", tb.OnPhoto, mock.Anything).Once().Return(nil, nil)
 		mockedBot.On("Handle", tb.OnText, mock.Anything).Once().Return(nil, nil)
 

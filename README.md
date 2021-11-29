@@ -52,6 +52,7 @@ Remember all env variables will be overridden by the ones defined in env.test
 
 ## Deploying the bot
 There's an action called deploy that you can trigger to deploy the bot. Some [secrets should be added](https://docs.github.com/en/actions/security-guides/encrypted-secrets) to your account before running the deployment script. The variables that should be added are:
+
 | Variable          | Description                                                         |
 |-------------------|---------------------------------------------------------------------|
 | ENV_FILE          | cmd/env file content                                                |

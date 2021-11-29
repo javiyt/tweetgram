@@ -4,7 +4,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-type EnvConfig struct {
+type AppConfig struct {
 	BotToken            string `required:"true" split_words:"true"`
 	Admins              []int  `required:"true" split_words:"true"`
 	BroadcastChannel    int64  `required:"true" split_words:"true"`
@@ -17,18 +17,18 @@ type EnvConfig struct {
 	LogFile             string `split_words:"true"`
 }
 
-func NewEnvConfig() (EnvConfig, error) {
-	var e EnvConfig
+func NewAppConfig() (AppConfig, error) {
+	var e AppConfig
 
 	err := envconfig.Process("", &e)
 	if err != nil {
-		return EnvConfig{}, err
+		return AppConfig{}, err
 	}
 
 	return e, nil
 }
 
-func (ec EnvConfig) IsAdmin(userID int) bool {
+func (ec AppConfig) IsAdmin(userID int) bool {
 	for _, v := range ec.Admins {
 		if v == userID {
 			return true
@@ -38,6 +38,6 @@ func (ec EnvConfig) IsAdmin(userID int) bool {
 	return false
 }
 
-func (ec EnvConfig) IsProd() bool {
+func (ec AppConfig) IsProd() bool {
 	return ec.Environment == "PROD"
 }

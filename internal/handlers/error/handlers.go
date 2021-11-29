@@ -17,6 +17,10 @@ func NewErrorHandler(log *logrus.Logger, q pubsub.Queue) *ErrorHandler {
 	return &ErrorHandler{log: log, q: q}
 }
 
+func (eh *ErrorHandler) ID() string {
+	return "error"
+}
+
 func (eh *ErrorHandler) ExecuteHandlers(ctx context.Context) {
 	messages, err := eh.q.Subscribe(ctx, pubsub.ErrorTopic.String())
 	if err != nil {
@@ -38,4 +42,8 @@ func (eh *ErrorHandler) ExecuteHandlers(ctx context.Context) {
 			msg.Ack()
 		}
 	}()
+}
+
+func (eh *ErrorHandler) StopNotifications() {
+	return
 }

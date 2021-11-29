@@ -10,8 +10,9 @@ import (
 )
 
 type Twitter struct {
-	tc bot.TwitterClient
-	q  pubsub.Queue
+	tc           bot.TwitterClient
+	q            pubsub.Queue
+	shouldNotify bool
 }
 
 type Option func(b *Twitter)
@@ -29,7 +30,7 @@ func WithQueue(q pubsub.Queue) Option {
 }
 
 func NewTwitter(options ...Option) *Twitter {
-	t := &Twitter{}
+	t := &Twitter{shouldNotify: true}
 
 	for _, o := range options {
 		o(t)
@@ -38,9 +39,17 @@ func NewTwitter(options ...Option) *Twitter {
 	return t
 }
 
+func (t *Twitter) ID() string {
+	return "twitter"
+}
+
 func (t *Twitter) ExecuteHandlers(ctx context.Context) {
 	t.handleText(ctx)
 	t.handlePhoto(ctx)
+}
+
+func (t *Twitter) StopNotifications() {
+	t.shouldNotify = false
 }
 
 func (t *Twitter) handleText(ctx context.Context) {
@@ -51,6 +60,12 @@ func (t *Twitter) handleText(ctx context.Context) {
 
 	go func() {
 		for msg := range messages {
+			if !t.shouldNotify {
+				msg.Ack()
+
+				continue
+			}
+
 			var m pubsub.TextEvent
 			if err := easyjson.Unmarshal(msg.Payload, &m); err != nil {
 				handlers.SendError(t.q, err)
@@ -79,6 +94,12 @@ func (t *Twitter) handlePhoto(ctx context.Context) {
 
 	go func() {
 		for msg := range messages {
+			if !t.shouldNotify {
+				msg.Ack()
+
+				continue
+			}
+
 			var m pubsub.PhotoEvent
 			if err := easyjson.Unmarshal(msg.Payload, &m); err != nil {
 				handlers.SendError(t.q, err)

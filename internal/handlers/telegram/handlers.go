@@ -12,9 +12,10 @@ import (
 )
 
 type Telegram struct {
-	bot bot.TelegramBot
-	cfg config.EnvConfig
-	q   pubsub.Queue
+	bot          bot.TelegramBot
+	cfg          config.AppConfig
+	q            pubsub.Queue
+	shouldNotify bool
 }
 
 type Option func(b *Telegram)
@@ -25,7 +26,7 @@ func WithTelegramBot(tb bot.TelegramBot) Option {
 	}
 }
 
-func WithConfig(cfg config.EnvConfig) Option {
+func WithAppConfig(cfg config.AppConfig) Option {
 	return func(b *Telegram) {
 		b.cfg = cfg
 	}
@@ -38,7 +39,7 @@ func WithQueue(q pubsub.Queue) Option {
 }
 
 func NewTelegram(options ...Option) *Telegram {
-	t := &Telegram{}
+	t := &Telegram{shouldNotify: true}
 
 	for _, o := range options {
 		o(t)
@@ -47,9 +48,17 @@ func NewTelegram(options ...Option) *Telegram {
 	return t
 }
 
+func (t *Telegram) ID() string {
+	return "telegram"
+}
+
 func (t *Telegram) ExecuteHandlers(ctx context.Context) {
 	t.handleText(ctx)
 	t.handlePhoto(ctx)
+}
+
+func (t *Telegram) StopNotifications() {
+	t.shouldNotify = false
 }
 
 func (t *Telegram) handleText(ctx context.Context) {
@@ -60,6 +69,12 @@ func (t *Telegram) handleText(ctx context.Context) {
 
 	go func() {
 		for msg := range messages {
+			if !t.shouldNotify {
+				msg.Ack()
+
+				continue
+			}
+
 			var m pubsub.TextEvent
 
 			if err := easyjson.Unmarshal(msg.Payload, &m); err != nil {
@@ -89,6 +104,12 @@ func (t *Telegram) handlePhoto(ctx context.Context) {
 
 	go func() {
 		for msg := range messages {
+			if !t.shouldNotify {
+				msg.Ack()
+
+				continue
+			}
+
 			var m pubsub.PhotoEvent
 			if err := easyjson.Unmarshal(msg.Payload, &m); err != nil {
 				handlers.SendError(t.q, err)

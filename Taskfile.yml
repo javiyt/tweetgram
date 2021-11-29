@@ -101,7 +101,7 @@ tasks:
     deps:
       - install
     cmds:
-      - go run golang.org/x/tools/cmd/stringer -type=TopicName internal/pubsub/broadcast.go
+      - go run golang.org/x/tools/cmd/stringer -type=TopicName,CommandName internal/pubsub/broadcast.go
     sources:
       - internal/pubsub/broadcast.go
     generates:
