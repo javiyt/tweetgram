@@ -61,21 +61,33 @@ func TestHandlerStartAndHelpCommand(t *testing.T) {
 		})
 
 		t.Run("it should message when in private conversation", func(t *testing.T) {
-			m := &bot.TelegramMessage{
-				IsPrivate: true,
-				SenderID:  "1234",
-			}
-			mockedBot.On(
-				"Send",
-				m.SenderID,
-				commands[i].expected,
-			).Once().Return(nil, nil)
+			m := &bot.TelegramMessage{IsPrivate: true, SenderID: "1234"}
+			mockedBot.On("Send", m.SenderID, commands[i].expected).Once().Return(nil, nil)
 
 			handler(m)
 
 			mockedBot.AssertExpectations(t)
 		})
 	}
+
+	t.Run("it should fail when help requested by non numeric user id", func(t *testing.T) {
+		handler, _, _ := generateHandlerAndMockedBot(t, "/help", config.AppConfig{})
+		m := &bot.TelegramMessage{IsPrivate: true, SenderID: "asdf"}
+
+		handler(m)
+	})
+
+	t.Run("it should send admin commands when user admin", func(t *testing.T) {
+		handler, mockedBot, _ := generateHandlerAndMockedBot(t, "/help", config.AppConfig{Admins: []int{1234}})
+		m := &bot.TelegramMessage{IsPrivate: true, SenderID: "1234"}
+		expected := "/help - Show help\n/start - Start a conversation with the bot\n/stop - Stop notifications" +
+			" for all handlers or specific handler\n"
+		mockedBot.On("Send", m.SenderID, expected).Once().Return(nil, nil)
+
+		handler(m)
+
+		mockedBot.AssertExpectations(t)
+	})
 }
 
 func TestHandlersFilters(t *testing.T) {
@@ -220,6 +232,42 @@ func TestHandlerText(t *testing.T) {
 		).Once().Return(nil)
 
 		handler(m)
+
+		mockedBot.AssertExpectations(t)
+		mockedQueue.AssertExpectations(t)
+	})
+}
+
+func TestHandleStopNotifications(t *testing.T) {
+	handler, mockedBot, mockedQueue := generateHandlerAndMockedBot(t, "/stop", config.AppConfig{
+		Admins:           []int{adminID},
+		BroadcastChannel: broadcastChannel,
+	})
+
+	t.Run("it should send an stop command event", func(t *testing.T) {
+		mockedQueue.On("Publish", pubsub.CommandTopic.String(), mock.MatchedBy(func(m *message.Message) bool {
+			return string(m.Payload) == "{\"command\":0,\"handler\":\"\"}"
+		})).Once().Return(nil)
+		handler(&bot.TelegramMessage{
+			IsPrivate: true,
+			SenderID:  strconv.Itoa(adminID),
+			Text:      "/stop",
+		})
+
+		mockedBot.AssertExpectations(t)
+		mockedQueue.AssertExpectations(t)
+	})
+
+	t.Run("it should send an stop command event to particular handle", func(t *testing.T) {
+		mockedQueue.On("Publish", pubsub.CommandTopic.String(), mock.MatchedBy(func(m *message.Message) bool {
+			return string(m.Payload) == "{\"command\":0,\"handler\":\"telegram\"}"
+		})).Once().Return(nil)
+		handler(&bot.TelegramMessage{
+			IsPrivate: true,
+			SenderID:  strconv.Itoa(adminID),
+			Text:      "/stop telegram",
+			Payload:   "telegram",
+		})
 
 		mockedBot.AssertExpectations(t)
 		mockedQueue.AssertExpectations(t)

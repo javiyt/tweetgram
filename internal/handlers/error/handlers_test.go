@@ -21,6 +21,15 @@ func (m gettingChannelError) Error() string {
 	return "error getting channel error"
 }
 
+func TestErrorHandler_ID(t *testing.T) {
+	mockedLogger, _ := logrusTest.NewNullLogger()
+	mockedQueue := new(mq.Queue)
+
+	th := hse.NewErrorHandler(mockedLogger, mockedQueue)
+
+	require.Equal(t, "error", th.ID())
+}
+
 func TestError_ExecuteHandlers(t *testing.T) {
 	ctx := context.Background()
 

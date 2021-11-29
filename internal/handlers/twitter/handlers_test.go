@@ -28,6 +28,15 @@ func (c channelError) Error() string {
 	return "error getting channel error"
 }
 
+func TestTwitter_ID(t *testing.T) {
+	mockedTwitter := new(mb.TwitterClient)
+	mockedQueue := new(mq.Queue)
+
+	th := ht.NewTwitter(ht.WithTwitterClient(mockedTwitter), ht.WithQueue(mockedQueue))
+
+	require.Equal(t, "twitter", th.ID())
+}
+
 func TestTwitter_ExecuteHandlers(t *testing.T) {
 	t.Run("it should fail getting channel for text and photo notifications", func(t *testing.T) {
 		ctx := context.Background()
@@ -167,6 +176,45 @@ func TestTwitter_ExecuteHandlersPhoto(t *testing.T) {
 
 		mockedQueue.AssertExpectations(t)
 		mockedTwitter.AssertExpectations(t)
+	})
+}
+
+func TestTwitter_ExecuteHandlersNotificationsDisabled(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("it should not send text message to twitter when notifications disabled", func(t *testing.T) {
+		th, mockedQueue, mockedTwitter, textChannel, _ := getTwitterHandlerAndMocks(ctx, true)
+
+		th.StopNotifications()
+		th.ExecuteHandlers(ctx)
+
+		sendMessageToChannel(t, textChannel, []byte("{\"text\":\"testing message\"}"), true)
+
+		mockedQueue.AssertExpectations(t)
+		mockedTwitter.AssertNotCalled(t, "SendUpdate", "testing message")
+	})
+
+	t.Run("it should send photo to twitter when notification disabled", func(t *testing.T) {
+		photoContent := []byte("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAEElEQVR4nGKaks0ECAAA//" +
+			"8CoAEEsZgdLgAAAABJRU5ErkJggg==")
+
+		bytes, _ := easyjson.Marshal(pubsub.PhotoEvent{
+			Caption:     "testing caption",
+			FileID:      "123456789asdfg",
+			FileURL:     "http://photo.url",
+			FileSize:    12345,
+			FileContent: photoContent,
+		})
+
+		th, mockedQueue, mockedTwitter, _, photoChannel := getTwitterHandlerAndMocks(context.Background(), true)
+
+		th.StopNotifications()
+		th.ExecuteHandlers(context.Background())
+
+		sendMessageToChannel(t, photoChannel, bytes, true)
+
+		mockedQueue.AssertExpectations(t)
+		mockedTwitter.AssertNotCalled(t, "SendUpdateWithPhoto", "testing caption", photoContent)
 	})
 }
 
