@@ -35,10 +35,7 @@ func (b *Bot) handleStopNotificationsCommand(m *TelegramMessage) {
 		ce.Handler = m.Payload
 	}
 
-	marshal, err := easyjson.Marshal(ce)
-	if err != nil {
-		return
-	}
+	marshal, _ := easyjson.Marshal(ce)
 
 	_ = b.q.Publish(pubsub.CommandTopic.String(), message.NewMessage(watermill.NewUUID(), marshal))
 }
