@@ -82,7 +82,7 @@ func TestTelegram_ExecuteHandlersText(t *testing.T) {
 
 		th.ExecuteHandlers(ctx)
 
-		sendMessageToChannel(t, textChannel, []byte("{\"asd\":\"qwer"), true)
+		sendMessageToChannel(t, textChannel, []byte("{\"asd\":\"qwer"))
 
 		mockedQueue.AssertExpectations(t)
 	})
@@ -99,7 +99,7 @@ func TestTelegram_ExecuteHandlersText(t *testing.T) {
 			Return(messageNotSendError{})
 
 		th.ExecuteHandlers(ctx)
-		sendMessageToChannel(t, textChannel, []byte("{\"text\":\"failing message\"}"), false)
+		sendMessageToChannel(t, textChannel, []byte("{\"text\":\"failing message\"}"))
 
 		mockedQueue.AssertExpectations(t)
 		mockedBot.AssertExpectations(t)
@@ -114,7 +114,7 @@ func TestTelegram_ExecuteHandlersText(t *testing.T) {
 
 		th.ExecuteHandlers(ctx)
 
-		sendMessageToChannel(t, textChannel, []byte("{\"text\":\"testing message\"}"), true)
+		sendMessageToChannel(t, textChannel, []byte("{\"text\":\"testing message\"}"))
 
 		mockedQueue.AssertExpectations(t)
 		mockedBot.AssertExpectations(t)
@@ -140,7 +140,7 @@ func TestTelegram_ExecuteHandlersPhoto(t *testing.T) {
 
 		th.ExecuteHandlers(ctx)
 
-		sendMessageToChannel(t, photoChannel, []byte("{\"asd\":\"qwer"), true)
+		sendMessageToChannel(t, photoChannel, []byte("{\"asd\":\"qwer"))
 
 		mockedQueue.AssertExpectations(t)
 	})
@@ -157,7 +157,7 @@ func TestTelegram_ExecuteHandlersPhoto(t *testing.T) {
 
 		th.ExecuteHandlers(ctx)
 
-		sendMessageToChannel(t, photoChannel, eventMsg, false)
+		sendMessageToChannel(t, photoChannel, eventMsg)
 
 		mockedQueue.AssertExpectations(t)
 		mockedBot.AssertExpectations(t)
@@ -170,7 +170,7 @@ func TestTelegram_ExecuteHandlersPhoto(t *testing.T) {
 			Once().Return(nil)
 
 		th.ExecuteHandlers(ctx)
-		sendMessageToChannel(t, photoChannel, eventMsg, true)
+		sendMessageToChannel(t, photoChannel, eventMsg)
 
 		mockedQueue.AssertExpectations(t)
 		mockedBot.AssertExpectations(t)
@@ -189,7 +189,7 @@ func TestTelegram_ExecuteHandlersNotificationsDisabled(t *testing.T) {
 		th.StopNotifications()
 		th.ExecuteHandlers(ctx)
 
-		sendMessageToChannel(t, textChannel, []byte("{\"text\":\"testing message\"}"), true)
+		sendMessageToChannel(t, textChannel, []byte("{\"text\":\"testing message\"}"))
 
 		mockedQueue.AssertExpectations(t)
 		mockedBot.AssertNotCalled(t, "Send", strconv.Itoa(int(cfg.BroadcastChannel)), "testing message")
@@ -203,7 +203,7 @@ func TestTelegram_ExecuteHandlersNotificationsDisabled(t *testing.T) {
 
 		th.StopNotifications()
 		th.ExecuteHandlers(ctx)
-		sendMessageToChannel(t, photoChannel, eventMsg, true)
+		sendMessageToChannel(t, photoChannel, eventMsg)
 
 		mockedQueue.AssertExpectations(t)
 		mockedBot.AssertNotCalled(t, "Send", strconv.Itoa(int(cfg.BroadcastChannel)), mock.MatchedBy(matchTelegramPhoto()))
@@ -239,16 +239,12 @@ func generateHandlerAndMocks(
 	return th, mockedQueue, mockedBot, textChannel, photoChannel
 }
 
-func sendMessageToChannel(t *testing.T, channel chan *message.Message, eventMsg []byte, acked bool) {
+func sendMessageToChannel(t *testing.T, channel chan *message.Message, eventMsg []byte) {
 	newMessage := message.NewMessage(watermill.NewUUID(), eventMsg)
 	channel <- newMessage
 
 	require.Eventually(t, func() bool {
-		if acked {
-			<-newMessage.Acked()
-		} else {
-			<-newMessage.Nacked()
-		}
+		<-newMessage.Acked()
 
 		return true
 	}, time.Second, time.Millisecond)
