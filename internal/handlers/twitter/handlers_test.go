@@ -74,7 +74,7 @@ func TestTwitter_ExecuteHandlersText(t *testing.T) {
 
 		th.ExecuteHandlers(ctx)
 
-		sendMessageToChannel(t, textChannel, []byte("{\"asd\":\"qwer"), true)
+		sendMessageToChannel(t, textChannel, []byte("{\"asd\":\"qwer"))
 
 		mockedQueue.AssertExpectations(t)
 	})
@@ -96,7 +96,7 @@ func TestTwitter_ExecuteHandlersText(t *testing.T) {
 
 		th.ExecuteHandlers(ctx)
 
-		sendMessageToChannel(t, textChannel, []byte("{\"text\":\"testing message\"}"), false)
+		sendMessageToChannel(t, textChannel, []byte("{\"text\":\"testing message\"}"))
 
 		mockedQueue.AssertExpectations(t)
 		mockedTwitter.AssertExpectations(t)
@@ -109,7 +109,7 @@ func TestTwitter_ExecuteHandlersText(t *testing.T) {
 
 		th.ExecuteHandlers(ctx)
 
-		sendMessageToChannel(t, textChannel, []byte("{\"text\":\"testing message\"}"), true)
+		sendMessageToChannel(t, textChannel, []byte("{\"text\":\"testing message\"}"))
 
 		mockedQueue.AssertExpectations(t)
 		mockedTwitter.AssertExpectations(t)
@@ -138,7 +138,7 @@ func TestTwitter_ExecuteHandlersPhoto(t *testing.T) {
 
 		th.ExecuteHandlers(context.Background())
 
-		sendMessageToChannel(t, photoChannel, []byte("{\"asd\":\"qwer"), true)
+		sendMessageToChannel(t, photoChannel, []byte("{\"asd\":\"qwer"))
 
 		mockedQueue.AssertExpectations(t)
 	})
@@ -158,7 +158,7 @@ func TestTwitter_ExecuteHandlersPhoto(t *testing.T) {
 
 		th.ExecuteHandlers(context.Background())
 
-		sendMessageToChannel(t, photoChannel, bytes, false)
+		sendMessageToChannel(t, photoChannel, bytes)
 
 		mockedQueue.AssertExpectations(t)
 		mockedTwitter.AssertExpectations(t)
@@ -172,7 +172,7 @@ func TestTwitter_ExecuteHandlersPhoto(t *testing.T) {
 
 		th.ExecuteHandlers(context.Background())
 
-		sendMessageToChannel(t, photoChannel, bytes, true)
+		sendMessageToChannel(t, photoChannel, bytes)
 
 		mockedQueue.AssertExpectations(t)
 		mockedTwitter.AssertExpectations(t)
@@ -188,7 +188,7 @@ func TestTwitter_ExecuteHandlersNotificationsDisabled(t *testing.T) {
 		th.StopNotifications()
 		th.ExecuteHandlers(ctx)
 
-		sendMessageToChannel(t, textChannel, []byte("{\"text\":\"testing message\"}"), true)
+		sendMessageToChannel(t, textChannel, []byte("{\"text\":\"testing message\"}"))
 
 		mockedQueue.AssertExpectations(t)
 		mockedTwitter.AssertNotCalled(t, "SendUpdate", "testing message")
@@ -211,7 +211,7 @@ func TestTwitter_ExecuteHandlersNotificationsDisabled(t *testing.T) {
 		th.StopNotifications()
 		th.ExecuteHandlers(context.Background())
 
-		sendMessageToChannel(t, photoChannel, bytes, true)
+		sendMessageToChannel(t, photoChannel, bytes)
 
 		mockedQueue.AssertExpectations(t)
 		mockedTwitter.AssertNotCalled(t, "SendUpdateWithPhoto", "testing caption", photoContent)
@@ -249,16 +249,12 @@ func getTwitterHandlerAndMocks(ctx context.Context, returnChannels bool) (
 	return th, mockedQueue, mockedTwitter, textChannel, photoChannel
 }
 
-func sendMessageToChannel(t *testing.T, channel chan *message.Message, eventMsg []byte, acked bool) {
+func sendMessageToChannel(t *testing.T, channel chan *message.Message, eventMsg []byte) {
 	newMessage := message.NewMessage(watermill.NewUUID(), eventMsg)
 	channel <- newMessage
 
 	require.Eventually(t, func() bool {
-		if acked {
-			<-newMessage.Acked()
-		} else {
-			<-newMessage.Nacked()
-		}
+		<-newMessage.Acked()
 
 		return true
 	}, time.Second, time.Millisecond)

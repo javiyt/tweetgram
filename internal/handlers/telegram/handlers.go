@@ -86,9 +86,6 @@ func (t *Telegram) handleText(ctx context.Context) {
 
 			if err := t.bot.Send(strconv.Itoa(int(t.cfg.BroadcastChannel)), m.Text); err != nil {
 				handlers.SendError(t.q, err)
-				msg.Nack()
-
-				continue
 			}
 
 			msg.Ack()
@@ -125,9 +122,6 @@ func (t *Telegram) handlePhoto(ctx context.Context) {
 				FileSize: m.FileSize,
 			}); err != nil {
 				handlers.SendError(t.q, err)
-				msg.Nack()
-
-				continue
 			}
 
 			msg.Ack()

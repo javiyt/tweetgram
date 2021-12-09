@@ -76,9 +76,6 @@ func (t *Twitter) handleText(ctx context.Context) {
 
 			if err := t.tc.SendUpdate(m.Text); err != nil {
 				handlers.SendError(t.q, err)
-				msg.Nack()
-
-				continue
 			}
 
 			msg.Ack()
@@ -110,9 +107,6 @@ func (t *Twitter) handlePhoto(ctx context.Context) {
 
 			if err := t.tc.SendUpdateWithPhoto(m.Caption, m.FileContent); err != nil {
 				handlers.SendError(t.q, err)
-				msg.Nack()
-
-				continue
 			}
 
 			msg.Ack()
