@@ -10,7 +10,7 @@ require (
 	github.com/subosito/gotenv v1.2.0
 	github.com/vektra/mockery/v2 v2.9.4
 	gopkg.in/tucnak/telebot.v2 v2.5.0
-	mvdan.cc/gofumpt v0.2.0
+	mvdan.cc/gofumpt v0.2.1
 )
 
 require (
@@ -40,7 +40,7 @@ require (
 	github.com/tetafro/godot v1.4.11 // indirect
 	github.com/timakin/bodyclose v0.0.0-20210704033933-f49887972144 // indirect
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
-	golang.org/x/sys v0.0.0-20211102192858-4dd72447c267 // indirect
+	golang.org/x/sys v0.0.0-20211213223007-03aa0b5f6827 // indirect
 	golang.org/x/term v0.0.0-20210916214954-140adaaadfaf // indirect
 	mvdan.cc/unparam v0.0.0-20210915133954-dcc0b62f2ca0 // indirect
 )
@@ -55,7 +55,7 @@ require (
 	github.com/mailru/easyjson v0.7.7
 	github.com/sirupsen/logrus v1.8.1
 	github.com/zimmski/go-mutesting v0.0.0-20210610104036-6d9217011a00
-	golang.org/x/tools v0.1.8-0.20211102182255-bb4add04ddef
+	golang.org/x/tools v0.1.8
 )
 
 require (
