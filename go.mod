@@ -17,7 +17,7 @@ require (
 	4d63.com/gochecknoglobals v0.1.0 // indirect
 	github.com/Antonboom/errname v0.1.5 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
-	github.com/dghubble/oauth1 v0.7.0
+	github.com/dghubble/oauth1 v0.7.1
 	github.com/go-critic/go-critic v0.6.1 // indirect
 	github.com/google/wire v0.5.0
 	github.com/gordonklaus/ineffassign v0.0.0-20210914165742-4cc7213b9bc8 // indirect
@@ -50,7 +50,7 @@ require (
 	github.com/go-toolsmith/pkgload v1.0.1 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/subcommands v1.2.0 // indirect
-	github.com/jarcoal/httpmock v1.0.8
+	github.com/jarcoal/httpmock v1.1.0
 	github.com/javiyt/twitter-text-go v0.0.0-20211005143923-7fd06898aff9
 	github.com/mailru/easyjson v0.7.7
 	github.com/sirupsen/logrus v1.8.1
