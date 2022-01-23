@@ -50,6 +50,7 @@ tasks:
       - task: stringer
       - task: json
       - task: wire
+      - task: embed
       - task: mock
   install:
     desc: Download all tools and dependencies to vendor directory
@@ -134,6 +135,35 @@ tasks:
     sources:
       - internal/pubsub/broadcast.go
     silent: true
+  embed:
+    desc: Generate embeded envFile
+    run: once
+    deps:
+      - install
+    dir: cmd/
+    silent: true
+    cmds:
+      - go run github.com/c-sto/encembed -i env -decvarname envFile -funcname env -o embededenv -srcname embededenv.go -encvarname embededenv
+      - go run github.com/c-sto/encembed -i env.test -decvarname envTestFile -funcname envTest -o embededenvtest -srcname embededenvtest.go -encvarname embededenvtest
+    sources:
+      - cmd/env
+      - cmd/env.test
+    generates:
+      - cmd/embededenv
+      - cmd/embededenv.go
+      - cmd/embededenvtest
+      - cmd/embededenvtest.go
+  clean-embed:
+    desc: Remove all embeded generated files
+    run: once
+    cmds:
+      - find ./cmd -type f -name 'embededenv*' -delete
+    sources:
+      - cmd/embededenv
+      - cmd/embededenv.go
+      - cmd/embededenvtest
+      - cmd/embededenvtest.go
+    silent: true
   mock:
     desc: Generate all mocks for testing
     run: once
@@ -180,7 +210,7 @@ tasks:
       - task: stringer
       - task: json
       - task: wire
-      - go run cmd/main.go -test=true
+      - go run cmd/*.go -test=true
   run:
     desc: Execute the bot
     deps:
@@ -190,7 +220,8 @@ tasks:
       - task: stringer
       - task: json
       - task: wire
-      - go run cmd/main.go
+      - task: embed
+      - go run cmd/*.go
   clean:
     desc: Clean all auto generated files
     run: once
@@ -198,6 +229,7 @@ tasks:
       - clean-json
       - clean-stringer
       - clean-wire
+      - clean-embed
       - clean-mock
     cmds:
       - echo "Removing auto generated files"
