@@ -49,8 +49,8 @@ tasks:
     cmds:
       - task: stringer
       - task: json
-      - task: wire
       - task: embed
+      - task: wire
       - task: mock
   install:
     desc: Download all tools and dependencies to vendor directory
