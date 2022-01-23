@@ -12,14 +12,6 @@ import (
 	"github.com/javiyt/tweetgram/internal/app"
 )
 
-//nolint:gochecknoglobals
-//go:embed env
-var envFile []byte
-
-//nolint:gochecknoglobals
-//go:embed env.test
-var envTestFile []byte
-
 func main() {
 	testBot := flag.Bool("test", false, "Should execute test bot")
 	flag.Parse()
