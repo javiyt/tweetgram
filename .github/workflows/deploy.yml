@@ -36,7 +36,7 @@ jobs:
       - name: Test
         run: task test
       - name: Build Binary
-        run: go build -o ${{secrets.BINARY_NAME}} cmd/main.go
+        run: go build -o ${{secrets.BINARY_NAME}} cmd/*.go
       - name: Find and Replace binary folder
         uses: jacobtomlinson/gha-find-replace@v2
         with:
