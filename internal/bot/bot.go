@@ -19,6 +19,7 @@ type TelegramBot interface {
 	Handle(string, TelegramHandler)
 	Send(string, interface{}, ...interface{}) error
 	GetFile(string) (io.ReadCloser, error)
+	SendAlbum(to string, a tb.Album, options ...interface{}) ([]tb.Message, error)
 }
 
 type TelegramHandler func(*TelegramMessage)
@@ -60,6 +61,7 @@ type Bot struct {
 	tc  TwitterClient
 	cfg config.AppConfig
 	q   pubsub.Queue
+	albumChan chan *tb.Message
 }
 
 type Option func(b *Bot)
@@ -96,7 +98,9 @@ func WithQueue(q pubsub.Queue) Option {
 }
 
 func NewBot(options ...Option) AppBot {
-	b := &Bot{}
+	b := &Bot{
+		albumChan: make(chan *tb.Message),
+	}
 
 	for _, o := range options {
 		o(b)
@@ -111,6 +115,7 @@ func (b *Bot) Start(context.Context) error {
 	}
 
 	b.setUpHandlers()
+	b.handleAlbum()
 
 	return nil
 }
@@ -120,6 +125,7 @@ func (b *Bot) Run() {
 }
 
 func (b *Bot) Stop() {
+	close(b.albumChan)
 	b.bot.Stop()
 	_ = b.q.Close()
 }
