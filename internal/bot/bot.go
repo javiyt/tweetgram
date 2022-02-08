@@ -9,7 +9,7 @@ import (
 	"github.com/javiyt/tweetgram/internal/pubsub"
 
 	"github.com/javiyt/tweetgram/internal/config"
-	tb "gopkg.in/tucnak/telebot.v2"
+	tb "gopkg.in/telebot.v3"
 )
 
 type TelegramBot interface {
@@ -21,7 +21,7 @@ type TelegramBot interface {
 	GetFile(string) (io.ReadCloser, error)
 }
 
-type TelegramHandler func(*TelegramMessage)
+type TelegramHandler func(*TelegramMessage) error
 
 type TelegramBotCommand struct {
 	Text        string

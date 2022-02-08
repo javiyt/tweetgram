@@ -16,7 +16,7 @@ import (
 	"github.com/javiyt/tweetgram/internal/bot"
 	"github.com/javiyt/tweetgram/internal/telegram"
 	"github.com/stretchr/testify/require"
-	tb "gopkg.in/tucnak/telebot.v2"
+	tb "gopkg.in/telebot.v3"
 )
 
 func TestMain(m *testing.M) {
@@ -129,9 +129,11 @@ func TestBot_Handle(t *testing.T) {
 
 	handled.Store(false)
 
-	bt.Handle(tb.OnPhoto, func(m *bot.TelegramMessage) {
+	bt.Handle(tb.OnPhoto, func(m *bot.TelegramMessage) error {
 		handled.Store(m.Photo.Caption == "image")
 		bt.Stop()
+
+		return nil
 	})
 
 	go bt.Start()
@@ -186,7 +188,7 @@ func TestBot_Send(t *testing.T) {
 	})
 
 	t.Run("it should fail sending a text message", func(t *testing.T) {
-		require.EqualError(t, bt.Send("1234567890", "fail message"), "telegram unknown:  (0)")
+		require.EqualError(t, bt.Send("1234567890", "fail message"), "telegram:  (0)")
 	})
 
 	t.Run("it send a text message longer than expected", func(t *testing.T) {

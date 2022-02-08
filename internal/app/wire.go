@@ -26,7 +26,7 @@ import (
 	"github.com/javiyt/tweetgram/internal/twitter"
 
 	gt "github.com/javiyt/go-twitter/twitter"
-	tb "gopkg.in/tucnak/telebot.v2"
+	tb "gopkg.in/telebot.v3"
 )
 
 type customHandlerGenerator func() []handlers.EventHandler
