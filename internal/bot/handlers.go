@@ -71,10 +71,7 @@ func (b *Bot) handleText(m *TelegramMessage) error {
 		return nil
 	}
 
-	mb, err := easyjson.Marshal(pubsub.TextEvent{Text: msg})
-	if err != nil {
-		return err
-	}
+	mb, _ := easyjson.Marshal(pubsub.TextEvent{Text: msg})
 
 	return b.q.Publish(pubsub.TextTopic.String(), message.NewMessage(watermill.NewUUID(), mb))
 }

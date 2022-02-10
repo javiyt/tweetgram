@@ -208,40 +208,68 @@ func TestBot_Send(t *testing.T) {
 }
 
 func TestBot_GetFile(t *testing.T) {
-	fileJson, _ := ioutil.ReadFile("testdata/getfile.json")
-	httpmock.RegisterResponder(
-		"POST",
-		"https://api.telegram.mock/botasdfg:12345/getFile",
-		httpmock.NewStringResponder(
-			200,
-			string(fileJson),
-		),
-	)
+	t.Run("it should fail when downloading the file", func(t *testing.T) {
+		httpmock.RegisterResponder(
+			"POST",
+			"https://api.telegram.mock/botasdfg:12345/getFile",
+			httpmock.NewStringResponder(
+				404,
+				"",
+			),
+		)
 
-	icon, _ := ioutil.ReadFile("testdata/td_icon.png")
-	httpmock.RegisterResponder(
-		"GET",
-		"https://api.telegram.mock/file/botasdfg:12345/photos/file_4.jpg",
-		httpmock.NewBytesResponder(
-			200,
-			icon,
-		),
-	)
+		tlgmbot, err := tb.NewBot(tb.Settings{
+			URL:   "https://api.telegram.mock",
+			Token: "asdfg:12345",
+			Poller: &tb.LongPoller{
+				Timeout: 10 * time.Second,
+			},
+		})
+		require.NoError(t, err)
 
-	tlgmbot, err := tb.NewBot(tb.Settings{
-		URL:   "https://api.telegram.mock",
-		Token: "asdfg:12345",
-		Poller: &tb.LongPoller{
-			Timeout: 10 * time.Second,
-		},
+		bt := telegram.NewBot(tlgmbot)
+
+		_, err = bt.GetFile("AZCDxruqG7J3iTM9")
+
+		require.EqualError(t, err, "telebot: unexpected end of JSON input")
 	})
-	require.NoError(t, err)
 
-	bt := telegram.NewBot(tlgmbot)
+	t.Run("it should download the file", func(t *testing.T) {
+		fileJson, _ := ioutil.ReadFile("testdata/getfile.json")
+		httpmock.RegisterResponder(
+			"POST",
+			"https://api.telegram.mock/botasdfg:12345/getFile",
+			httpmock.NewStringResponder(
+				200,
+				string(fileJson),
+			),
+		)
 
-	_, err = bt.GetFile("AZCDxruqG7J3iTM9")
+		icon, _ := ioutil.ReadFile("testdata/td_icon.png")
+		httpmock.RegisterResponder(
+			"GET",
+			"https://api.telegram.mock/file/botasdfg:12345/photos/file_4.jpg",
+			httpmock.NewBytesResponder(
+				200,
+				icon,
+			),
+		)
 
-	require.NoError(t, err)
+		tlgmbot, err := tb.NewBot(tb.Settings{
+			URL:   "https://api.telegram.mock",
+			Token: "asdfg:12345",
+			Poller: &tb.LongPoller{
+				Timeout: 10 * time.Second,
+			},
+		})
+		require.NoError(t, err)
+
+		bt := telegram.NewBot(tlgmbot)
+
+		_, err = bt.GetFile("AZCDxruqG7J3iTM9")
+
+		require.NoError(t, err)
+	})
 }
 
 func registerResponders(testMessageSent, testLongMessageSent, photoSent, firstLongMessage *atomic.Value) {
