@@ -208,24 +208,21 @@ func TestBot_Send(t *testing.T) {
 }
 
 func TestBot_GetFile(t *testing.T) {
+	tlgmbot, err := tb.NewBot(tb.Settings{
+		URL:   "https://api.telegram.mock",
+		Token: "asdfg:12345",
+		Poller: &tb.LongPoller{
+			Timeout: 10 * time.Second,
+		},
+	})
+	require.NoError(t, err)
+
 	t.Run("it should fail when downloading the file", func(t *testing.T) {
 		httpmock.RegisterResponder(
 			"POST",
 			"https://api.telegram.mock/botasdfg:12345/getFile",
-			httpmock.NewStringResponder(
-				404,
-				"",
-			),
+			httpmock.NewStringResponder(404, ""),
 		)
-
-		tlgmbot, err := tb.NewBot(tb.Settings{
-			URL:   "https://api.telegram.mock",
-			Token: "asdfg:12345",
-			Poller: &tb.LongPoller{
-				Timeout: 10 * time.Second,
-			},
-		})
-		require.NoError(t, err)
 
 		bt := telegram.NewBot(tlgmbot)
 
@@ -254,15 +251,6 @@ func TestBot_GetFile(t *testing.T) {
 				icon,
 			),
 		)
-
-		tlgmbot, err := tb.NewBot(tb.Settings{
-			URL:   "https://api.telegram.mock",
-			Token: "asdfg:12345",
-			Poller: &tb.LongPoller{
-				Timeout: 10 * time.Second,
-			},
-		})
-		require.NoError(t, err)
 
 		bt := telegram.NewBot(tlgmbot)
 
