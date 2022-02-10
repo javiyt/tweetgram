@@ -8,7 +8,7 @@ import (
 	mq "github.com/javiyt/tweetgram/mocks/pubsub"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	tb "gopkg.in/tucnak/telebot.v2"
+	tb "gopkg.in/telebot.v3"
 )
 
 type settingCommandError struct{}

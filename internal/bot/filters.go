@@ -7,26 +7,26 @@ import (
 type filterFunc func(f TelegramHandler) TelegramHandler
 
 func (b *Bot) onlyPrivate(f TelegramHandler) TelegramHandler {
-	return func(m *TelegramMessage) {
+	return func(m *TelegramMessage) error {
 		if !m.IsPrivate {
-			return
+			return nil
 		}
 
-		f(m)
+		return f(m)
 	}
 }
 
 func (b *Bot) onlyAdmins(f TelegramHandler) TelegramHandler {
-	return func(m *TelegramMessage) {
+	return func(m *TelegramMessage) error {
 		senderID, err := strconv.Atoi(m.SenderID)
 		if err != nil {
-			return
+			return err
 		}
 
 		if !b.cfg.IsAdmin(senderID) {
-			return
+			return nil
 		}
 
-		f(m)
+		return f(m)
 	}
 }

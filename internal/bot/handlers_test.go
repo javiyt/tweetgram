@@ -13,7 +13,7 @@ import (
 	mq "github.com/javiyt/tweetgram/mocks/pubsub"
 	"github.com/stretchr/testify/mock"
 
-	tb "gopkg.in/tucnak/telebot.v2"
+	tb "gopkg.in/telebot.v3"
 )
 
 const (

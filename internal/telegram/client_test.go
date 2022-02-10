@@ -16,7 +16,7 @@ import (
 	"github.com/javiyt/tweetgram/internal/bot"
 	"github.com/javiyt/tweetgram/internal/telegram"
 	"github.com/stretchr/testify/require"
-	tb "gopkg.in/tucnak/telebot.v2"
+	tb "gopkg.in/telebot.v3"
 )
 
 func TestMain(m *testing.M) {
@@ -129,9 +129,11 @@ func TestBot_Handle(t *testing.T) {
 
 	handled.Store(false)
 
-	bt.Handle(tb.OnPhoto, func(m *bot.TelegramMessage) {
+	bt.Handle(tb.OnPhoto, func(m *bot.TelegramMessage) error {
 		handled.Store(m.Photo.Caption == "image")
 		bt.Stop()
+
+		return nil
 	})
 
 	go bt.Start()
@@ -186,7 +188,7 @@ func TestBot_Send(t *testing.T) {
 	})
 
 	t.Run("it should fail sending a text message", func(t *testing.T) {
-		require.EqualError(t, bt.Send("1234567890", "fail message"), "telegram unknown:  (0)")
+		require.EqualError(t, bt.Send("1234567890", "fail message"), "telegram:  (0)")
 	})
 
 	t.Run("it send a text message longer than expected", func(t *testing.T) {
@@ -206,26 +208,6 @@ func TestBot_Send(t *testing.T) {
 }
 
 func TestBot_GetFile(t *testing.T) {
-	fileJson, _ := ioutil.ReadFile("testdata/getfile.json")
-	httpmock.RegisterResponder(
-		"POST",
-		"https://api.telegram.mock/botasdfg:12345/getFile",
-		httpmock.NewStringResponder(
-			200,
-			string(fileJson),
-		),
-	)
-
-	icon, _ := ioutil.ReadFile("testdata/td_icon.png")
-	httpmock.RegisterResponder(
-		"GET",
-		"https://api.telegram.mock/file/botasdfg:12345/photos/file_4.jpg",
-		httpmock.NewBytesResponder(
-			200,
-			icon,
-		),
-	)
-
 	tlgmbot, err := tb.NewBot(tb.Settings{
 		URL:   "https://api.telegram.mock",
 		Token: "asdfg:12345",
@@ -235,11 +217,47 @@ func TestBot_GetFile(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	bt := telegram.NewBot(tlgmbot)
+	t.Run("it should fail when downloading the file", func(t *testing.T) {
+		httpmock.RegisterResponder(
+			"POST",
+			"https://api.telegram.mock/botasdfg:12345/getFile",
+			httpmock.NewStringResponder(404, ""),
+		)
 
-	_, err = bt.GetFile("AZCDxruqG7J3iTM9")
+		bt := telegram.NewBot(tlgmbot)
 
-	require.NoError(t, err)
+		_, err = bt.GetFile("AZCDxruqG7J3iTM9")
+
+		require.EqualError(t, err, "telebot: unexpected end of JSON input")
+	})
+
+	t.Run("it should download the file", func(t *testing.T) {
+		fileJson, _ := ioutil.ReadFile("testdata/getfile.json")
+		httpmock.RegisterResponder(
+			"POST",
+			"https://api.telegram.mock/botasdfg:12345/getFile",
+			httpmock.NewStringResponder(
+				200,
+				string(fileJson),
+			),
+		)
+
+		icon, _ := ioutil.ReadFile("testdata/td_icon.png")
+		httpmock.RegisterResponder(
+			"GET",
+			"https://api.telegram.mock/file/botasdfg:12345/photos/file_4.jpg",
+			httpmock.NewBytesResponder(
+				200,
+				icon,
+			),
+		)
+
+		bt := telegram.NewBot(tlgmbot)
+
+		_, err = bt.GetFile("AZCDxruqG7J3iTM9")
+
+		require.NoError(t, err)
+	})
 }
 
 func registerResponders(testMessageSent, testLongMessageSent, photoSent, firstLongMessage *atomic.Value) {

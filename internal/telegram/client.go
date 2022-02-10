@@ -2,12 +2,13 @@ package telegram
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"strconv"
 	"strings"
 
 	"github.com/javiyt/tweetgram/internal/bot"
-	tb "gopkg.in/tucnak/telebot.v2"
+	tb "gopkg.in/telebot.v3"
 )
 
 const telegramMessageLength = 4096
@@ -42,25 +43,25 @@ func (b *Bot) SetCommands(commands []bot.TelegramBotCommand) error {
 }
 
 func (b *Bot) Handle(endpoint string, handler bot.TelegramHandler) {
-	b.b.Handle(endpoint, func(m *tb.Message) {
+	b.b.Handle(endpoint, func(m tb.Context) error {
 		var p bot.TelegramPhoto
-		if m.Photo != nil && strings.TrimSpace(m.Photo.FileID) != "" {
+		if m.Message().Photo != nil && strings.TrimSpace(m.Message().Photo.FileID) != "" {
 			p = bot.TelegramPhoto{
-				Caption:  m.Caption,
-				FileID:   m.Photo.FileID,
-				FileURL:  m.Photo.FileURL,
-				FileSize: m.Photo.FileSize,
+				Caption:  m.Message().Caption,
+				FileID:   m.Message().Photo.FileID,
+				FileURL:  m.Message().Photo.FileURL,
+				FileSize: m.Message().Photo.FileSize,
 			}
 		}
 		message := bot.TelegramMessage{
-			SenderID:  m.Sender.Recipient(),
-			Text:      m.Text,
-			Payload:   m.Payload,
+			SenderID:  fmt.Sprintf("%v", m.Sender().ID),
+			Text:      m.Text(),
+			Payload:   m.Message().Payload,
 			Photo:     p,
-			IsPrivate: m.Private(),
+			IsPrivate: m.Chat().Private,
 		}
 
-		handler(&message)
+		return handler(&message)
 	})
 }
 
@@ -105,7 +106,12 @@ func (b *Bot) Send(to string, what interface{}, options ...interface{}) error {
 }
 
 func (b *Bot) GetFile(fileID string) (io.ReadCloser, error) {
-	return b.b.GetFile(&tb.File{FileID: fileID})
+	fileByID, err := b.b.FileByID(fileID)
+	if err != nil {
+		return nil, err
+	}
+
+	return b.b.File(&fileByID)
 }
 
 func (b *Bot) chunks(s string, chunkSize int) []string {
