@@ -6,15 +6,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v2.2.0
         with:
           go-version: 1.17.5
       - name: Install Task
-        uses: arduino/setup-task@v1
+        uses: arduino/setup-task@v1.0.0
         with:
-          version: 3.7.3
+          version: 3.11.0
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.4.0
       - name: Generate env file
         run: 'echo "$ENV_FILE" > cmd/env'
         shell: bash

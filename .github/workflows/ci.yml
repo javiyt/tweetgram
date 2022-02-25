@@ -8,11 +8,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v2.2.0
         with:
           go-version: ${{ matrix.go-version }}
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.4.0
       - name: Generate env file
         run: 'echo "$ENV_FILE" > cmd/env'
         shell: bash
@@ -24,9 +24,9 @@ jobs:
         env:
           ENV_TEST_FILE: ${{secrets.ENV_TEST}}
       - name: Install Task
-        uses: arduino/setup-task@v1
+        uses: arduino/setup-task@v1.0.0
         with:
-          version: 3.7.3
+          version: 3.11.0
       - name: Test
         run: task test
       - name: Upload report to Codecov
@@ -39,10 +39,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v2.2.0
         with:
           go-version: 1.17.x
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2.4.0
       - name: Generate env file
         run: 'echo "$ENV_FILE" > cmd/env'
         shell: bash
@@ -54,15 +54,15 @@ jobs:
         env:
           ENV_TEST_FILE: ${{secrets.ENV_TEST}}
       - name: Install Task
-        uses: arduino/setup-task@v1
+        uses: arduino/setup-task@v1.0.0
         with:
-          version: 3.7.3
+          version: 3.11.0
       - name: Generate code
         run: task generate
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v3.0.0
         with:
-          version: v1.43.0
+          version: v1.44.2
           skip-pkg-cache: true
           skip-go-installation: true
           skip-build-cache: true
