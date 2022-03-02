@@ -12,7 +12,7 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
       - name: Checkout code
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
       - name: Generate env file
         run: 'echo "$ENV_FILE" > cmd/env'
         shell: bash
@@ -42,7 +42,7 @@ jobs:
         uses: actions/setup-go@v3.0.0
         with:
           go-version: 1.17.x
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3
       - name: Generate env file
         run: 'echo "$ENV_FILE" > cmd/env'
         shell: bash
