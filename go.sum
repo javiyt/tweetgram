@@ -473,8 +473,8 @@ github.com/inconshreveable/mousetrap v1.0.0 h1:Z8tu5sraLXCXIcARxBp/8cbvlwVa7Z1NH
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
 github.com/jarcoal/httpmock v1.1.0 h1:F47ChZj1Y2zFsCXxNkBPwNNKnAyOATcdQibk0qEdVCE=
 github.com/jarcoal/httpmock v1.1.0/go.mod h1:ATjnClrvW/3tijVmpL/va5Z3aAyGvqU3gCT8nX0Txik=
-github.com/javiyt/go-twitter v0.0.2 h1:0Av5FiZzf8YY90KX2t+n0OWXRREzNlGRzhhPYduS0n0=
-github.com/javiyt/go-twitter v0.0.2/go.mod h1:KOZ6oUc5OQiP8dnuTkgJ2YeWTl05R41kh8kJKafVxYY=
+github.com/javiyt/go-twitter v0.0.3 h1:vJFpkj89dUK/JXEANePMBE56olKc7b69mN8NiFwBRe8=
+github.com/javiyt/go-twitter v0.0.3/go.mod h1:KOZ6oUc5OQiP8dnuTkgJ2YeWTl05R41kh8kJKafVxYY=
 github.com/javiyt/twitter-text-go v0.0.0-20211005143923-7fd06898aff9 h1:dRGBFN5cESNVPTvnVNelz3d58bFi/UVkRIVPdl4TA2s=
 github.com/javiyt/twitter-text-go v0.0.0-20211005143923-7fd06898aff9/go.mod h1:1epIq7AbU5flqlyoR77wiOY9vYe82sXjj4CLjuB3vOM=
 github.com/jessevdk/go-flags v1.4.0 h1:4IU2WS7AumrZ/40jfhf4QVDMsQwqA7VEHozFRrGARJA=
