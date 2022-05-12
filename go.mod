@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/c-sto/encembed v0.0.0-20211021084118-3213e2129290
-	github.com/golangci/golangci-lint v1.46.0
+	github.com/golangci/golangci-lint v1.46.1
 	github.com/javiyt/go-twitter v0.0.3
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/stretchr/testify v1.7.1
@@ -133,7 +133,7 @@ require (
 	github.com/ldez/tagliatelle v0.3.1 // indirect
 	github.com/leonklingele/grouper v1.1.0 // indirect
 	github.com/lithammer/shortuuid/v3 v3.0.4 // indirect
-	github.com/lufeee/execinquery v1.0.0 // indirect
+	github.com/lufeee/execinquery v1.2.0 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/maratori/testpackage v1.0.1 // indirect
 	github.com/matoous/godox v0.0.0-20210227103229-6504466cf951 // indirect
