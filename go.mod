@@ -1,6 +1,6 @@
 module github.com/javiyt/tweetgram
 
-go 1.17
+go 1.18
 
 require (
 	github.com/c-sto/encembed v0.0.0-20211021084118-3213e2129290
