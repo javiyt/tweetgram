@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/javiyt/tweetgram/mocks/telebot"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -12,6 +11,8 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
+
+	"github.com/javiyt/tweetgram/mocks/telebot"
 
 	"github.com/jarcoal/httpmock"
 	"github.com/javiyt/tweetgram/internal/bot"
