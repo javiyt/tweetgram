@@ -11,11 +11,11 @@ import (
 	"github.com/mailru/easyjson"
 )
 
-func (b *Bot) handleStartCommand(m *TelegramMessage) error {
+func (b *Bot) handleStartCommand(m TelegramMessage) error {
 	return b.bot.Send(m.SenderID, "Thanks for using the bot! You can type /help command to know what can I do")
 }
 
-func (b *Bot) handleHelpCommand(m *TelegramMessage) error {
+func (b *Bot) handleHelpCommand(m TelegramMessage) error {
 	user, err := strconv.Atoi(m.SenderID)
 	if err != nil {
 		return err
@@ -29,7 +29,7 @@ func (b *Bot) handleHelpCommand(m *TelegramMessage) error {
 	return b.bot.Send(m.SenderID, helpText)
 }
 
-func (b *Bot) handleStopNotificationsCommand(m *TelegramMessage) error {
+func (b *Bot) handleStopNotificationsCommand(m TelegramMessage) error {
 	ce := pubsub.CommandEvent{Command: pubsub.StopCommand}
 	if m.Payload != "" {
 		ce.Handler = m.Payload
@@ -40,7 +40,7 @@ func (b *Bot) handleStopNotificationsCommand(m *TelegramMessage) error {
 	return b.q.Publish(pubsub.CommandTopic.String(), message.NewMessage(watermill.NewUUID(), marshal))
 }
 
-func (b *Bot) handlePhoto(m *TelegramMessage) error {
+func (b *Bot) handlePhoto(m TelegramMessage) error {
 	caption := strings.TrimSpace(m.Photo.Caption)
 	if caption == "" {
 		return nil
@@ -65,7 +65,7 @@ func (b *Bot) handlePhoto(m *TelegramMessage) error {
 	return b.q.Publish(pubsub.PhotoTopic.String(), message.NewMessage(watermill.NewUUID(), mb))
 }
 
-func (b *Bot) handleText(m *TelegramMessage) error {
+func (b *Bot) handleText(m TelegramMessage) error {
 	msg := strings.TrimSpace(m.Text)
 	if msg == "" {
 		return nil
