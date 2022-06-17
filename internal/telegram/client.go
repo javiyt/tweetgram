@@ -53,6 +53,7 @@ func (b *Bot) Handle(endpoint string, handler bot.TelegramHandler) {
 				FileSize: m.Message().Photo.FileSize,
 			}
 		}
+
 		return handler(bot.TelegramMessage{
 			SenderID:  fmt.Sprintf("%v", m.Sender().ID),
 			Text:      m.Text(),
