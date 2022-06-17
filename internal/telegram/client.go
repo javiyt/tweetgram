@@ -53,15 +53,14 @@ func (b *Bot) Handle(endpoint string, handler bot.TelegramHandler) {
 				FileSize: m.Message().Photo.FileSize,
 			}
 		}
-		message := bot.TelegramMessage{
+
+		return handler(bot.TelegramMessage{
 			SenderID:  fmt.Sprintf("%v", m.Sender().ID),
 			Text:      m.Text(),
 			Payload:   m.Message().Payload,
 			Photo:     p,
 			IsPrivate: m.Chat().Private,
-		}
-
-		return handler(&message)
+		})
 	})
 }
 
@@ -112,6 +111,17 @@ func (b *Bot) GetFile(fileID string) (io.ReadCloser, error) {
 	}
 
 	return b.b.File(&fileByID)
+}
+
+func (b *Bot) ErrorHandler(f func(error, bot.TelegramMessage)) {
+	b.b.OnError = func(err error, ctx tb.Context) {
+		f(err, bot.TelegramMessage{
+			SenderID:  fmt.Sprintf("%v", ctx.Sender().ID),
+			Text:      ctx.Text(),
+			Payload:   ctx.Message().Payload,
+			IsPrivate: ctx.Chat().Private,
+		})
+	}
 }
 
 func (b *Bot) chunks(s string, chunkSize int) []string {

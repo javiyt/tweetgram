@@ -19,9 +19,10 @@ type TelegramBot interface {
 	Handle(string, TelegramHandler)
 	Send(string, interface{}, ...interface{}) error
 	GetFile(string) (io.ReadCloser, error)
+	ErrorHandler(func(error, TelegramMessage))
 }
 
-type TelegramHandler func(*TelegramMessage) error
+type TelegramHandler func(TelegramMessage) error
 
 type TelegramBotCommand struct {
 	Text        string

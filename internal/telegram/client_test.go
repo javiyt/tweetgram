@@ -12,6 +12,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/javiyt/tweetgram/mocks/telebot"
+
 	"github.com/jarcoal/httpmock"
 	"github.com/javiyt/tweetgram/internal/bot"
 	"github.com/javiyt/tweetgram/internal/telegram"
@@ -129,7 +131,7 @@ func TestBot_Handle(t *testing.T) {
 
 	handled.Store(false)
 
-	bt.Handle(tb.OnPhoto, func(m *bot.TelegramMessage) error {
+	bt.Handle(tb.OnPhoto, func(m bot.TelegramMessage) error {
 		handled.Store(m.Photo.Caption == "image")
 		bt.Stop()
 
@@ -258,6 +260,39 @@ func TestBot_GetFile(t *testing.T) {
 
 		require.NoError(t, err)
 	})
+}
+
+func TestBot_ErrorHandler(t *testing.T) {
+	var handled atomic.Value
+
+	handled.Store(false)
+
+	eh := func(e error, m bot.TelegramMessage) {
+		handled.Store(true)
+	}
+
+	tlgmbot, err := tb.NewBot(tb.Settings{
+		URL:   "https://api.telegram.mock",
+		Token: "asdfg:12345",
+		Poller: &tb.LongPoller{
+			Timeout: 10 * time.Second,
+		},
+	})
+	require.NoError(t, err)
+
+	bt := telegram.NewBot(tlgmbot)
+
+	bt.ErrorHandler(eh)
+
+	c := new(telebot.Context)
+	c.On("Sender").Return(&tb.User{})
+	c.On("Text").Return("test")
+	c.On("Message").Return(&tb.Message{})
+	c.On("Chat").Return(&tb.Chat{})
+
+	tlgmbot.OnError(nil, c)
+
+	require.Equal(t, true, handled.Load())
 }
 
 func registerResponders(testMessageSent, testLongMessageSent, photoSent, firstLongMessage *atomic.Value) {
