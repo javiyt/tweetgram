@@ -191,6 +191,7 @@ func TestTwitter_ExecuteHandlersNotificationsDisabled(t *testing.T) {
 		sendMessageToChannel(t, textChannel, []byte("{\"text\":\"testing message\"}"))
 
 		mockedQueue.AssertExpectations(t)
+		mockedTwitter.Test(t)
 		mockedTwitter.AssertNotCalled(t, "SendUpdate", "testing message")
 	})
 
@@ -214,6 +215,7 @@ func TestTwitter_ExecuteHandlersNotificationsDisabled(t *testing.T) {
 		sendMessageToChannel(t, photoChannel, bytes)
 
 		mockedQueue.AssertExpectations(t)
+		mockedTwitter.Test(t)
 		mockedTwitter.AssertNotCalled(t, "SendUpdateWithPhoto", "testing caption", photoContent)
 	})
 }

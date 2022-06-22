@@ -192,6 +192,7 @@ func TestTelegram_ExecuteHandlersNotificationsDisabled(t *testing.T) {
 		sendMessageToChannel(t, textChannel, []byte("{\"text\":\"testing message\"}"))
 
 		mockedQueue.AssertExpectations(t)
+		mockedBot.Test(t)
 		mockedBot.AssertNotCalled(t, "Send", strconv.Itoa(int(cfg.BroadcastChannel)), "testing message")
 	})
 
@@ -206,6 +207,7 @@ func TestTelegram_ExecuteHandlersNotificationsDisabled(t *testing.T) {
 		sendMessageToChannel(t, photoChannel, eventMsg)
 
 		mockedQueue.AssertExpectations(t)
+		mockedBot.Test(t)
 		mockedBot.AssertNotCalled(t, "Send", strconv.Itoa(int(cfg.BroadcastChannel)), mock.MatchedBy(matchTelegramPhoto()))
 	})
 }
