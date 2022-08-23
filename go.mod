@@ -8,7 +8,7 @@ require (
 	github.com/javiyt/go-twitter v0.0.3
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/stretchr/testify v1.8.0
-	github.com/subosito/gotenv v1.4.0
+	github.com/subosito/gotenv v1.4.1
 	github.com/vektra/mockery/v2 v2.14.0
 	gopkg.in/telebot.v3 v3.0.0
 	mvdan.cc/gofumpt v0.3.1
