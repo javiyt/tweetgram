@@ -1,0 +1,6 @@
+{
+  "name": "Tweetgram Bot",
+  "description": "A telegram bot to publish to Twitter and to broadcast messages to channels",
+  "repository": "https://github.com/javiyt/tweetgram/tree/main",
+  "keywords": ["twitter", "telegram", "bot"]
+}
