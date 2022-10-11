@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	tbBotMock "github.com/javiyt/tweetgram/mocks/telegram"
 	"math/rand"
 	"net/http"
 	"os"
@@ -73,6 +74,13 @@ func TestBot_Start(t *testing.T) {
 
 		return ok
 	}, time.Second, time.Millisecond)
+}
+
+func TestBot_Stop(t *testing.T) {
+	tbBot := tbBotMock.NewTbBot(t)
+	tbBot.On("Stop")
+	telegram.NewBot(tbBot).Stop()
+	tbBot.AssertCalled(t, "Stop")
 }
 
 func TestBot_SetCommands(t *testing.T) {
