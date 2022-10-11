@@ -113,17 +113,6 @@ func (b *Bot) GetFile(fileID string) (io.ReadCloser, error) {
 	return b.b.File(&fileByID)
 }
 
-func (b *Bot) ErrorHandler(f func(error, bot.TelegramMessage)) {
-	b.b.OnError = func(err error, ctx tb.Context) {
-		f(err, bot.TelegramMessage{
-			SenderID:  fmt.Sprintf("%v", ctx.Sender().ID),
-			Text:      ctx.Text(),
-			Payload:   ctx.Message().Payload,
-			IsPrivate: ctx.Chat().Private,
-		})
-	}
-}
-
 func (b *Bot) chunks(s string, chunkSize int) []string {
 	if chunkSize >= len(s) {
 		return []string{s}

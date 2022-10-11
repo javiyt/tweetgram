@@ -38,7 +38,7 @@ type PhotoEvent struct {
 	Caption     string `json:"caption"`
 	FileID      string `json:"fileId"`
 	FileURL     string `json:"fileUrl"`
-	FileSize    int    `json:"fileSize"`
+	FileSize    int64  `json:"fileSize"`
 	FileContent []byte `json:"fileContent"`
 }
 
