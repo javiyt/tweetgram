@@ -13,11 +13,21 @@ import (
 
 const telegramMessageLength = 4096
 
-type Bot struct {
-	b *tb.Bot
+type TbBot interface {
+	Start()
+	Stop()
+	SetCommands(opts ...interface{}) error
+	Handle(endpoint interface{}, h tb.HandlerFunc, m ...tb.MiddlewareFunc)
+	Send(to tb.Recipient, what interface{}, opts ...interface{}) (*tb.Message, error)
+	File(file *tb.File) (io.ReadCloser, error)
+	FileByID(fileID string) (tb.File, error)
 }
 
-func NewBot(b *tb.Bot) bot.TelegramBot {
+type Bot struct {
+	b TbBot
+}
+
+func NewBot(b TbBot) bot.TelegramBot {
 	return &Bot{b: b}
 }
 

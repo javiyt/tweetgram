@@ -12,6 +12,8 @@ import (
 	"testing"
 	"time"
 
+	tbBotMock "github.com/javiyt/tweetgram/mocks/telegram"
+
 	"github.com/javiyt/tweetgram/mocks/telebot"
 
 	"github.com/jarcoal/httpmock"
@@ -73,6 +75,13 @@ func TestBot_Start(t *testing.T) {
 
 		return ok
 	}, time.Second, time.Millisecond)
+}
+
+func TestBot_Stop(t *testing.T) {
+	tbBot := tbBotMock.NewTbBot(t)
+	tbBot.On("Stop")
+	telegram.NewBot(tbBot).Stop()
+	tbBot.AssertCalled(t, "Stop")
 }
 
 func TestBot_SetCommands(t *testing.T) {
