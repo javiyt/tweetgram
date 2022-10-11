@@ -5,13 +5,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	tbBotMock "github.com/javiyt/tweetgram/mocks/telegram"
 	"math/rand"
 	"net/http"
 	"os"
 	"sync/atomic"
 	"testing"
 	"time"
+
+	tbBotMock "github.com/javiyt/tweetgram/mocks/telegram"
 
 	"github.com/javiyt/tweetgram/mocks/telebot"
 
