@@ -24,7 +24,7 @@ jobs:
         env:
           ENV_TEST_FILE: ${{secrets.ENV_TEST}}
       - name: Install Task
-        uses: arduino/setup-task@v1.0.1
+        uses: arduino/setup-task@1.0.2
         with:
           version: 3.11.0
       - name: Test
@@ -54,7 +54,7 @@ jobs:
         env:
           ENV_TEST_FILE: ${{secrets.ENV_TEST}}
       - name: Install Task
-        uses: arduino/setup-task@v1.0.1
+        uses: arduino/setup-task@1.0.2
         with:
           version: 3.11.0
       - name: Generate code
