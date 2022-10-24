@@ -7,7 +7,7 @@ require (
 	github.com/golangci/golangci-lint v1.50.1
 	github.com/javiyt/go-twitter v0.0.3
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 	github.com/subosito/gotenv v1.4.1
 	github.com/vektra/mockery/v2 v2.14.0
 	gopkg.in/telebot.v3 v3.1.2
@@ -37,7 +37,7 @@ require (
 	github.com/sanposhiho/wastedassign/v2 v2.0.7 // indirect
 	github.com/spf13/viper v1.13.0 // indirect
 	github.com/ssgreg/nlreturn/v2 v2.2.1 // indirect
-	github.com/stretchr/objx v0.4.0 // indirect
+	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/tetafro/godot v1.4.11 // indirect
 	github.com/timakin/bodyclose v0.0.0-20210704033933-f49887972144 // indirect
 	golang.org/x/crypto v0.1.0 // indirect
