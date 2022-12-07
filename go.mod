@@ -41,7 +41,7 @@ require (
 	github.com/tetafro/godot v1.4.11 // indirect
 	github.com/timakin/bodyclose v0.0.0-20210704033933-f49887972144 // indirect
 	golang.org/x/crypto v0.1.0 // indirect
-	golang.org/x/sys v0.2.0 // indirect
+	golang.org/x/sys v0.3.0 // indirect
 	golang.org/x/term v0.1.0 // indirect
 	mvdan.cc/unparam v0.0.0-20220706161116-678bad134442 // indirect
 )
@@ -55,7 +55,7 @@ require (
 	github.com/mailru/easyjson v0.7.7
 	github.com/sirupsen/logrus v1.9.0
 	github.com/zimmski/go-mutesting v0.0.0-20210610104036-6d9217011a00
-	golang.org/x/tools v0.3.0
+	golang.org/x/tools v0.4.0
 )
 
 require (
