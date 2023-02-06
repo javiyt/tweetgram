@@ -4,7 +4,7 @@ jobs:
   test:
     strategy:
       matrix:
-        go-version: [1.19.x]
+        go-version: [1.20.x]
     runs-on: ubuntu-latest
     steps:
       - name: Install Go
@@ -41,7 +41,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v3.5.0
         with:
-          go-version: 1.19.1
+          go-version: 1.20
       - uses: actions/checkout@v3
       - name: Generate env file
         run: 'echo "$ENV_FILE" > cmd/env'
@@ -62,7 +62,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3.4.0
         with:
-          version: v1.50.0
+          version: v1.51.0
           skip-pkg-cache: true
           skip-go-installation: true
           skip-build-cache: true
