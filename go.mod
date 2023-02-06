@@ -50,7 +50,7 @@ require (
 	github.com/ThreeDotsLabs/watermill v1.1.1
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/subcommands v1.2.0 // indirect
-	github.com/jarcoal/httpmock v1.2.0
+	github.com/jarcoal/httpmock v1.3.0
 	github.com/javiyt/twitter-text-go v0.0.0-20211005143923-7fd06898aff9
 	github.com/mailru/easyjson v0.7.7
 	github.com/sirupsen/logrus v1.9.0
