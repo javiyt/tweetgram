@@ -38,7 +38,7 @@ jobs:
       - name: Build Binary
         run: go build -o ${{secrets.BINARY_NAME}} cmd/*.go
       - name: Find and Replace binary folder
-        uses: jacobtomlinson/gha-find-replace@v2
+        uses: jacobtomlinson/gha-find-replace@v3
         with:
           find: "/home/tweetgram/bin"
           replace: ${{secrets.FOLDER}}
@@ -46,7 +46,7 @@ jobs:
           include: "system/*"
           exclude: ".git/"
       - name: Find and Replace binary name
-        uses: jacobtomlinson/gha-find-replace@v2
+        uses: jacobtomlinson/gha-find-replace@v3
         with:
           find: "tweetgram_bin"
           replace: ${{secrets.BINARY_NAME}}
@@ -54,7 +54,7 @@ jobs:
           include: "system/*"
           exclude: ".git/"
       - name: Find and Replace bot name
-        uses: jacobtomlinson/gha-find-replace@v2
+        uses: jacobtomlinson/gha-find-replace@v3
         with:
           find: "Tweetgram"
           replace: ${{secrets.BOT_NAME}}
