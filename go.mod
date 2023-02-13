@@ -9,7 +9,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/stretchr/testify v1.8.1
 	github.com/subosito/gotenv v1.4.2
-	github.com/vektra/mockery/v2 v2.19.0
+	github.com/vektra/mockery/v2 v2.20.0
 	gopkg.in/telebot.v3 v3.1.2
 	mvdan.cc/gofumpt v0.4.0
 )
