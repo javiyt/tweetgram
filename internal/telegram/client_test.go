@@ -23,6 +23,8 @@ import (
 	tb "gopkg.in/telebot.v3"
 )
 
+const botToken = "asdfg:12345"
+
 func TestMain(m *testing.M) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
@@ -30,7 +32,7 @@ func TestMain(m *testing.M) {
 	meJson, _ := os.ReadFile("testdata/me.json")
 	httpmock.RegisterResponder(
 		"POST",
-		"https://api.telegram.mock/botasdfg:12345/getMe",
+		fmt.Sprintf("https://api.telegram.mock/bot%s/getMe", botToken),
 		httpmock.NewStringResponder(
 			200,
 			string(meJson),
@@ -38,7 +40,7 @@ func TestMain(m *testing.M) {
 	)
 	httpmock.RegisterResponder(
 		"POST",
-		"https://api.telegram.mock/botasdfg:12345/getUpdates",
+		fmt.Sprintf("https://api.telegram.mock/bot%s/getUpdates", botToken),
 		httpmock.NewStringResponder(
 			200,
 			" {\"ok\":true,\"result\":[]}",
@@ -46,7 +48,7 @@ func TestMain(m *testing.M) {
 	)
 	httpmock.RegisterResponder(
 		"POST",
-		"https://api.telegram.mock/botasdfg:12345/setMyCommands",
+		fmt.Sprintf("https://api.telegram.mock/bot%s/setMyCommands", botToken),
 		httpmock.NewStringResponder(
 			200,
 			" {\"ok\":true,\"result\":true}",
@@ -59,7 +61,7 @@ func TestMain(m *testing.M) {
 func TestBot_Start(t *testing.T) {
 	tlgmbot, err := tb.NewBot(tb.Settings{
 		URL:   "https://api.telegram.mock",
-		Token: "asdfg:12345",
+		Token: botToken,
 		Poller: &tb.LongPoller{
 			Timeout: 10 * time.Second,
 		},
@@ -87,7 +89,7 @@ func TestBot_Stop(t *testing.T) {
 func TestBot_SetCommands(t *testing.T) {
 	tlgmbot, err := tb.NewBot(tb.Settings{
 		URL:   "https://api.telegram.mock",
-		Token: "asdfg:12345",
+		Token: botToken,
 		Poller: &tb.LongPoller{
 			Timeout: 10 * time.Second,
 		},
@@ -112,10 +114,12 @@ func TestBot_SetCommands(t *testing.T) {
 }
 
 func TestBot_Handle(t *testing.T) {
+	token := "qwert:98765"
+
 	updateJson, _ := os.ReadFile("testdata/image.json")
 	httpmock.RegisterResponder(
 		"POST",
-		"https://api.telegram.mock/botasdfg:12345/getUpdates",
+		fmt.Sprintf("https://api.telegram.mock/bot%s/getUpdates", token),
 		httpmock.NewStringResponder(
 			200,
 			string(updateJson),
@@ -124,7 +128,7 @@ func TestBot_Handle(t *testing.T) {
 
 	tlgmbot, err := tb.NewBot(tb.Settings{
 		URL:   "https://api.telegram.mock",
-		Token: "asdfg:12345",
+		Token: token,
 		Poller: &tb.LongPoller{
 			Timeout: 10 * time.Second,
 		},
@@ -154,9 +158,10 @@ func TestBot_Handle(t *testing.T) {
 }
 
 func TestBot_Send(t *testing.T) {
+	token := "zxcvb:54321"
 	tlgmbot, _ := tb.NewBot(tb.Settings{
 		URL:   "https://api.telegram.mock",
-		Token: "asdfg:12345",
+		Token: token,
 		Poller: &tb.LongPoller{
 			Timeout: 10 * time.Second,
 		},
@@ -177,7 +182,7 @@ func TestBot_Send(t *testing.T) {
 	photoSent.Store(false)
 	firstLongMessage.Store(false)
 
-	registerResponders(&testMessageSent, &testLongMessageSent, &photoSent, &firstLongMessage)
+	registerResponders(token, &testMessageSent, &testLongMessageSent, &photoSent, &firstLongMessage)
 
 	t.Run("it should fail when unsupported message sent", func(t *testing.T) {
 		require.EqualError(t, bt.Send("1234567890", tb.File{}), "unsupported type")
@@ -310,10 +315,10 @@ func TestBot_ErrorHandler(t *testing.T) {
 	require.Equal(t, true, handled.Load())
 }
 
-func registerResponders(testMessageSent, testLongMessageSent, photoSent, firstLongMessage *atomic.Value) {
+func registerResponders(token string, testMessageSent, testLongMessageSent, photoSent, firstLongMessage *atomic.Value) {
 	httpmock.RegisterResponder(
 		"POST",
-		"https://api.telegram.mock/botasdfg:12345/sendMessage",
+		fmt.Sprintf("https://api.telegram.mock/bot%s/sendMessage", token),
 		func(req *http.Request) (*http.Response, error) {
 			buf := new(bytes.Buffer)
 			_, _ = buf.ReadFrom(req.Body)
@@ -355,7 +360,7 @@ func registerResponders(testMessageSent, testLongMessageSent, photoSent, firstLo
 
 	httpmock.RegisterResponder(
 		"POST",
-		"https://api.telegram.mock/botasdfg:12345/sendPhoto",
+		fmt.Sprintf("https://api.telegram.mock/bot%s/sendPhoto", token),
 		func(req *http.Request) (*http.Response, error) {
 			photoSent.Store(true)
 
