@@ -23,7 +23,18 @@ import (
 	tb "gopkg.in/telebot.v3"
 )
 
-const botToken = "asdfg:12345"
+const (
+	botToken            = "asdfg:12345"
+	botImageHandleToken = "qwert:98765"
+	botSendToken        = "zxcvb:54321"
+)
+
+var (
+	testMessageSent     atomic.Value
+	testLongMessageSent atomic.Value
+	photoSent           atomic.Value
+	firstLongMessage    atomic.Value
+)
 
 func TestMain(m *testing.M) {
 	httpmock.Activate()
@@ -54,6 +65,18 @@ func TestMain(m *testing.M) {
 			" {\"ok\":true,\"result\":true}",
 		),
 	)
+
+	updateJson, _ := os.ReadFile("testdata/image.json")
+	httpmock.RegisterResponder(
+		"POST",
+		fmt.Sprintf("https://api.telegram.mock/bot%s/getUpdates", botImageHandleToken),
+		httpmock.NewStringResponder(
+			200,
+			string(updateJson),
+		),
+	)
+
+	registerResponders(botSendToken, &testMessageSent, &testLongMessageSent, &photoSent, &firstLongMessage)
 
 	os.Exit(m.Run())
 }
@@ -114,21 +137,9 @@ func TestBot_SetCommands(t *testing.T) {
 }
 
 func TestBot_Handle(t *testing.T) {
-	token := "qwert:98765"
-
-	updateJson, _ := os.ReadFile("testdata/image.json")
-	httpmock.RegisterResponder(
-		"POST",
-		fmt.Sprintf("https://api.telegram.mock/bot%s/getUpdates", token),
-		httpmock.NewStringResponder(
-			200,
-			string(updateJson),
-		),
-	)
-
 	tlgmbot, err := tb.NewBot(tb.Settings{
 		URL:   "https://api.telegram.mock",
-		Token: token,
+		Token: botImageHandleToken,
 		Poller: &tb.LongPoller{
 			Timeout: 10 * time.Second,
 		},
@@ -158,26 +169,16 @@ func TestBot_Handle(t *testing.T) {
 }
 
 func TestBot_Send(t *testing.T) {
-	token := "zxcvb:54321"
-	tlgmbot, _ := tb.NewBot(tb.Settings{URL: "https://api.telegram.mock", Token: token, Poller: &tb.LongPoller{
+	tlgmbot, _ := tb.NewBot(tb.Settings{URL: "https://api.telegram.mock", Token: botSendToken, Poller: &tb.LongPoller{
 		Timeout: 10 * time.Second,
 	}, Offline: true})
 
 	bt := telegram.NewBot(tlgmbot)
 
-	var (
-		testMessageSent     atomic.Value
-		testLongMessageSent atomic.Value
-		photoSent           atomic.Value
-		firstLongMessage    atomic.Value
-	)
-
 	testMessageSent.Store(false)
 	testLongMessageSent.Store(false)
 	photoSent.Store(false)
 	firstLongMessage.Store(false)
-
-	registerResponders(token, &testMessageSent, &testLongMessageSent, &photoSent, &firstLongMessage)
 
 	t.Run("it should fail when unsupported message sent", func(t *testing.T) {
 		require.EqualError(t, bt.Send("1234567890", tb.File{}), "unsupported type")
