@@ -159,14 +159,9 @@ func TestBot_Handle(t *testing.T) {
 
 func TestBot_Send(t *testing.T) {
 	token := "zxcvb:54321"
-	tlgmbot, _ := tb.NewBot(tb.Settings{
-		URL:   "https://api.telegram.mock",
-		Token: token,
-		Poller: &tb.LongPoller{
-			Timeout: 10 * time.Second,
-		},
-		Offline: true,
-	})
+	tlgmbot, _ := tb.NewBot(tb.Settings{URL: "https://api.telegram.mock", Token: token, Poller: &tb.LongPoller{
+		Timeout: 10 * time.Second,
+	}, Offline: true})
 
 	bt := telegram.NewBot(tlgmbot)
 
