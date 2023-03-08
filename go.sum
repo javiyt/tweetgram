@@ -745,8 +745,8 @@ github.com/ultraware/whitespace v0.0.5 h1:hh+/cpIcopyMYbZNVov9iSxvJU3OYQg78Sfaqz
 github.com/ultraware/whitespace v0.0.5/go.mod h1:aVMh/gQve5Maj9hQ/hg+F75lr/X5A89uZnzAmWSineA=
 github.com/uudashr/gocognit v1.0.6 h1:2Cgi6MweCsdB6kpcVQp7EW4U23iBFQWfTXiWlyp842Y=
 github.com/uudashr/gocognit v1.0.6/go.mod h1:nAIUuVBnYU7pcninia3BHOvQkpQCeO76Uscky5BOwcY=
-github.com/vektra/mockery/v2 v2.21.1 h1:c71s04/KWKA6LEyu90+qUC3TxRSarPRjd/W+LFAO0z4=
-github.com/vektra/mockery/v2 v2.21.1/go.mod h1:le9nnD50TkeV8QGwrkza7v/xd3DA7YbSZYBEyiuAlsI=
+github.com/vektra/mockery/v2 v2.21.3 h1:h2g/Zfa4ngs6Z4zLdMIijXEPtnayoKjSxowcAFhaMow=
+github.com/vektra/mockery/v2 v2.21.3/go.mod h1:le9nnD50TkeV8QGwrkza7v/xd3DA7YbSZYBEyiuAlsI=
 github.com/yagipy/maintidx v1.0.0 h1:h5NvIsCz+nRDapQ0exNv4aJ0yXSI0420omVANTv3GJM=
 github.com/yagipy/maintidx v1.0.0/go.mod h1:0qNf/I/CCZXSMhsRsrEPDZ+DkekpKLXAJfsTACwgXLk=
 github.com/yeya24/promlinter v0.2.0 h1:xFKDQ82orCU5jQujdaD8stOHiv8UN68BSdn2a8u8Y3o=
