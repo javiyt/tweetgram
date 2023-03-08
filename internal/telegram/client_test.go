@@ -23,6 +23,19 @@ import (
 	tb "gopkg.in/telebot.v3"
 )
 
+const (
+	botToken            = "asdfg:12345"
+	botImageHandleToken = "qwert:98765"
+	botSendToken        = "zxcvb:54321"
+)
+
+var (
+	testMessageSent     atomic.Value
+	testLongMessageSent atomic.Value
+	photoSent           atomic.Value
+	firstLongMessage    atomic.Value
+)
+
 func TestMain(m *testing.M) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
@@ -30,7 +43,7 @@ func TestMain(m *testing.M) {
 	meJson, _ := os.ReadFile("testdata/me.json")
 	httpmock.RegisterResponder(
 		"POST",
-		"https://api.telegram.mock/botasdfg:12345/getMe",
+		fmt.Sprintf("https://api.telegram.mock/bot%s/getMe", botToken),
 		httpmock.NewStringResponder(
 			200,
 			string(meJson),
@@ -38,7 +51,7 @@ func TestMain(m *testing.M) {
 	)
 	httpmock.RegisterResponder(
 		"POST",
-		"https://api.telegram.mock/botasdfg:12345/getUpdates",
+		fmt.Sprintf("https://api.telegram.mock/bot%s/getUpdates", botToken),
 		httpmock.NewStringResponder(
 			200,
 			" {\"ok\":true,\"result\":[]}",
@@ -46,12 +59,24 @@ func TestMain(m *testing.M) {
 	)
 	httpmock.RegisterResponder(
 		"POST",
-		"https://api.telegram.mock/botasdfg:12345/setMyCommands",
+		fmt.Sprintf("https://api.telegram.mock/bot%s/setMyCommands", botToken),
 		httpmock.NewStringResponder(
 			200,
 			" {\"ok\":true,\"result\":true}",
 		),
 	)
+
+	updateJson, _ := os.ReadFile("testdata/image.json")
+	httpmock.RegisterResponder(
+		"POST",
+		fmt.Sprintf("https://api.telegram.mock/bot%s/getUpdates", botImageHandleToken),
+		httpmock.NewStringResponder(
+			200,
+			string(updateJson),
+		),
+	)
+
+	registerResponders(botSendToken, &testMessageSent, &testLongMessageSent, &photoSent, &firstLongMessage)
 
 	os.Exit(m.Run())
 }
@@ -59,7 +84,7 @@ func TestMain(m *testing.M) {
 func TestBot_Start(t *testing.T) {
 	tlgmbot, err := tb.NewBot(tb.Settings{
 		URL:   "https://api.telegram.mock",
-		Token: "asdfg:12345",
+		Token: botToken,
 		Poller: &tb.LongPoller{
 			Timeout: 10 * time.Second,
 		},
@@ -87,7 +112,7 @@ func TestBot_Stop(t *testing.T) {
 func TestBot_SetCommands(t *testing.T) {
 	tlgmbot, err := tb.NewBot(tb.Settings{
 		URL:   "https://api.telegram.mock",
-		Token: "asdfg:12345",
+		Token: botToken,
 		Poller: &tb.LongPoller{
 			Timeout: 10 * time.Second,
 		},
@@ -112,19 +137,9 @@ func TestBot_SetCommands(t *testing.T) {
 }
 
 func TestBot_Handle(t *testing.T) {
-	updateJson, _ := os.ReadFile("testdata/image.json")
-	httpmock.RegisterResponder(
-		"POST",
-		"https://api.telegram.mock/botasdfg:12345/getUpdates",
-		httpmock.NewStringResponder(
-			200,
-			string(updateJson),
-		),
-	)
-
 	tlgmbot, err := tb.NewBot(tb.Settings{
 		URL:   "https://api.telegram.mock",
-		Token: "asdfg:12345",
+		Token: botImageHandleToken,
 		Poller: &tb.LongPoller{
 			Timeout: 10 * time.Second,
 		},
@@ -154,30 +169,16 @@ func TestBot_Handle(t *testing.T) {
 }
 
 func TestBot_Send(t *testing.T) {
-	tlgmbot, _ := tb.NewBot(tb.Settings{
-		URL:   "https://api.telegram.mock",
-		Token: "asdfg:12345",
-		Poller: &tb.LongPoller{
-			Timeout: 10 * time.Second,
-		},
-		Offline: true,
-	})
+	tlgmbot, _ := tb.NewBot(tb.Settings{URL: "https://api.telegram.mock", Token: botSendToken, Poller: &tb.LongPoller{
+		Timeout: 10 * time.Second,
+	}, Offline: true})
 
 	bt := telegram.NewBot(tlgmbot)
-
-	var (
-		testMessageSent     atomic.Value
-		testLongMessageSent atomic.Value
-		photoSent           atomic.Value
-		firstLongMessage    atomic.Value
-	)
 
 	testMessageSent.Store(false)
 	testLongMessageSent.Store(false)
 	photoSent.Store(false)
 	firstLongMessage.Store(false)
-
-	registerResponders(&testMessageSent, &testLongMessageSent, &photoSent, &firstLongMessage)
 
 	t.Run("it should fail when unsupported message sent", func(t *testing.T) {
 		require.EqualError(t, bt.Send("1234567890", tb.File{}), "unsupported type")
@@ -310,10 +311,10 @@ func TestBot_ErrorHandler(t *testing.T) {
 	require.Equal(t, true, handled.Load())
 }
 
-func registerResponders(testMessageSent, testLongMessageSent, photoSent, firstLongMessage *atomic.Value) {
+func registerResponders(token string, testMessageSent, testLongMessageSent, photoSent, firstLongMessage *atomic.Value) {
 	httpmock.RegisterResponder(
 		"POST",
-		"https://api.telegram.mock/botasdfg:12345/sendMessage",
+		fmt.Sprintf("https://api.telegram.mock/bot%s/sendMessage", token),
 		func(req *http.Request) (*http.Response, error) {
 			buf := new(bytes.Buffer)
 			_, _ = buf.ReadFrom(req.Body)
@@ -355,7 +356,7 @@ func registerResponders(testMessageSent, testLongMessageSent, photoSent, firstLo
 
 	httpmock.RegisterResponder(
 		"POST",
-		"https://api.telegram.mock/botasdfg:12345/sendPhoto",
+		fmt.Sprintf("https://api.telegram.mock/bot%s/sendPhoto", token),
 		func(req *http.Request) (*http.Response, error) {
 			photoSent.Store(true)
 
