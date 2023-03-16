@@ -9,7 +9,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/stretchr/testify v1.8.2
 	github.com/subosito/gotenv v1.4.2
-	github.com/vektra/mockery/v2 v2.21.1
+	github.com/vektra/mockery/v2 v2.22.1
 	gopkg.in/telebot.v3 v3.1.3
 	mvdan.cc/gofumpt v0.4.0
 )
@@ -123,6 +123,7 @@ require (
 	github.com/hashicorp/go-version v1.6.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hexops/gotextdiff v1.0.3 // indirect
+	github.com/iancoleman/strcase v0.2.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jessevdk/go-flags v1.4.0 // indirect
 	github.com/jgautheron/goconst v1.5.1 // indirect
