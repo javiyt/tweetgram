@@ -11,7 +11,7 @@ require (
 	github.com/subosito/gotenv v1.4.2
 	github.com/vektra/mockery/v2 v2.23.2
 	gopkg.in/telebot.v3 v3.1.3
-	mvdan.cc/gofumpt v0.4.0
+	mvdan.cc/gofumpt v0.5.0
 )
 
 require (
