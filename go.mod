@@ -53,7 +53,7 @@ require (
 	github.com/jarcoal/httpmock v1.3.0
 	github.com/javiyt/twitter-text-go v0.0.0-20211005143923-7fd06898aff9
 	github.com/mailru/easyjson v0.7.7
-	github.com/sirupsen/logrus v1.9.1
+	github.com/sirupsen/logrus v1.9.2
 	github.com/zimmski/go-mutesting v0.0.0-20210610104036-6d9217011a00
 	golang.org/x/tools v0.9.1
 )
