@@ -8,7 +8,7 @@ require (
 	github.com/javiyt/go-twitter v0.0.3
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/stretchr/testify v1.8.4
-	github.com/subosito/gotenv v1.4.2
+	github.com/subosito/gotenv v1.5.0
 	github.com/vektra/mockery/v2 v2.32.4
 	gopkg.in/telebot.v3 v3.1.3
 	mvdan.cc/gofumpt v0.5.0
@@ -211,7 +211,7 @@ require (
 	golang.org/x/exp/typeparams v0.0.0-20230307190834-24139beb5833 // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/text v0.12.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
