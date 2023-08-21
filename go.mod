@@ -47,7 +47,7 @@ require (
 )
 
 require (
-	github.com/ThreeDotsLabs/watermill v1.3.2
+	github.com/ThreeDotsLabs/watermill v1.3.3
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/subcommands v1.2.0 // indirect
 	github.com/jarcoal/httpmock v1.3.1
