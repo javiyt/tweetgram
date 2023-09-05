@@ -17,7 +17,7 @@ jobs:
         with:
           version: 3.20.0
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Generate env file
         run: 'echo "$ENV_FILE" > cmd/env'
         shell: bash
