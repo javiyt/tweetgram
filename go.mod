@@ -10,7 +10,7 @@ require (
 	github.com/stretchr/testify v1.8.4
 	github.com/subosito/gotenv v1.6.0
 	github.com/vektra/mockery/v2 v2.37.1
-	gopkg.in/telebot.v3 v3.1.4
+	gopkg.in/telebot.v3 v3.2.1
 	mvdan.cc/gofumpt v0.5.0
 )
 
