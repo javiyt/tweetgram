@@ -25,7 +25,7 @@ jobs:
         shell: bash
         env:
           ENV_TEST_FILE: ${{secrets.ENV_TEST}}
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.cache/go-build
