@@ -11,7 +11,7 @@ require (
 	github.com/subosito/gotenv v1.6.0
 	github.com/vektra/mockery/v2 v2.38.0
 	gopkg.in/telebot.v3 v3.2.1
-	mvdan.cc/gofumpt v0.5.0
+	mvdan.cc/gofumpt v0.6.0
 )
 
 require (
@@ -41,7 +41,7 @@ require (
 	github.com/tetafro/godot v1.4.15 // indirect
 	github.com/timakin/bodyclose v0.0.0-20230421092635-574207250966 // indirect
 	golang.org/x/crypto v0.14.0 // indirect
-	golang.org/x/sys v0.14.0 // indirect
+	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/term v0.13.0 // indirect
 	mvdan.cc/unparam v0.0.0-20221223090309-7455f1af531d // indirect
 )
