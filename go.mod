@@ -18,7 +18,7 @@ require (
 	4d63.com/gochecknoglobals v0.2.1 // indirect
 	github.com/Antonboom/errname v0.1.12 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
-	github.com/dghubble/oauth1 v0.7.2
+	github.com/dghubble/oauth1 v0.7.3
 	github.com/go-critic/go-critic v0.11.1 // indirect
 	github.com/google/wire v0.6.0
 	github.com/gordonklaus/ineffassign v0.1.0 // indirect
