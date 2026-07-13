@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install Go
-        uses: actions/setup-go@v6.4.0
+        uses: actions/setup-go@v6.5.0
         with:
           go-version: 1.20
       - name: Install Task
@@ -14,7 +14,7 @@ jobs:
         with:
           version: 3.20.0
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Generate env file
         run: 'echo "$ENV_FILE" > cmd/env'
         shell: bash
@@ -25,7 +25,7 @@ jobs:
         shell: bash
         env:
           ENV_TEST_FILE: ${{secrets.ENV_TEST}}
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: |
             ~/.cache/go-build
